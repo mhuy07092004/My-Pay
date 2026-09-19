@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useState, type FormEvent } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Button } from '../../components/button/button'
+import { useAuth } from '../context/AuthContext'
 
 type AuthMode = 'signin' | 'signup'
 
@@ -9,9 +10,29 @@ const inputClassName =
 
 export function Login() {
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const { login } = useAuth()
   const [mode, setMode] = useState<AuthMode>(() =>
     searchParams.get('mode') === 'signup' ? 'signup' : 'signin',
   )
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  async function handleSignIn(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError('')
+    setLoading(true)
+    try {
+      await login(email, password)
+      navigate('/dashboard')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to sign in')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="flex min-h-svh items-center justify-center bg-[#18181B] px-4 py-12 text-[#F4F4F5]">
@@ -41,13 +62,16 @@ export function Login() {
         </h1>
 
         {mode === 'signin' ? (
-          <form className="mt-8 space-y-4">
+          <form className="mt-8 space-y-4" onSubmit={handleSignIn}>
             <label className="block text-left text-sm text-[#A1A1AA]">
               Email
               <input
                 type="email"
                 name="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
                 placeholder="you@company.com"
+                required
                 className={inputClassName}
               />
             </label>
@@ -56,12 +80,26 @@ export function Login() {
               <input
                 type="password"
                 name="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
                 placeholder="••••••••"
+                required
                 className={inputClassName}
               />
             </label>
-            <Button variant="green" size="lg" className="w-full" type="submit">
-              Sign in
+            {error ? (
+              <p className="text-sm text-[#EF4444]" role="alert">
+                {error}
+              </p>
+            ) : null}
+            <Button
+              variant="green"
+              size="lg"
+              className="w-full"
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? 'Signing in…' : 'Sign in'}
             </Button>
             <p className="text-center text-sm text-[#A1A1AA]">
               Not A Member with us ?{' '}
