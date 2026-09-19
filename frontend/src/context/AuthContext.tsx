@@ -56,11 +56,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const data = (await response.json()) as {
       token?: string
       user?: AuthUser
-      message?: string
     }
 
     if (!response.ok || !data.token || !data.user) {
-      throw new Error(data.message ?? 'Unable to sign in')
+      throw new Error(
+        response.status === 401
+          ? 'auth.errors.invalidCredentials'
+          : 'auth.errors.unexpected',
+      )
     }
 
     const nextSession: AuthSession = { token: data.token, user: data.user }

@@ -1,21 +1,24 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../button/button'
+import { LanguageSwitchButton } from '../button/swtich_button'
 
 const navLinks = [
-  { href: '#features', label: 'Features' },
-  { href: '#pricing', label: 'Pricing' },
-  { href: '#about', label: 'About' },
-]
+  { href: '#features', labelKey: 'nav.features' },
+  { href: '#pricing', labelKey: 'nav.pricing' },
+  { href: '#about', labelKey: 'nav.about' },
+] as const
 
 export function LandingNavbar() {
   const [open, setOpen] = useState(false)
+  const { t } = useTranslation()
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#27272A] bg-[#09090B]">
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link to="/" className="text-lg font-semibold tracking-tight text-[#F4F4F5]">
-          My Pay
+          {t('common.appName')}
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
@@ -25,14 +28,15 @@ export function LandingNavbar() {
               href={link.href}
               className="text-sm text-[#A1A1AA] transition-colors hover:text-[#F4F4F5]"
             >
-              {link.label}
+              {t(link.labelKey)}
             </a>
           ))}
         </div>
 
-        <div className="hidden md:block">
+        <div className="hidden items-center gap-3 md:flex">
+          <LanguageSwitchButton />
           <Button variant="white" to="/login">
-            Login
+            {t('nav.login')}
           </Button>
         </div>
 
@@ -40,7 +44,7 @@ export function LandingNavbar() {
           type="button"
           className="inline-flex items-center justify-center rounded-md p-2 text-[#F4F4F5] md:hidden"
           aria-expanded={open}
-          aria-label="Toggle menu"
+          aria-label={t('nav.toggleMenu')}
           onClick={() => setOpen((value) => !value)}
         >
           {open ? (
@@ -75,11 +79,12 @@ export function LandingNavbar() {
                 className="text-sm text-[#A1A1AA] hover:text-[#F4F4F5]"
                 onClick={() => setOpen(false)}
               >
-                {link.label}
+                {t(link.labelKey)}
               </a>
             ))}
+            <LanguageSwitchButton className="self-start" />
             <Button variant="white" to="/login" className="w-full">
-              Login
+              {t('nav.login')}
             </Button>
           </div>
         </div>

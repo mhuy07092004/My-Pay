@@ -1,17 +1,27 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../../components/button/button'
 import { useAuth } from '../context/AuthContext'
 
 type AuthMode = 'signin' | 'signup'
+type AuthErrorKey = 'auth.errors.invalidCredentials' | 'auth.errors.unexpected'
 
 const inputClassName =
   'mt-2 w-full rounded-lg border border-[#27272A] bg-[#18181B] px-3 py-2.5 text-[#F4F4F5] placeholder:text-[#71717A] focus:border-[#22C55E] focus:outline-none'
+
+function isAuthErrorKey(value: string): value is AuthErrorKey {
+  return (
+    value === 'auth.errors.invalidCredentials' ||
+    value === 'auth.errors.unexpected'
+  )
+}
 
 export function Login() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { login } = useAuth()
+  const { t } = useTranslation()
   const [mode, setMode] = useState<AuthMode>(() =>
     searchParams.get('mode') === 'signup' ? 'signup' : 'signin',
   )
@@ -28,7 +38,8 @@ export function Login() {
       await login(email, password)
       navigate('/dashboard')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to sign in')
+      const message = err instanceof Error ? err.message : 'auth.errors.unexpected'
+      setError(isAuthErrorKey(message) ? message : 'auth.errors.unexpected')
     } finally {
       setLoading(false)
     }
@@ -54,29 +65,29 @@ export function Login() {
               clipRule="evenodd"
             />
           </svg>
-          Back to home
+          {t('auth.backToHome')}
         </Link>
 
         <h1 className="mt-4 text-center text-2xl font-semibold tracking-tight">
-          {mode === 'signin' ? 'Sign in' : 'Sign up'}
+          {mode === 'signin' ? t('auth.signIn') : t('auth.signUp')}
         </h1>
 
         {mode === 'signin' ? (
           <form className="mt-8 space-y-4" onSubmit={handleSignIn}>
             <label className="block text-left text-sm text-[#A1A1AA]">
-              Email
+              {t('auth.email')}
               <input
                 type="email"
                 name="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="you@company.com"
+                placeholder={t('auth.emailPlaceholder')}
                 required
                 className={inputClassName}
               />
             </label>
             <label className="block text-left text-sm text-[#A1A1AA]">
-              Password
+              {t('auth.password')}
               <input
                 type="password"
                 name="password"
@@ -89,7 +100,7 @@ export function Login() {
             </label>
             {error ? (
               <p className="text-sm text-[#EF4444]" role="alert">
-                {error}
+                {isAuthErrorKey(error) ? t(error) : t('auth.errors.unexpected')}
               </p>
             ) : null}
             <Button
@@ -99,16 +110,16 @@ export function Login() {
               type="submit"
               disabled={loading}
             >
-              {loading ? 'Signing in…' : 'Sign in'}
+              {loading ? t('auth.signingIn') : t('auth.signIn')}
             </Button>
             <p className="text-center text-sm text-[#A1A1AA]">
-              Not A Member with us ?{' '}
+              {t('auth.notAMember')}{' '}
               <button
                 type="button"
                 onClick={() => setMode('signup')}
                 className="font-medium text-[#22C55E] hover:text-[#16A34A]"
               >
-                Sign Up now !
+                {t('auth.signUpNow')}
               </button>
             </p>
           </form>
@@ -116,38 +127,38 @@ export function Login() {
           <form className="mt-8 space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <label className="block text-left text-sm text-[#A1A1AA]">
-                First Name
+                {t('auth.firstName')}
                 <input
                   type="text"
                   name="firstName"
-                  placeholder="First name"
+                  placeholder={t('auth.firstNamePlaceholder')}
                   required
                   className={inputClassName}
                 />
               </label>
               <label className="block text-left text-sm text-[#A1A1AA]">
-                Last Name
+                {t('auth.lastName')}
                 <input
                   type="text"
                   name="lastName"
-                  placeholder="Last name"
+                  placeholder={t('auth.lastNamePlaceholder')}
                   required
                   className={inputClassName}
                 />
               </label>
             </div>
             <label className="block text-left text-sm text-[#A1A1AA]">
-              Email
+              {t('auth.email')}
               <input
                 type="email"
                 name="email"
-                placeholder="you@company.com"
+                placeholder={t('auth.emailPlaceholder')}
                 required
                 className={inputClassName}
               />
             </label>
             <label className="block text-left text-sm text-[#A1A1AA]">
-              Password
+              {t('auth.password')}
               <input
                 type="password"
                 name="password"
@@ -157,7 +168,7 @@ export function Login() {
               />
             </label>
             <label className="block text-left text-sm text-[#A1A1AA]">
-              Retype password
+              {t('auth.retypePassword')}
               <input
                 type="password"
                 name="passwordConfirm"
@@ -167,16 +178,16 @@ export function Login() {
               />
             </label>
             <Button variant="green" size="lg" className="w-full" type="submit">
-              Sign Up
+              {t('auth.signUp')}
             </Button>
             <p className="text-center text-sm text-[#A1A1AA]">
-              Already a member ?{' '}
+              {t('auth.alreadyMember')}{' '}
               <button
                 type="button"
                 onClick={() => setMode('signin')}
                 className="font-medium text-[#22C55E] hover:text-[#16A34A]"
               >
-                Sign in
+                {t('auth.signIn')}
               </button>
             </p>
           </form>

@@ -1,0 +1,82 @@
+{
+  "common": {
+    "appName": "My Pay",
+    "language": {
+      "switchTo": "Switch to {{language}}",
+      "en": "English",
+      "vn": "Vietnamese"
+    }
+  },
+  "nav": {
+    "features": "Features",
+    "pricing": "Pricing",
+    "about": "About",
+    "login": "Login",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "logout": "Logout",
+    "guest": "Guest",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "toggleMenu": "Toggle menu"
+  },
+  "landing": {
+    "hero": {
+      "title": "Every minute worked. Every dollar counted.",
+      "subtitle": "Simple time tracking and payroll for teams that want accuracy without the extra busywork.",
+      "cta": "Start for Free"
+    }
+  },
+  "auth": {
+    "backToHome": "Back to home",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "signingIn": "Signing in…",
+    "email": "Email",
+    "password": "Password",
+    "retypePassword": "Retype password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "emailPlaceholder": "you@company.com",
+    "firstNamePlaceholder": "First name",
+    "lastNamePlaceholder": "Last name",
+    "notAMember": "Not A Member with us ?",
+    "signUpNow": "Sign Up now !",
+    "alreadyMember": "Already a member ?",
+    "errors": {
+      "invalidCredentials": "Invalid email or password",
+      "unexpected": "Unable to sign in"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back, {{name}}.",
+    "totalEarning": "Total Earning Until Now"
+  },
+  "footer": {
+    "tagline": "Track every minute and every dollar so payroll stays accurate, on time, and easy to understand.",
+    "product": {
+      "title": "Product",
+      "features": "Features",
+      "pricing": "Pricing",
+      "integrations": "Integrations",
+      "changelog": "Changelog"
+    },
+    "company": {
+      "title": "Company",
+      "about": "About",
+      "careers": "Careers",
+      "blog": "Blog",
+      "contact": "Contact"
+    },
+    "legal": {
+      "title": "Legal",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "security": "Security"
+    },
+    "copyright": "© {{year}} My Pay. All rights reserved.",
+    "status": "Status",
+    "support": "Support"
+  }
+}

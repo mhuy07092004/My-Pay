@@ -1,0 +1,82 @@
+{
+  "common": {
+    "appName": "My Pay",
+    "language": {
+      "switchTo": "Chuyển sang {{language}}",
+      "en": "Tiếng Anh",
+      "vn": "Tiếng Việt"
+    }
+  },
+  "nav": {
+    "features": "Tính năng",
+    "pricing": "Bảng giá",
+    "about": "Giới thiệu",
+    "login": "Đăng nhập",
+    "dashboard": "Bảng điều khiển",
+    "settings": "Cài đặt",
+    "logout": "Đăng xuất",
+    "guest": "Khách",
+    "openMenu": "Mở menu",
+    "closeMenu": "Đóng menu",
+    "toggleMenu": "Mở hoặc đóng menu"
+  },
+  "landing": {
+    "hero": {
+      "title": "Từng Phút Làm Việc Đều Phải Được Trả Lương",
+      "subtitle": "Theo dõi thời gian và tính lương đơn giản cho đội ngũ muốn chính xác mà không thêm việc rườm rà.",
+      "cta": "Bắt đầu miễn phí"
+    }
+  },
+  "auth": {
+    "backToHome": "Quay lại trang chủ",
+    "signIn": "Đăng nhập",
+    "signUp": "Đăng ký",
+    "signingIn": "Đang đăng nhập…",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "retypePassword": "Nhập lại mật khẩu",
+    "firstName": "Tên",
+    "lastName": "Họ",
+    "emailPlaceholder": "example@gmail.com",
+    "firstNamePlaceholder": "Tên",
+    "lastNamePlaceholder": "Họ",
+    "notAMember": "Chưa là thành viên?",
+    "signUpNow": "Đăng ký ngay!",
+    "alreadyMember": "Đã là thành viên?",
+    "errors": {
+      "invalidCredentials": "Email hoặc mật khẩu không đúng",
+      "unexpected": "Không thể đăng nhập"
+    }
+  },
+  "dashboard": {
+    "title": "Trang Chủ",
+    "welcome": "Anh Chào {{name}} Nhá !",
+    "totalEarning": "Tổng thu nhập Đến Hiện Tại"
+  },
+  "footer": {
+    "tagline": "Ghi nhận từng phút và từng đồng để bảng lương luôn chính xác",
+    "product": {
+      "title": "Sản phẩm",
+      "features": "Tính năng",
+      "pricing": "Bảng giá",
+      "integrations": "Tích hợp",
+      "changelog": "Nhật ký thay đổi"
+    },
+    "company": {
+      "title": "Công ty",
+      "about": "Giới thiệu",
+      "careers": "Tuyển dụng",
+      "blog": "Blog",
+      "contact": "Liên hệ"
+    },
+    "legal": {
+      "title": "Pháp lý",
+      "privacy": "Quyền riêng tư",
+      "terms": "Điều khoản",
+      "security": "Bảo mật"
+    },
+    "copyright": "© {{year}} My Pay. Đã đăng ký bản quyền.",
+    "status": "Trạng thái",
+    "support": "Hỗ trợ"
+  }
+}
