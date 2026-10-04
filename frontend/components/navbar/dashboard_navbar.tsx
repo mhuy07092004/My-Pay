@@ -4,13 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../src/context/AuthContext'
 import { LanguageSwitchButton } from '../button/swtich_button'
 
-const navLinkClassName = ({ isActive }: { isActive: boolean }) =>
-  `rounded-lg px-3 py-2 text-sm transition-colors ${
-    isActive
-      ? 'bg-[#18181B] text-[#F4F4F5]'
-      : 'text-[#A1A1AA] hover:bg-[#18181B] hover:text-[#F4F4F5]'
-  }`
-
 const mobileNavLinkClassName = ({ isActive }: { isActive: boolean }) =>
   `text-2xl font-bold transition-colors ${
     isActive ? 'text-[#A1A1AA]' : 'text-[#F4F4F5] hover:text-[#A1A1AA]'
@@ -55,51 +48,113 @@ function MobileNavContent({ onNavigate }: { onNavigate?: () => void }) {
   )
 }
 
-function NavContent({ onNavigate }: { onNavigate?: () => void }) {
+type NavItemKey = 'home' | 'timesheet' | 'reports' | 'history' | 'settings'
+
+const iconProps = {
+  width: 24,
+  height: 24,
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 1.6,
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+  'aria-hidden': true,
+}
+
+const icons: Record<NavItemKey, React.ReactNode> = {
+  home: (
+    <svg {...iconProps}>
+      <path d="M3 11l9-8 9 8" />
+      <path d="M5 10v10h14V10" />
+    </svg>
+  ),
+  timesheet: (
+    <svg {...iconProps}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </svg>
+  ),
+  reports: (
+    <svg {...iconProps}>
+      <path d="M6 20v-7M12 20V5M18 20v-11" />
+    </svg>
+  ),
+  history: (
+    <svg {...iconProps}>
+      <path d="M3 12a9 9 0 1 0 3-6.7" />
+      <path d="M3 4v5h5" />
+      <path d="M12 7v5l3 2" />
+    </svg>
+  ),
+  settings: (
+    <svg {...iconProps}>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
+    </svg>
+  ),
+}
+
+const navItems: { key: NavItemKey; labelKey: `nav.${NavItemKey}` }[] = [
+  { key: 'home', labelKey: 'nav.home' },
+  { key: 'timesheet', labelKey: 'nav.timesheet' },
+  { key: 'reports', labelKey: 'nav.reports' },
+  { key: 'history', labelKey: 'nav.history' },
+  { key: 'settings', labelKey: 'nav.settings' },
+]
+
+function NavContent() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const [active, setActive] = useState<NavItemKey>('home')
 
   function handleLogout() {
     logout()
-    onNavigate?.()
     navigate('/login')
+  }
+
+  function handleSelect(key: NavItemKey) {
+    setActive(key)
+    if (key === 'home') navigate('/dashboard')
   }
 
   return (
     <>
-      <div>
-        <p className="text-lg font-semibold tracking-tight text-[#F4F4F5]">
-          {t('common.appName')}
-        </p>
-        <div className="mt-4 rounded-lg border border-[#27272A] bg-[#18181B] px-3 py-2 text-sm text-[#F4F4F5]">
-          {user?.firstName ?? t('nav.guest')}
-        </div>
+      <div
+        className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#C8E664] text-xl font-extrabold text-black"
+        title={user?.firstName ?? t('nav.guest')}
+      >
+        {(user?.firstName?.[0] ?? t('common.appName')[0]).toUpperCase()}
       </div>
 
-      <nav className="mt-6 flex flex-col gap-1">
-        <NavLink
-          to="/dashboard"
-          className={navLinkClassName}
-          onClick={onNavigate}
-        >
-          {t('nav.dashboard')}
-        </NavLink>
+      <nav className="mt-8 flex w-full flex-col items-center gap-3">
+        {navItems.map(({ key, labelKey }) => {
+          const isActive = active === key
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => handleSelect(key)}
+              className={`flex w-16 flex-col items-center gap-1.5 rounded-xl py-2.5 text-xs transition-colors ${
+                isActive
+                  ? 'bg-[#2A3018] font-semibold text-[#C8E664]'
+                  : 'text-[#E4E4E7] hover:bg-[#1E1E1E]'
+              }`}
+            >
+              {icons[key]}
+              <span>{t(labelKey)}</span>
+            </button>
+          )
+        })}
       </nav>
 
-      <div className="mt-auto flex flex-col gap-1 pt-6">
-        <LanguageSwitchButton className="mb-2 self-start" />
-        <button
-          type="button"
-          className="rounded-lg px-3 py-2 text-left text-sm text-[#A1A1AA] transition-colors hover:bg-[#18181B] hover:text-[#F4F4F5]"
-          onClick={onNavigate}
-        >
-          {t('nav.settings')}
-        </button>
+      <div className="mt-auto flex flex-col items-center gap-3 pt-6">
+        <LanguageSwitchButton />
         <button
           type="button"
           onClick={handleLogout}
-          className="rounded-lg px-3 py-2 text-left text-sm font-medium text-[#EF4444] transition-colors hover:bg-[#7F1D1D]/30"
+          className="rounded-lg px-2 py-1.5 text-xs font-medium text-[#EF4444] transition-colors hover:bg-[#7F1D1D]/30"
         >
           {t('nav.logout')}
         </button>
@@ -114,7 +169,7 @@ export function DashboardNavbar() {
 
   return (
     <>
-      <aside className="sticky top-0 hidden h-svh w-64 shrink-0 flex-col border-r border-[#27272A] bg-[#09090B] p-4 md:flex">
+      <aside className="sticky top-0 hidden h-svh w-24 shrink-0 flex-col items-center bg-[#121212] px-2 py-5 md:flex">
         <NavContent />
       </aside>
 
