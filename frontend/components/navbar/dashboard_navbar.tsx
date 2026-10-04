@@ -24,10 +24,25 @@ function MobileNavContent({ onNavigate }: { onNavigate?: () => void }) {
     <nav className="flex flex-col items-center gap-8">
       <NavLink
         to="/dashboard"
+        end
         className={mobileNavLinkClassName}
         onClick={onNavigate}
       >
-        {t('nav.dashboard')}
+        {t('nav.home')}
+      </NavLink>
+      <NavLink
+        to="/dashboard/timesheet"
+        className={mobileNavLinkClassName}
+        onClick={onNavigate}
+      >
+        {t('nav.timesheet')}
+      </NavLink>
+      <NavLink
+        to="/dashboard/history"
+        className={mobileNavLinkClassName}
+        onClick={onNavigate}
+      >
+        {t('nav.history')}
       </NavLink>
       <button
         type="button"
@@ -103,20 +118,27 @@ const navItems: { key: NavItemKey; labelKey: `nav.${NavItemKey}` }[] = [
   { key: 'settings', labelKey: 'nav.settings' },
 ]
 
+const navPaths: Partial<Record<NavItemKey, string>> = {
+  home: '/dashboard',
+  timesheet: '/dashboard/timesheet',
+  history: '/dashboard/history',
+}
+
+const sidebarItemClassName = (isActive: boolean) =>
+  `flex w-16 flex-col items-center gap-1.5 rounded-xl py-2.5 text-xs transition-colors ${
+    isActive
+      ? 'bg-[#2A3018] font-semibold text-[#C8E664]'
+      : 'text-[#E4E4E7] hover:bg-[#1E1E1E]'
+  }`
+
 function NavContent() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const [active, setActive] = useState<NavItemKey>('home')
 
   function handleLogout() {
     logout()
     navigate('/login')
-  }
-
-  function handleSelect(key: NavItemKey) {
-    setActive(key)
-    if (key === 'home') navigate('/dashboard')
   }
 
   return (
@@ -130,17 +152,25 @@ function NavContent() {
 
       <nav className="mt-8 flex w-full flex-col items-center gap-3">
         {navItems.map(({ key, labelKey }) => {
-          const isActive = active === key
+          const to = navPaths[key]
+          if (to) {
+            return (
+              <NavLink
+                key={key}
+                to={to}
+                end={key === 'home'}
+                className={({ isActive }) => sidebarItemClassName(isActive)}
+              >
+                {icons[key]}
+                <span>{t(labelKey)}</span>
+              </NavLink>
+            )
+          }
           return (
             <button
               key={key}
               type="button"
-              onClick={() => handleSelect(key)}
-              className={`flex w-16 flex-col items-center gap-1.5 rounded-xl py-2.5 text-xs transition-colors ${
-                isActive
-                  ? 'bg-[#2A3018] font-semibold text-[#C8E664]'
-                  : 'text-[#E4E4E7] hover:bg-[#1E1E1E]'
-              }`}
+              className={sidebarItemClassName(false)}
             >
               {icons[key]}
               <span>{t(labelKey)}</span>

@@ -57,6 +57,60 @@
     "welcome": "Anh Chào {{name}} Nhá !",
     "totalEarning": "Tổng thu nhập Đến Hiện Tại"
   },
+  "timesheet": {
+    "title": "Kỳ lương hiện tại",
+    "dailyShifts": "Ca làm theo ngày",
+    "noShift": "Không có ca",
+    "today": "HÔM NAY",
+    "checkIn": "Vào ca",
+    "checkOut": "Ra ca",
+    "thisShift": "Ca này",
+    "saveShift": "Lưu ca",
+    "moreShifts": "Có hơn 1 ca?",
+    "shiftNumber": "Ca {{n}}",
+    "break": {
+      "label": "Nghỉ không lương",
+      "none": "Không nghỉ",
+      "minutes": "{{count}} phút",
+      "custom": "Tùy chọn",
+      "customMinutes": "Số phút"
+    },
+    "rate": {
+      "label": "Mức lương · Cố định",
+      "hint": "Một công việc · một mức lương"
+    },
+    "estimate": {
+      "title": "Ước tính kỳ lương",
+      "live": "TRỰC TIẾP",
+      "beforeTax": "Trước thuế",
+      "tax": "Thuế ước tính",
+      "afterTax": "Sau thuế"
+    },
+    "howItUpdates": {
+      "title": "Cách cập nhật",
+      "body": "Thu nhập được cập nhật từ giờ vào ca, ra ca và thời gian nghỉ không lương mỗi khi bạn lưu ca."
+    },
+    "earnings": {
+      "title": "Thu nhập kỳ lương",
+      "whole": "Toàn kỳ lương",
+      "beforeTax": "Ước tính trước thuế",
+      "tax": "Thuế ước tính",
+      "afterTax": "Ước tính sau thuế",
+      "note": "Số liệu ước tính dựa trên các ca đã nhập và có thể khác với phiếu lương cuối cùng."
+    },
+    "picker": {
+      "label": "Chọn khoảng ngày",
+      "prevMonth": "Tháng trước",
+      "nextMonth": "Tháng sau",
+      "pickStart": "Chọn ngày bắt đầu (tối đa {{max}} ngày)",
+      "pickEnd": "Chọn ngày kết thúc (tối đa {{max}} ngày)",
+      "days_other": "{{count}} ngày"
+    }
+  },
+  "history": {
+    "title": "Lịch sử",
+    "subtitle": "Xem các mục chấm công và hoạt động trước đây."
+  },
   "footer": {
     "tagline": "Ghi nhận từng phút và từng đồng để bảng lương luôn chính xác",
     "product": {

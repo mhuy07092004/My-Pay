@@ -57,6 +57,61 @@
     "welcome": "Welcome back, {{name}}.",
     "totalEarning": "Total Earning Until Now"
   },
+  "timesheet": {
+    "title": "Current Fortnight",
+    "dailyShifts": "Daily shifts",
+    "noShift": "No shift",
+    "today": "TODAY",
+    "checkIn": "Check in",
+    "checkOut": "Check out",
+    "thisShift": "This shift",
+    "saveShift": "Save Shift",
+    "moreShifts": "More than 1 shift?",
+    "shiftNumber": "Shift {{n}}",
+    "break": {
+      "label": "Unpaid break",
+      "none": "No break",
+      "minutes": "{{count}} min",
+      "custom": "Custom",
+      "customMinutes": "Minutes"
+    },
+    "rate": {
+      "label": "Rate · Fixed",
+      "hint": "One job · one rate"
+    },
+    "estimate": {
+      "title": "Fortnight estimate",
+      "live": "LIVE",
+      "beforeTax": "Before tax",
+      "tax": "Est. tax",
+      "afterTax": "After tax"
+    },
+    "howItUpdates": {
+      "title": "How it updates",
+      "body": "Earnings update from your check-in, check-out and unpaid breaks as you save each shift."
+    },
+    "earnings": {
+      "title": "Fortnight earnings",
+      "whole": "Whole fortnight",
+      "beforeTax": "Estimated before tax",
+      "tax": "Est. tax",
+      "afterTax": "Estimated after tax",
+      "note": "Estimates are based on entered shifts and may differ from your final payslip."
+    },
+    "picker": {
+      "label": "Select date range",
+      "prevMonth": "Previous month",
+      "nextMonth": "Next month",
+      "pickStart": "Select a start date (up to {{max}} days)",
+      "pickEnd": "Select an end date (up to {{max}} days)",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days"
+    }
+  },
+  "history": {
+    "title": "History",
+    "subtitle": "View your past time entries and activity."
+  },
   "footer": {
     "tagline": "Track every minute and every dollar so payroll stays accurate, on time, and easy to understand.",
     "product": {
