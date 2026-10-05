@@ -111,6 +111,44 @@
     "title": "Lịch sử",
     "subtitle": "Xem các mục chấm công và hoạt động trước đây."
   },
+  "settings": {
+    "title": "Cài đặt",
+    "personal": {
+      "title": "Thông tin cá nhân",
+      "avatar": "Ảnh đại diện",
+      "upload": "Tải ảnh lên",
+      "password": "Mật khẩu"
+    },
+    "rates": {
+      "title": "Mức lương",
+      "add": "Thêm mức lương",
+      "adjust": "Điều chỉnh",
+      "rate": "Mức lương",
+      "custom": "Tùy chỉnh",
+      "fastFood": "Ngành Thức ăn nhanh",
+      "name": "Tên mức lương",
+      "namePlaceholder": "vd. Quán cà phê",
+      "status": "Trạng thái",
+      "level": "Cấp độ",
+      "ages": "Tuổi",
+      "fullTime": "Toàn thời gian",
+      "partTime": "Bán thời gian",
+      "casual": "Thời vụ",
+      "select": "Chọn…",
+      "ordinary": "Thông thường",
+      "night1": "22:00-23:59",
+      "night2": "00:00-06:00",
+      "saturday": "Thứ Bảy",
+      "sunday": "Chủ Nhật",
+      "publicHoliday": "Ngày lễ",
+      "overtime": "Lương tăng ca",
+      "first2": "2 giờ đầu",
+      "after2": "Sau 2 giờ",
+      "confirm": "Xác nhận",
+      "cancel": "Hủy",
+      "perHour": "/giờ"
+    }
+  },
   "footer": {
     "tagline": "Ghi nhận từng phút và từng đồng để bảng lương luôn chính xác",
     "product": {

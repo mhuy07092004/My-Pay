@@ -44,13 +44,13 @@ function MobileNavContent({ onNavigate }: { onNavigate?: () => void }) {
       >
         {t('nav.history')}
       </NavLink>
-      <button
-        type="button"
-        className="text-2xl font-bold text-[#F4F4F5] transition-colors hover:text-[#A1A1AA]"
+      <NavLink
+        to="/dashboard/settings"
+        className={mobileNavLinkClassName}
         onClick={onNavigate}
       >
         {t('nav.settings')}
-      </button>
+      </NavLink>
       <LanguageSwitchButton />
       <button
         type="button"
@@ -122,6 +122,7 @@ const navPaths: Partial<Record<NavItemKey, string>> = {
   home: '/dashboard',
   timesheet: '/dashboard/timesheet',
   history: '/dashboard/history',
+  settings: '/dashboard/settings',
 }
 
 const sidebarItemClassName = (isActive: boolean) =>

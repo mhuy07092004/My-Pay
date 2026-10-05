@@ -112,6 +112,44 @@
     "title": "History",
     "subtitle": "View your past time entries and activity."
   },
+  "settings": {
+    "title": "Settings",
+    "personal": {
+      "title": "Personal Information",
+      "avatar": "Avatar",
+      "upload": "Upload photo",
+      "password": "Password"
+    },
+    "rates": {
+      "title": "Rates",
+      "add": "Add rates",
+      "adjust": "Adjust",
+      "rate": "Rate",
+      "custom": "Custom",
+      "fastFood": "Fast Food Industry",
+      "name": "Rate name",
+      "namePlaceholder": "e.g. My Cafe",
+      "status": "Status",
+      "level": "Level",
+      "ages": "Ages",
+      "fullTime": "Full time",
+      "partTime": "Part time",
+      "casual": "Casual",
+      "select": "Select…",
+      "ordinary": "Ordinary",
+      "night1": "22:00-23:59",
+      "night2": "00:00-06:00",
+      "saturday": "Saturday",
+      "sunday": "Sunday",
+      "publicHoliday": "Public Holiday",
+      "overtime": "Overtime rates",
+      "first2": "First 2 Hour",
+      "after2": "After 2 Hour",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "perHour": "/hr"
+    }
+  },
   "footer": {
     "tagline": "Track every minute and every dollar so payroll stays accurate, on time, and easy to understand.",
     "product": {

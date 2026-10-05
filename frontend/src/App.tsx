@@ -6,6 +6,7 @@ import { Login } from './pages/Login'
 import { Dashboard } from './pages/dashboard/dashboard'
 import { DashboardLayout } from './pages/dashboard/DashboardLayout'
 import { History } from './pages/dashboard/history'
+import { Settings } from './pages/dashboard/settings'
 import { Timesheet } from './pages/dashboard/timesheet'
 
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -47,6 +48,7 @@ function App() {
         <Route index element={<Dashboard />} />
         <Route path="timesheet" element={<Timesheet />} />
         <Route path="history" element={<History />} />
+        <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>
   )
