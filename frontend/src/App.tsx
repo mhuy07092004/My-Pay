@@ -5,7 +5,6 @@ import { Landing } from './pages/Landing'
 import { Login } from './pages/Login'
 import { Dashboard } from './pages/dashboard/dashboard'
 import { DashboardLayout } from './pages/dashboard/DashboardLayout'
-import { History } from './pages/dashboard/history'
 import { NewShifts } from './pages/dashboard/new_shifts'
 import { PeriodDetail } from './pages/dashboard/period_detail'
 import { Settings } from './pages/dashboard/settings'
@@ -51,7 +50,6 @@ function App() {
         <Route path="timesheet" element={<Timesheet />} />
         <Route path="timesheet/newshifts" element={<NewShifts />} />
         <Route path="timesheet/:periodId" element={<PeriodDetail />} />
-        <Route path="history" element={<History />} />
         <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>
