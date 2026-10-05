@@ -38,13 +38,6 @@ function MobileNavContent({ onNavigate }: { onNavigate?: () => void }) {
         {t('nav.timesheet')}
       </NavLink>
       <NavLink
-        to="/dashboard/history"
-        className={mobileNavLinkClassName}
-        onClick={onNavigate}
-      >
-        {t('nav.history')}
-      </NavLink>
-      <NavLink
         to="/dashboard/settings"
         className={mobileNavLinkClassName}
         onClick={onNavigate}
@@ -63,7 +56,7 @@ function MobileNavContent({ onNavigate }: { onNavigate?: () => void }) {
   )
 }
 
-type NavItemKey = 'home' | 'timesheet' | 'reports' | 'history' | 'settings'
+type NavItemKey = 'home' | 'timesheet' | 'reports' | 'settings'
 
 const iconProps = {
   width: 24,
@@ -95,13 +88,6 @@ const icons: Record<NavItemKey, React.ReactNode> = {
       <path d="M6 20v-7M12 20V5M18 20v-11" />
     </svg>
   ),
-  history: (
-    <svg {...iconProps}>
-      <path d="M3 12a9 9 0 1 0 3-6.7" />
-      <path d="M3 4v5h5" />
-      <path d="M12 7v5l3 2" />
-    </svg>
-  ),
   settings: (
     <svg {...iconProps}>
       <circle cx="12" cy="12" r="3" />
@@ -114,14 +100,12 @@ const navItems: { key: NavItemKey; labelKey: `nav.${NavItemKey}` }[] = [
   { key: 'home', labelKey: 'nav.home' },
   { key: 'timesheet', labelKey: 'nav.timesheet' },
   { key: 'reports', labelKey: 'nav.reports' },
-  { key: 'history', labelKey: 'nav.history' },
   { key: 'settings', labelKey: 'nav.settings' },
 ]
 
 const navPaths: Partial<Record<NavItemKey, string>> = {
   home: '/dashboard',
   timesheet: '/dashboard/timesheet',
-  history: '/dashboard/history',
   settings: '/dashboard/settings',
 }
 

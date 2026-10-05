@@ -58,7 +58,7 @@
     "totalEarning": "Total Earning Until Now"
   },
   "timesheet": {
-    "title": "Current Fortnight",
+    "title": "Current Period",
     "dailyShifts": "Daily shifts",
     "noShift": "No shift",
     "today": "TODAY",
@@ -80,7 +80,7 @@
       "hint": "One job · one rate"
     },
     "estimate": {
-      "title": "Fortnight estimate",
+      "title": "Period estimate",
       "live": "LIVE",
       "beforeTax": "Before tax",
       "tax": "Est. tax",
@@ -91,8 +91,8 @@
       "body": "Earnings update from your check-in, check-out and unpaid breaks as you save each shift."
     },
     "earnings": {
-      "title": "Fortnight earnings",
-      "whole": "Whole fortnight",
+      "title": "Period earnings",
+      "whole": "Whole period",
       "beforeTax": "Estimated before tax",
       "tax": "Est. tax",
       "afterTax": "Estimated after tax",
@@ -105,7 +105,29 @@
       "pickStart": "Select a start date (up to {{max}} days)",
       "pickEnd": "Select an end date (up to {{max}} days)",
       "days_one": "{{count}} day",
-      "days_other": "{{count}} days"
+      "days_other": "{{count}} days",
+      "placeholder": "Select dates"
+    },
+    "addNewShifts": "Add New Shifts",
+    "periods": {
+      "title": "Timesheet",
+      "empty": "No periods yet. Add your first shifts to get started.",
+      "income": "Income",
+      "tax": "Tax",
+      "actual": "Actual",
+      "actualRecorded": "Actual recorded",
+      "estimated": "Estimated"
+    },
+    "newShifts": {
+      "title": "Add New Shifts",
+      "hint": "Select a date range to start adding shifts.",
+      "savePeriod": "Save period",
+      "overlap": "This range overlaps an existing period."
+    },
+    "detail": {
+      "back": "Back",
+      "actualReceived": "Actual received",
+      "saveActual": "Save actual"
     }
   },
   "history": {

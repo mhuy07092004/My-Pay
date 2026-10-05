@@ -104,7 +104,29 @@
       "nextMonth": "Tháng sau",
       "pickStart": "Chọn ngày bắt đầu (tối đa {{max}} ngày)",
       "pickEnd": "Chọn ngày kết thúc (tối đa {{max}} ngày)",
-      "days_other": "{{count}} ngày"
+      "days_other": "{{count}} ngày",
+      "placeholder": "Chọn ngày"
+    },
+    "addNewShifts": "Thêm ca mới",
+    "periods": {
+      "title": "Chấm công",
+      "empty": "Chưa có kỳ lương nào. Hãy thêm ca làm đầu tiên.",
+      "income": "Thu nhập",
+      "tax": "Thuế",
+      "actual": "Thực nhận",
+      "actualRecorded": "Đã ghi thực nhận",
+      "estimated": "Ước tính"
+    },
+    "newShifts": {
+      "title": "Thêm ca mới",
+      "hint": "Chọn khoảng ngày để bắt đầu thêm ca làm.",
+      "savePeriod": "Lưu kỳ lương",
+      "overlap": "Khoảng ngày này trùng với một kỳ lương đã có."
+    },
+    "detail": {
+      "back": "Quay lại",
+      "actualReceived": "Thực nhận",
+      "saveActual": "Lưu thực nhận"
     }
   },
   "history": {

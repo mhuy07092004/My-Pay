@@ -10,7 +10,7 @@ import {
 } from '../../src/lib/timesheet'
 
 type DateRangePickerProps = {
-  value: DateRange
+  value: DateRange | null
   onChange: (range: DateRange) => void
   maxDays?: number
   className?: string
@@ -56,7 +56,9 @@ export function DateRangePicker({
   const locale = isAppLanguage(i18n.language) ? HTML_LANG[i18n.language] : 'en'
   const containerRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
-  const [viewMonth, setViewMonth] = useState(() => startOfMonth(value.start))
+  const [viewMonth, setViewMonth] = useState(() =>
+    startOfMonth(value?.start ?? new Date()),
+  )
   const [pendingStart, setPendingStart] = useState<Date | null>(null)
   const [hover, setHover] = useState<Date | null>(null)
 
@@ -87,7 +89,7 @@ export function DateRangePicker({
 
   function toggle() {
     if (!open) {
-      setViewMonth(startOfMonth(value.start))
+      setViewMonth(startOfMonth(value?.start ?? new Date()))
       setPendingStart(null)
       setHover(null)
     }
@@ -111,8 +113,8 @@ export function DateRangePicker({
     setOpen(false)
   }
 
-  let shownStart = value.start
-  let shownEnd = value.end
+  let shownStart: Date | null = value?.start ?? null
+  let shownEnd: Date | null = value?.end ?? null
   if (pendingStart) {
     shownStart = pendingStart
     shownEnd =
@@ -120,7 +122,7 @@ export function DateRangePicker({
   }
 
   const today = startOfDay(new Date())
-  const dayCount = diffDays(shownStart, shownEnd) + 1
+  const dayCount = shownStart && shownEnd ? diffDays(shownStart, shownEnd) + 1 : 0
   const weekdayLabels = Array.from({ length: 7 }, (_, i) =>
     weekday.format(new Date(2024, 0, 1 + i)),
   )
@@ -140,9 +142,10 @@ export function DateRangePicker({
           {buildMonthCells(month).map((day, i) => {
             if (!day) return <span key={`empty-${i}`} />
 
-            const isStart = isSameDay(day, shownStart)
-            const isEnd = isSameDay(day, shownEnd)
-            const inRange = day >= shownStart && day <= shownEnd
+            const isStart = shownStart ? isSameDay(day, shownStart) : false
+            const isEnd = shownEnd ? isSameDay(day, shownEnd) : false
+            const inRange =
+              shownStart && shownEnd ? day >= shownStart && day <= shownEnd : false
             const disabled = isDisabled(day)
             const edge = isStart || isEnd
 
@@ -188,7 +191,9 @@ export function DateRangePicker({
           <path d="M3 10h18M8 3v4M16 3v4" />
         </svg>
         <span>
-          {shortDate.format(value.start)} → {shortDate.format(value.end)}
+          {value
+            ? `${shortDate.format(value.start)} → ${shortDate.format(value.end)}`
+            : t('timesheet.picker.placeholder')}
         </span>
       </button>
 

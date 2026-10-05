@@ -17,6 +17,65 @@ export type DateRange = {
 
 export const MAX_RANGE_DAYS = 14
 
+export type Period = {
+  id: string
+  /** ISO date YYYY-MM-DD */
+  start: string
+  /** ISO date YYYY-MM-DD */
+  end: string
+  shifts: Record<string, Shift>
+  actual?: number
+}
+
+export function parseIsoDate(iso: string): Date {
+  const [y, m, d] = iso.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+
+export function periodRange(period: Pick<Period, 'start' | 'end'>): DateRange {
+  return { start: parseIsoDate(period.start), end: parseIsoDate(period.end) }
+}
+
+export function rangesOverlap(a: DateRange, b: DateRange): boolean {
+  return !(a.end < b.start || a.start > b.end)
+}
+
+export function periodTotals(
+  period: Period,
+  hourlyRateOf: (rateId: string) => number,
+  taxRate: number,
+) {
+  const income = Object.values(period.shifts).reduce(
+    (sum, shift) => sum + calcTotalPay(shift, hourlyRateOf),
+    0,
+  )
+  const tax = income * taxRate
+  return { income, tax, afterTax: income - tax }
+}
+
+export type PeriodGroup = { key: string; month: Date; periods: Period[] }
+
+/** Groups by month of the start date, newest first. */
+export function groupPeriodsByMonth(periods: Period[]): PeriodGroup[] {
+  const sorted = [...periods].sort((a, b) => b.start.localeCompare(a.start))
+  const groups: PeriodGroup[] = []
+  for (const period of sorted) {
+    const key = period.start.slice(0, 7)
+    const last = groups[groups.length - 1]
+    if (last && last.key === key) {
+      last.periods.push(period)
+    } else {
+      const d = parseIsoDate(period.start)
+      groups.push({
+        key,
+        month: new Date(d.getFullYear(), d.getMonth(), 1),
+        periods: [period],
+      })
+    }
+  }
+  return groups
+}
+
 export function startOfDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate())
 }
