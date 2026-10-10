@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import { Landing } from './pages/Landing'
 import { Login } from './pages/Login'
+import { Pricing } from './pages/Pricing'
 import { Dashboard } from './pages/dashboard/dashboard'
 import { DashboardLayout } from './pages/dashboard/DashboardLayout'
 import { NewShifts } from './pages/dashboard/new_shifts'
@@ -31,6 +32,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/pricing" element={<Pricing />} />
       <Route
         path="/login"
         element={

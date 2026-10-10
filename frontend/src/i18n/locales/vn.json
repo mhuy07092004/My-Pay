@@ -31,6 +31,47 @@
       "cta": "Bắt đầu miễn phí"
     }
   },
+  "pricing": {
+    "title": "Bảng giá đơn giản cho mọi đội nhóm",
+    "subtitle": "Bắt đầu miễn phí. Nâng cấp khi bạn cần thêm.",
+    "billing": {
+      "label": "Chu kỳ thanh toán",
+      "monthly": "Hàng tháng",
+      "yearly": "Hàng năm"
+    },
+    "perMonth": "/tháng",
+    "billedYearly": "Thanh toán {{amount}} mỗi năm",
+    "billedMonthly": "Thanh toán hàng tháng",
+    "comingSoon": "Sắp ra mắt",
+    "priceTbd": "Giá sẽ được công bố",
+    "includes": "Bao gồm:",
+    "everythingIn": "Mọi thứ trong {{plan}}, thêm:",
+    "plans": {
+      "free": {
+        "name": "Miễn phí",
+        "description": "Theo dõi ca làm và lương cho nhu cầu cá nhân.",
+        "price": "Miễn phí",
+        "cta": "Bắt đầu miễn phí",
+        "features": [
+          "Không giới hạn số ca làm",
+          "Ước tính lương theo kỳ hai tuần",
+          "Báo cáo thu nhập cơ bản",
+          "Tiếng Anh và tiếng Việt"
+        ]
+      },
+      "premium": {
+        "name": "Premium",
+        "description": "Thống kê chuyên sâu cho người muốn tính từng đồng.",
+        "cta": "Sắp ra mắt",
+        "features": [
+          "Báo cáo thu nhập nâng cao",
+          "Xuất PDF và CSV",
+          "Nhiều mức lương",
+          "Hỗ trợ ưu tiên"
+        ]
+      }
+    }
+  },
   "auth": {
     "backToHome": "Quay lại trang chủ",
     "signIn": "Đăng nhập",

@@ -6,7 +6,7 @@ import { LanguageSwitchButton } from '../button/swtich_button'
 
 const navLinks = [
   { href: '#features', labelKey: 'nav.features' },
-  { href: '#pricing', labelKey: 'nav.pricing' },
+  { href: '/pricing', labelKey: 'nav.pricing' },
   { href: '#about', labelKey: 'nav.about' },
 ] as const
 

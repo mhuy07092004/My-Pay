@@ -31,6 +31,47 @@
       "cta": "Start for Free"
     }
   },
+  "pricing": {
+    "title": "Simple pricing for every team",
+    "subtitle": "Start free. Upgrade when you need more.",
+    "billing": {
+      "label": "Billing period",
+      "monthly": "Monthly",
+      "yearly": "Yearly"
+    },
+    "perMonth": "/month",
+    "billedYearly": "Billed {{amount}} per year",
+    "billedMonthly": "Billed monthly",
+    "comingSoon": "Coming soon",
+    "priceTbd": "Price to be announced",
+    "includes": "Includes:",
+    "everythingIn": "Everything in {{plan}}, plus:",
+    "plans": {
+      "free": {
+        "name": "Free",
+        "description": "Track your shifts and pay for personal use.",
+        "price": "Free",
+        "cta": "Get started free",
+        "features": [
+          "Unlimited shifts",
+          "Fortnight pay estimate",
+          "Basic income report",
+          "English and Vietnamese"
+        ]
+      },
+      "premium": {
+        "name": "Premium",
+        "description": "Deeper insights for people who want every dollar counted.",
+        "cta": "Coming soon",
+        "features": [
+          "Advanced income reports",
+          "Export to PDF and CSV",
+          "Multiple pay rates",
+          "Priority support"
+        ]
+      }
+    }
+  },
   "auth": {
     "backToHome": "Back to home",
     "signIn": "Sign in",
