@@ -72,6 +72,36 @@
       }
     }
   },
+  "about": {
+    "title": "Nhận đúng lương không nên là chuyện đoán mò",
+    "subtitle": "My Pay giúp bạn ghi ca làm, biết lương sau thuế và đối chiếu với số tiền thực sự về tài khoản.",
+    "problem": {
+      "eyebrow": "Vấn đề",
+      "title": "Tiền nhận được hiếm khi khớp với dự tính",
+      "body": "Ca làm, giờ nghỉ, ca qua đêm và thuế cộng dồn rất nhanh. Khi tiền về thiếu, khó mà chứng minh lý do."
+    },
+    "solution": {
+      "eyebrow": "Cách giải quyết",
+      "title": "Ba bước, không cần bảng tính",
+      "body": "Ghi một lần, My Pay tính toán và lưu lại thay bạn.",
+      "steps": {
+        "1": { "title": "Ghi ca làm", "body": "Thêm giờ vào, giờ ra và giờ nghỉ cho mỗi ngày đi làm." },
+        "2": { "title": "Xem lương", "body": "Lương và thuế của kỳ hai tuần được tính ngay khi bạn ghi." },
+        "3": { "title": "Đối chiếu", "body": "Nhập số tiền được trả và thấy chênh lệch ngay." }
+      }
+    },
+    "principles": {
+      "title": "Chúng tôi theo đuổi điều gì",
+      "simple": { "title": "Đơn giản", "body": "Chỉ có những gì bạn cần để theo dõi lương." },
+      "private": { "title": "Riêng tư", "body": "Ca làm và thu nhập chỉ thuộc về bạn." },
+      "accurate": { "title": "Chính xác", "body": "Xử lý giờ nghỉ, ca tách đôi và ca qua đêm." },
+      "bilingual": { "title": "Song ngữ", "body": "Dùng bằng tiếng Anh hoặc tiếng Việt." }
+    },
+    "cta": {
+      "title": "Biết mình được trả bao nhiêu",
+      "body": "Bắt đầu ghi ca làm ngay hôm nay. Thiết lập chỉ mất một phút."
+    }
+  },
   "features": {
     "title": "Tính năng",
     "subtitle": "Chỉ là số liệu mẫu. Bấm khoảng thời gian của biểu đồ để xem một tháng, ba tháng hoặc cả năm. Giờ làm và tiền không đổi.",

@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../button/button'
 import type { BillingPeriod } from './billing_toggle'
@@ -17,6 +18,7 @@ export type PlanCardProps = {
   featured?: boolean
   comingSoon?: boolean
   ctaTo?: string
+  delay?: number
 }
 
 const usd = (amount: number) => `$${amount}`
@@ -54,13 +56,14 @@ export function PlanCard({
   featured = false,
   comingSoon = false,
   ctaTo,
+  delay = 0,
 }: PlanCardProps) {
   const { t } = useTranslation()
 
   const useFeatured = featured && !comingSoon
   const surface = useFeatured
     ? 'border-[#F4F4F5] bg-[#F4F4F5] text-[#09090B]'
-    : 'border-[#27272A] bg-[#121212] text-[#F4F4F5]'
+    : 'border-white/[0.08] bg-white/[0.02] text-[#F4F4F5] transition-colors duration-300 hover:border-white/20'
   const muted = useFeatured ? 'text-[#09090B]/70' : 'text-[#A1A1AA]'
   const divider = useFeatured ? 'border-[#09090B]/15' : 'border-[#3F3F46]'
 
@@ -72,9 +75,13 @@ export function PlanCard({
       : t('pricing.billedMonthly')
 
   return (
-    <article
+    <motion.article
+      initial={{ opacity: 0, y: 14 }}
+      whileInView={{ opacity: comingSoon ? 0.55 : 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay }}
       className={`row-span-7 grid grid-rows-subgrid gap-y-0 rounded-2xl border py-7 *:px-7 ${surface} ${
-        comingSoon ? 'opacity-55 saturate-50' : ''
+        comingSoon ? 'saturate-50' : ''
       }`}
     >
       <div className="flex items-center justify-between gap-3">
@@ -93,9 +100,15 @@ export function PlanCard({
       <div className="mt-6 flex items-baseline gap-1">
         {price ? (
           <>
-            <span className="text-3xl font-bold tabular-nums">
+            <motion.span
+              key={period}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="text-3xl font-semibold tabular-nums"
+            >
               {usd(Number.isInteger(amount) ? amount : Number(amount.toFixed(2)))}
-            </span>
+            </motion.span>
             <span className={`text-sm ${muted}`}>{t('pricing.perMonth')}</span>
           </>
         ) : (
@@ -135,6 +148,6 @@ export function PlanCard({
           </Button>
         )}
       </div>
-    </article>
+    </motion.article>
   )
 }

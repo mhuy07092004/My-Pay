@@ -30,31 +30,41 @@ const columns = [
   },
 ] as const
 
+const linkClass = 'text-sm text-[#71717A] transition-colors duration-200 hover:text-[#F4F4F5]'
+
 export function LandingFooter() {
   const { t } = useTranslation()
 
   return (
-    <footer className="hidden border-t border-[#27272A] bg-[#09090B] md:block">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-4">
+    <footer className="hidden border-t border-white/[0.08] bg-[#09090B] md:block">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-4">
         <div>
-          <p className="text-lg font-semibold text-[#F4F4F5]">{t('common.appName')}</p>
-          <p className="mt-3 max-w-xs text-sm leading-6 text-[#A1A1AA]">
-            {t('footer.tagline')}
+          <p className="text-base font-semibold tracking-tight text-[#F4F4F5]">
+            {t('common.appName')}
           </p>
+          <p className="mt-3 max-w-xs text-sm leading-6 text-[#71717A]">{t('footer.tagline')}</p>
         </div>
 
         {columns.map((column) => (
           <div key={column.titleKey}>
-            <p className="text-sm font-semibold text-[#F4F4F5]">{t(column.titleKey)}</p>
+            <p className="text-sm font-medium text-[#F4F4F5]">{t(column.titleKey)}</p>
             <ul className="mt-4 space-y-3">
               {column.links.map((link) => (
                 <li key={link}>
                   {link === 'footer.product.features' ? (
-                    <Link to="/features" className="text-sm text-[#A1A1AA] hover:text-[#F4F4F5]">
+                    <Link to="/features" className={linkClass}>
+                      {t(link)}
+                    </Link>
+                  ) : link === 'footer.product.pricing' ? (
+                    <Link to="/pricing" className={linkClass}>
+                      {t(link)}
+                    </Link>
+                  ) : link === 'footer.company.about' ? (
+                    <Link to="/about" className={linkClass}>
                       {t(link)}
                     </Link>
                   ) : (
-                    <a href="#" className="text-sm text-[#A1A1AA] hover:text-[#F4F4F5]">
+                    <a href="#" className={linkClass}>
                       {t(link)}
                     </a>
                   )}
@@ -65,14 +75,14 @@ export function LandingFooter() {
         ))}
       </div>
 
-      <div className="border-t border-[#27272A]">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-6 text-sm text-[#A1A1AA] sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <div className="border-t border-white/[0.08]">
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-6 text-sm text-[#71717A] sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p>{t('footer.copyright', { year: new Date().getFullYear() })}</p>
           <div className="flex gap-5">
-            <a href="#" className="hover:text-[#F4F4F5]">
+            <a href="#" className="transition-colors duration-200 hover:text-[#F4F4F5]">
               {t('footer.status')}
             </a>
-            <a href="#" className="hover:text-[#F4F4F5]">
+            <a href="#" className="transition-colors duration-200 hover:text-[#F4F4F5]">
               {t('footer.support')}
             </a>
           </div>

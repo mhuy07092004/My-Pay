@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
+import { About } from './pages/About'
 import { Feature } from './pages/Feature'
 import { Landing } from './pages/Landing'
 import { Login } from './pages/Login'
@@ -35,6 +36,7 @@ function App() {
       <Route path="/" element={<Landing />} />
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/features" element={<Feature />} />
+      <Route path="/about" element={<About />} />
       <Route
         path="/login"
         element={

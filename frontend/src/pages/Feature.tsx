@@ -9,6 +9,8 @@ import { LandingFooter } from '../../components/footer/landing_footer'
 import { LandingNavbar } from '../../components/navbar/landing_navbar'
 import { IncomeChart } from '../../components/report/income_chart'
 import { FortnightEstimate } from '../../components/shift/fortnight_estimate'
+import { PageFade } from '../../components/motion/page_fade'
+import { Reveal, RevealItem, RevealList } from '../../components/motion/reveal'
 import { Tabs } from '../../components/tabs/tabs'
 import { HTML_LANG, isAppLanguage } from '../i18n/config'
 import { buildFeatureSample } from '../lib/featureSample'
@@ -121,26 +123,35 @@ export function Feature() {
   ]
 
   return (
-    <div className="flex min-h-svh flex-col bg-[#18181B] text-[#F4F4F5]">
+    <div className="flex min-h-svh flex-col bg-[#09090B] text-[#F4F4F5]">
       <LandingNavbar />
-      <main className="flex-1">
-        <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+      <PageFade className="flex-1">
+      <main>
+        <div className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
           <header>
-            <h1 className="text-balance text-2xl font-bold sm:text-3xl">{t('features.title')}</h1>
-            <p className="mt-3 max-w-[62ch] text-balance text-sm/6 text-[#A1A1AA] sm:text-base/7">
-              {t('features.subtitle')}
-            </p>
-            <ul className="mt-6 flex flex-wrap gap-2">
-              {chips.map((chip) => (
-                <li
-                  key={chip.key}
-                  className="flex items-center gap-2 rounded-full border border-[#27272A] px-3 py-1.5 text-sm text-[#A1A1AA]"
-                >
-                  <span className="text-[#C8E664]">{chip.icon}</span>
-                  {chip.label}
-                </li>
-              ))}
-            </ul>
+            <Reveal immediate>
+              <h1 className="text-balance bg-gradient-to-b from-white to-[#A1A1AA] bg-clip-text text-4xl font-semibold tracking-tight text-transparent sm:text-5xl">
+                {t('features.title')}
+              </h1>
+            </Reveal>
+            <Reveal immediate delay={0.08}>
+              <p className="mt-4 max-w-[62ch] text-balance text-sm/6 text-[#A1A1AA] sm:text-base/7">
+                {t('features.subtitle')}
+              </p>
+            </Reveal>
+            <Reveal immediate delay={0.16}>
+              <ul className="mt-6 flex flex-wrap gap-2">
+                {chips.map((chip) => (
+                  <li
+                    key={chip.key}
+                    className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.02] px-3 py-1.5 text-sm text-[#A1A1AA]"
+                  >
+                    <span className="text-[#C8E664]">{chip.icon}</span>
+                    {chip.label}
+                  </li>
+                ))}
+              </ul>
+            </Reveal>
           </header>
 
           <FeatureBlock
@@ -197,13 +208,14 @@ export function Feature() {
             />
           </FeatureBlock>
 
-          <section className="feature-reveal mt-20">
+          <Reveal className="mt-28">
+          <section>
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-[#C8E664]">
+                <p className="text-xs font-medium uppercase tracking-wider text-[#C8E664]">
                   {t('features.report.eyebrow')}
                 </p>
-                <h2 className="mt-3 text-balance text-xl font-bold sm:text-2xl">
+                <h2 className="mt-3 text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
                   {t('features.report.title')}
                 </h2>
                 <p className="mt-3 max-w-[48ch] text-sm/6 text-[#A1A1AA] sm:text-base/7">
@@ -222,7 +234,7 @@ export function Feature() {
               />
             </div>
 
-            <div className="mt-6 rounded-xl border border-[#27272A] bg-[#18181B] p-5">
+            <div className="mt-6 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
               <h3 className="mb-3 text-sm font-semibold text-[#A1A1AA]">
                 {t('report.chartTitle', { range: t(`report.range.${range}`) })}
               </h3>
@@ -274,23 +286,27 @@ export function Feature() {
               />
             </div>
           </section>
+          </Reveal>
 
-          <section className="feature-reveal mt-20">
-            <h2 className="text-lg font-semibold tracking-tight">{t('features.extras.title')}</h2>
-            <ul className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <section className="mt-28">
+            <Reveal>
+              <h2 className="text-xl font-semibold tracking-tight">{t('features.extras.title')}</h2>
+            </Reveal>
+            <RevealList className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
               {extras.map((item) => (
-                <li
+                <RevealItem
                   key={item.key}
-                  className="flex flex-col gap-3 rounded-xl border border-[#27272A] bg-[#18181B] p-5"
+                  className="flex flex-col gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-5 transition-colors duration-300 hover:border-white/20"
                 >
                   <span className="text-[#C8E664]">{item.icon}</span>
                   <span className="text-sm font-medium">{item.label}</span>
-                </li>
+                </RevealItem>
               ))}
-            </ul>
+            </RevealList>
           </section>
         </div>
       </main>
+      </PageFade>
       <LandingFooter />
     </div>
   )

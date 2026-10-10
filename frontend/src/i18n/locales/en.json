@@ -72,6 +72,36 @@
       }
     }
   },
+  "about": {
+    "title": "Getting paid right should not be guesswork",
+    "subtitle": "My Pay is a simple way to log your shifts, see what you should earn after tax, and check it against what actually lands in your account.",
+    "problem": {
+      "eyebrow": "The problem",
+      "title": "Pay slips rarely match what you expect",
+      "body": "Shifts, breaks, overnight hours and tax add up fast. When the money arrives short, it is hard to prove why."
+    },
+    "solution": {
+      "eyebrow": "Our answer",
+      "title": "Three steps, no spreadsheets",
+      "body": "Log once, and My Pay does the maths and keeps the record for you.",
+      "steps": {
+        "1": { "title": "Log your shifts", "body": "Add start, finish and break times for each day you work." },
+        "2": { "title": "See your pay", "body": "Pay and tax for the fortnight are worked out as you go." },
+        "3": { "title": "Check it", "body": "Enter what you were paid and see the difference straight away." }
+      }
+    },
+    "principles": {
+      "title": "What we stand for",
+      "simple": { "title": "Simple", "body": "Only what you need to track your pay." },
+      "private": { "title": "Private", "body": "Your shifts and income are yours alone." },
+      "accurate": { "title": "Accurate", "body": "Breaks, split and overnight shifts are handled." },
+      "bilingual": { "title": "Bilingual", "body": "Use it in English or Vietnamese." }
+    },
+    "cta": {
+      "title": "Know what you are owed",
+      "body": "Start logging your shifts today. It takes a minute to set up."
+    }
+  },
   "features": {
     "title": "Features",
     "subtitle": "Sample numbers only. Switch the report range to look at a month, three months, or the year. Hours and pay do not change.",
