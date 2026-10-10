@@ -129,6 +129,35 @@
       "saveActual": "Lưu thực nhận"
     }
   },
+  "report": {
+    "title": "Báo cáo",
+    "chartTitle": "Thu nhập · {{range}}",
+    "empty": "Chưa có ca làm nào trong khoảng này.",
+    "range": {
+      "month": "1 tháng",
+      "threeMonths": "3 tháng",
+      "annual": "Năm tài chính",
+      "year": "Năm"
+    },
+    "series": {
+      "estimated": "Ước tính",
+      "net": "Thực nhận"
+    },
+    "stats": {
+      "estimated": "Thu nhập ước tính đến nay",
+      "estimatedHint": "Tính từ các ca làm, trước thuế, trong năm nay",
+      "net": "Thu nhập thực nhận",
+      "netHint": "Số tiền thực tế bạn đã nhập",
+      "variance": "Chênh lệch",
+      "varianceHint": "Thực nhận so với ước tính · {{done}}/{{total}} kỳ đã nhập",
+      "tax": "Thuế ước tính",
+      "taxHint": "{{rate}}% thu nhập ước tính",
+      "hours": "Tổng giờ đã làm",
+      "bestWeek": "Tuần năng suất nhất",
+      "highestFortnight": "Kỳ lương cao nhất",
+      "lowestFortnight": "Kỳ lương thấp nhất"
+    }
+  },
   "history": {
     "title": "Lịch sử",
     "subtitle": "Xem các mục chấm công và hoạt động trước đây."

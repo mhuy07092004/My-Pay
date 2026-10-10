@@ -130,6 +130,35 @@
       "saveActual": "Save actual"
     }
   },
+  "report": {
+    "title": "Report",
+    "chartTitle": "Income · {{range}}",
+    "empty": "No shifts recorded in this range yet.",
+    "range": {
+      "month": "1 month",
+      "threeMonths": "3 months",
+      "annual": "Annual",
+      "year": "Year"
+    },
+    "series": {
+      "estimated": "Estimated",
+      "net": "Net"
+    },
+    "stats": {
+      "estimated": "Estimated earnings to date",
+      "estimatedHint": "From your shifts, before tax, this year",
+      "net": "Net income",
+      "netHint": "Actual amounts you entered",
+      "variance": "Difference",
+      "varianceHint": "Net vs estimated · {{done}}/{{total}} fortnights entered",
+      "tax": "Estimated tax",
+      "taxHint": "{{rate}}% of estimated earnings",
+      "hours": "Total hours worked",
+      "bestWeek": "Most productive week",
+      "highestFortnight": "Highest income fortnight",
+      "lowestFortnight": "Lowest income fortnight"
+    }
+  },
   "history": {
     "title": "History",
     "subtitle": "View your past time entries and activity."

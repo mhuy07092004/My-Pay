@@ -38,6 +38,13 @@ function MobileNavContent({ onNavigate }: { onNavigate?: () => void }) {
         {t('nav.timesheet')}
       </NavLink>
       <NavLink
+        to="/dashboard/report"
+        className={mobileNavLinkClassName}
+        onClick={onNavigate}
+      >
+        {t('nav.reports')}
+      </NavLink>
+      <NavLink
         to="/dashboard/settings"
         className={mobileNavLinkClassName}
         onClick={onNavigate}
@@ -106,6 +113,7 @@ const navItems: { key: NavItemKey; labelKey: `nav.${NavItemKey}` }[] = [
 const navPaths: Partial<Record<NavItemKey, string>> = {
   home: '/dashboard',
   timesheet: '/dashboard/timesheet',
+  reports: '/dashboard/report',
   settings: '/dashboard/settings',
 }
 
