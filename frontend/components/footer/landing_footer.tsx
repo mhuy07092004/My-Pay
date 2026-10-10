@@ -30,11 +30,21 @@ function SocialIcon({
   )
 }
 
-type FooterLink =
-  | { key: string; to: string }
-  | { key: string; href: string }
+type FooterTitleKey = 'footer.product.title' | 'footer.company.title' | 'footer.legal.title'
 
-const columns: { titleKey: string; links: FooterLink[] }[] = [
+type FooterLinkKey =
+  | 'footer.product.features'
+  | 'footer.product.pricing'
+  | 'footer.company.about'
+  | 'footer.legal.privacy'
+  | 'footer.legal.terms'
+  | 'footer.legal.security'
+
+type FooterLink =
+  | { key: FooterLinkKey; to: string }
+  | { key: FooterLinkKey; href: string }
+
+const columns: { titleKey: FooterTitleKey; links: FooterLink[] }[] = [
   {
     titleKey: 'footer.product.title',
     links: [
