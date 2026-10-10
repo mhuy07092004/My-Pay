@@ -314,6 +314,14 @@
   },
   "footer": {
     "tagline": "Ghi nhận từng phút và từng đồng để bảng lương luôn chính xác",
+    "profile": "Hồ sơ",
+    "creatorName": "Hayden Loi",
+    "social": {
+      "github": "Hayden Loi trên GitHub",
+      "website": "Trang web cá nhân Hayden Loi",
+      "youtube": "Hayden Loi trên YouTube",
+      "linkedin": "Hayden Loi trên LinkedIn"
+    },
     "product": {
       "title": "Sản phẩm",
       "features": "Tính năng",

@@ -315,6 +315,14 @@
   },
   "footer": {
     "tagline": "Track every minute and every dollar so payroll stays accurate, on time, and easy to understand.",
+    "profile": "Profile",
+    "creatorName": "Hayden Loi",
+    "social": {
+      "github": "Hayden Loi on GitHub",
+      "website": "Hayden Loi personal website",
+      "youtube": "Hayden Loi on YouTube",
+      "linkedin": "Hayden Loi on LinkedIn"
+    },
     "product": {
       "title": "Product",
       "features": "Features",
