@@ -6,6 +6,8 @@ type FortnightEstimateProps = {
   tax: number
   afterTax: number
   className?: string
+  showLive?: boolean
+  showNote?: boolean
 }
 
 export function FortnightEstimate({
@@ -13,6 +15,8 @@ export function FortnightEstimate({
   tax,
   afterTax,
   className = '',
+  showLive = true,
+  showNote = true,
 }: FortnightEstimateProps) {
   const { t } = useTranslation()
 
@@ -23,9 +27,11 @@ export function FortnightEstimate({
           <p className="text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
             {t('timesheet.estimate.title')}
           </p>
-          <span className="rounded-full bg-[#2A3018] px-2 py-0.5 text-[10px] font-semibold text-[#C8E664]">
-            {t('timesheet.estimate.live')}
-          </span>
+          {showLive ? (
+            <span className="rounded-full bg-[#2A3018] px-2 py-0.5 text-[10px] font-semibold text-[#C8E664]">
+              {t('timesheet.estimate.live')}
+            </span>
+          ) : null}
         </div>
         <dl className="mt-4 space-y-3 text-sm">
           <div className="flex justify-between">
@@ -43,14 +49,16 @@ export function FortnightEstimate({
         </dl>
       </div>
 
-      <div className="rounded-xl border border-[#27272A] bg-[#18181B] p-5">
-        <p className="text-sm font-semibold text-[#F4F4F5]">
-          {t('timesheet.howItUpdates.title')}
-        </p>
-        <p className="mt-2 text-sm text-[#A1A1AA]">
-          {t('timesheet.howItUpdates.body')}
-        </p>
-      </div>
+      {showNote ? (
+        <div className="rounded-xl border border-[#27272A] bg-[#18181B] p-5">
+          <p className="text-sm font-semibold text-[#F4F4F5]">
+            {t('timesheet.howItUpdates.title')}
+          </p>
+          <p className="mt-2 text-sm text-[#A1A1AA]">
+            {t('timesheet.howItUpdates.body')}
+          </p>
+        </div>
+      ) : null}
     </aside>
   )
 }

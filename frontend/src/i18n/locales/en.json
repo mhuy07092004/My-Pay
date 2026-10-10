@@ -72,6 +72,47 @@
       }
     }
   },
+  "features": {
+    "title": "Features",
+    "subtitle": "Sample numbers only. Switch the report range to look at a month, three months, or the year. Hours and pay do not change.",
+    "difference": "Difference",
+    "differenceHint": "Actual received minus the estimate, before tax",
+    "notRecorded": "Not recorded for this period",
+    "chips": {
+      "calendar": "Shift calendar",
+      "tax": "Tax",
+      "report": "Reports"
+    },
+    "calendar": {
+      "eyebrow": "Log shifts",
+      "title": "See your whole fortnight at a glance",
+      "body": "Every day you worked lights up with its hours. Tap a day to see times, breaks and pay."
+    },
+    "estimate": {
+      "eyebrow": "Know your pay",
+      "title": "Your pay, before payday",
+      "body": "Pay and tax are worked out as you log, so you know what lands in your account."
+    },
+    "actual": {
+      "eyebrow": "Check it",
+      "title": "Compare with what you actually got",
+      "body": "Enter what was paid and see right away if it is short or over.",
+      "estimated": "Estimate",
+      "received": "Actual"
+    },
+    "report": {
+      "eyebrow": "Reports",
+      "title": "Watch your income over time",
+      "body": "Switch between a month, three months or the year."
+    },
+    "extras": {
+      "title": "And more",
+      "rates": "Multiple pay rates",
+      "languages": "English and Vietnamese",
+      "tax": "Automatic tax",
+      "split": "Split and overnight shifts"
+    }
+  },
   "auth": {
     "backToHome": "Back to home",
     "signIn": "Sign in",

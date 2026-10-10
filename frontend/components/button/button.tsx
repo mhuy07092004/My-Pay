@@ -9,10 +9,8 @@ type ButtonProps = {
 } & ComponentPropsWithoutRef<'button'>
 
 const variantClasses = {
-  green:
-    'bg-[#22C55E] text-[#052E16] hover:bg-[#16A34A] focus-visible:ring-[#22C55E]',
-  white:
-    'bg-[#F4F4F5] text-[#09090B] hover:bg-white focus-visible:ring-[#F4F4F5]',
+  green: 'bg-[#22C55E] text-[#052E16] hover:bg-[#16A34A]',
+  white: 'bg-[#F4F4F5] text-[#09090B] hover:bg-white',
 } as const
 
 const sizeClasses = {
@@ -29,7 +27,7 @@ export function Button({
   children,
   ...props
 }: ButtonProps) {
-  const classes = `inline-flex items-center justify-center rounded-lg font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090B] ${variantClasses[variant]} ${sizeClasses[size]} ${className}`
+  const classes = `inline-flex items-center justify-center rounded-lg font-semibold transition-colors focus-visible:outline-none ${variantClasses[variant]} ${sizeClasses[size]} ${className}`
 
   if (to) {
     return (

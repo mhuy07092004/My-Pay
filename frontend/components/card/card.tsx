@@ -29,7 +29,7 @@ export function Card({
         {value}
         {suffix ? <span className="ml-1 text-base font-medium">{suffix}</span> : null}
       </p>
-      {hint ? <p className="mt-1 text-xs text-[#A1A1AA]">{hint}</p> : null}
+      {hint ? <p className="mt-1 text-pretty text-xs text-[#A1A1AA]">{hint}</p> : null}
     </div>
   )
 }

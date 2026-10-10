@@ -72,6 +72,47 @@
       }
     }
   },
+  "features": {
+    "title": "Tính năng",
+    "subtitle": "Chỉ là số liệu mẫu. Bấm khoảng thời gian của biểu đồ để xem một tháng, ba tháng hoặc cả năm. Giờ làm và tiền không đổi.",
+    "difference": "Chênh lệch",
+    "differenceHint": "Thực nhận trừ ước tính, trước thuế",
+    "notRecorded": "Kỳ này chưa ghi thực nhận",
+    "chips": {
+      "calendar": "Lịch ca làm",
+      "tax": "Thuế",
+      "report": "Báo cáo"
+    },
+    "calendar": {
+      "eyebrow": "Ghi ca làm",
+      "title": "Nhìn cả kỳ hai tuần trong một cái liếc",
+      "body": "Mỗi ngày đi làm sáng lên cùng số giờ. Bấm vào một ngày để xem giờ làm, giờ nghỉ và tiền."
+    },
+    "estimate": {
+      "eyebrow": "Biết trước lương",
+      "title": "Biết lương trước ngày nhận",
+      "body": "Lương và thuế được tính ngay khi bạn ghi ca, nên bạn biết trước số tiền sẽ về."
+    },
+    "actual": {
+      "eyebrow": "Đối chiếu",
+      "title": "So với số tiền thực nhận",
+      "body": "Nhập số tiền được trả và thấy ngay mình bị thiếu hay dư.",
+      "estimated": "Ước tính",
+      "received": "Thực nhận"
+    },
+    "report": {
+      "eyebrow": "Báo cáo",
+      "title": "Theo dõi thu nhập theo thời gian",
+      "body": "Chuyển giữa một tháng, ba tháng hoặc cả năm."
+    },
+    "extras": {
+      "title": "Và còn nữa",
+      "rates": "Nhiều mức lương",
+      "languages": "Tiếng Anh và tiếng Việt",
+      "tax": "Tự tính thuế",
+      "split": "Ca tách đôi và ca qua đêm"
+    }
+  },
   "auth": {
     "backToHome": "Quay lại trang chủ",
     "signIn": "Đăng nhập",

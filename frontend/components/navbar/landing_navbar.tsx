@@ -5,7 +5,7 @@ import { Button } from '../button/button'
 import { LanguageSwitchButton } from '../button/swtich_button'
 
 const navLinks = [
-  { href: '#features', labelKey: 'nav.features' },
+  { href: '/features', labelKey: 'nav.features' },
   { href: '/pricing', labelKey: 'nav.pricing' },
   { href: '#about', labelKey: 'nav.about' },
 ] as const
@@ -17,7 +17,10 @@ export function LandingNavbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-[#27272A] bg-[#09090B]">
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link to="/" className="text-lg font-semibold tracking-tight text-[#F4F4F5]">
+        <Link
+          to="/"
+          className="inline-flex min-h-8 items-center text-lg font-semibold tracking-tight text-[#F4F4F5]"
+        >
           {t('common.appName')}
         </Link>
 

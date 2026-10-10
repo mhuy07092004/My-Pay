@@ -113,7 +113,7 @@ export function IncomeChart({ series, locale, labels }: IncomeChartProps) {
         </ul>
       </div>
 
-      <div ref={wrapRef} className="relative w-full" style={{ height: HEIGHT }}>
+      <div ref={wrapRef} className="relative w-full min-w-0 overflow-hidden" style={{ height: HEIGHT }}>
         {width > 0 ? (
           <svg width={width} height={HEIGHT} role="img" aria-label={labels.estimated}>
             {[0, 1, 2, 3].map((k) => (

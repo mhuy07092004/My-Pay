@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
 const columns = [
@@ -48,9 +49,15 @@ export function LandingFooter() {
             <ul className="mt-4 space-y-3">
               {column.links.map((link) => (
                 <li key={link}>
-                  <a href="#" className="text-sm text-[#A1A1AA] hover:text-[#F4F4F5]">
-                    {t(link)}
-                  </a>
+                  {link === 'footer.product.features' ? (
+                    <Link to="/features" className="text-sm text-[#A1A1AA] hover:text-[#F4F4F5]">
+                      {t(link)}
+                    </Link>
+                  ) : (
+                    <a href="#" className="text-sm text-[#A1A1AA] hover:text-[#F4F4F5]">
+                      {t(link)}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>

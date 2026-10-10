@@ -65,7 +65,7 @@ export function LanguageSwitchButton({
       aria-checked={!isEnglish}
       aria-label={label}
       title={label}
-      className={`relative inline-flex h-9 w-[4.5rem] shrink-0 rounded-full border border-[#27272A] bg-[#09090B] p-1 transition-colors hover:bg-[#18181B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22C55E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090B] ${className}`}
+      className={`relative inline-flex h-9 w-[4.5rem] shrink-0 rounded-full border border-[#27272A] bg-[#09090B] p-1 transition-colors hover:bg-[#18181B] focus-visible:outline-none ${className}`}
       onClick={() => {
         void i18n.changeLanguage(nextLanguage)
       }}
