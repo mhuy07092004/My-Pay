@@ -25,3 +25,5 @@ dist-ssr
 
 # Environment variables
 frontend/.env.local
+backend/.env
+.vercel

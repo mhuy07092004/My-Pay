@@ -1,93 +1,111 @@
+import type { Session } from '@supabase/supabase-js'
 import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from 'react'
-
-const AUTH_STORAGE_KEY = 'my-pay-auth'
+import { supabase } from '../lib/supabaseClient'
 
 export type AuthUser = {
   email: string
   firstName: string
+  lastName: string
 }
 
-type AuthSession = {
-  token: string
-  user: AuthUser
+export type SignUpInput = {
+  firstName: string
+  lastName: string
+  email: string
+  password: string
 }
 
 type AuthContextValue = {
   user: AuthUser | null
+  /** True until the stored session has been read. */
+  loading: boolean
   login: (email: string, password: string) => Promise<void>
-  logout: () => void
+  /** Resolves true when the project requires email confirmation first. */
+  signUp: (input: SignUpInput) => Promise<{ needsConfirmation: boolean }>
+  logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
-function readStoredSession(): AuthSession | null {
-  try {
-    const raw = localStorage.getItem(AUTH_STORAGE_KEY)
-    if (!raw) {
-      return null
-    }
-    const parsed = JSON.parse(raw) as AuthSession
-    if (!parsed?.token || !parsed?.user?.email || !parsed?.user?.firstName) {
-      return null
-    }
-    return parsed
-  } catch {
-    return null
+function toUser(session: Session | null): AuthUser | null {
+  const u = session?.user
+  if (!u?.email) return null
+  const meta = u.user_metadata as { first_name?: string; last_name?: string }
+  return {
+    email: u.email,
+    firstName: meta.first_name ?? u.email.split('@')[0],
+    lastName: meta.last_name ?? '',
+  }
+}
+
+function authError(error: { code?: string; message: string }): Error {
+  switch (error.code) {
+    case 'invalid_credentials':
+      return new Error('auth.errors.invalidCredentials')
+    case 'user_already_exists':
+    case 'email_exists':
+      return new Error('auth.errors.emailInUse')
+    case 'weak_password':
+      return new Error('auth.errors.weakPassword')
+    case 'email_address_invalid':
+      return new Error('auth.errors.invalidEmail')
+    default:
+      return new Error('auth.errors.unexpected')
   }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<AuthSession | null>(readStoredSession)
+  const [session, setSession] = useState<Session | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  const login = useCallback(async (email: string, password: string) => {
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+  useEffect(() => {
+    void supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session)
+      setLoading(false)
     })
-
-    const data = (await response.json()) as {
-      token?: string
-      user?: AuthUser
-    }
-
-    if (!response.ok || !data.token || !data.user) {
-      throw new Error(
-        response.status === 401
-          ? 'auth.errors.invalidCredentials'
-          : 'auth.errors.unexpected',
-      )
-    }
-
-    const nextSession: AuthSession = { token: data.token, user: data.user }
-    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(nextSession))
-    setSession(nextSession)
+    const { data } = supabase.auth.onAuthStateChange((_event, next) => {
+      setSession(next)
+      setLoading(false)
+    })
+    return () => data.subscription.unsubscribe()
   }, [])
 
-  const logout = useCallback(() => {
-    localStorage.removeItem(AUTH_STORAGE_KEY)
-    setSession(null)
+  const login = useCallback(async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) throw authError(error)
+  }, [])
+
+  const signUp = useCallback(async (input: SignUpInput) => {
+    const { data, error } = await supabase.auth.signUp({
+      email: input.email,
+      password: input.password,
+      options: { data: { first_name: input.firstName, last_name: input.lastName } },
+    })
+    if (error) throw authError(error)
+    return { needsConfirmation: data.session === null }
+  }, [])
+
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut()
   }, [])
 
   const value = useMemo<AuthContextValue>(
-    () => ({
-      user: session?.user ?? null,
-      login,
-      logout,
-    }),
-    [login, logout, session],
+    () => ({ user: toUser(session), loading, login, signUp, logout }),
+    [session, loading, login, signUp, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext)
   if (!context) {

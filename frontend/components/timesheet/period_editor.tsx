@@ -1,14 +1,16 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MOCK_RATES, TAX_RATE } from '../../mock/timesheet'
+import { Link } from 'react-router-dom'
+import { usePayData } from '../../src/context/PayDataContext'
+import { estimateShifts } from '../../src/lib/pay'
 import {
-  calcTotalPay,
   eachDayInRange,
   formatMoney,
   isSameDay,
   startOfDay,
   toIsoDate,
   type DateRange,
+  type PayCycle,
   type Shift,
 } from '../../src/lib/timesheet'
 import { Card } from '../card/card'
@@ -17,61 +19,97 @@ import { ShiftRow } from '../shift/shift_row'
 
 type PeriodEditorProps = {
   range: DateRange
+  payCycle: PayCycle
   shifts: Record<string, Shift>
-  onSaveShift: (isoDate: string, shift: Shift) => void
+  onSaveShift: (isoDate: string, shift: Shift) => Promise<void> | void
+  /** Extra panel shown under the estimate on laptop, after the days on mobile. */
+  aside?: ReactNode
 }
 
-export function PeriodEditor({ range, shifts, onSaveShift }: PeriodEditorProps) {
+export function PeriodEditor({ range, payCycle, shifts, onSaveShift, aside }: PeriodEditorProps) {
   const { t } = useTranslation()
+  const { rates, rateOf, taxContext, loading, holidays } = usePayData()
   const today = useMemo(() => startOfDay(new Date()), [])
   const [openDay, setOpenDay] = useState<string | null>(null)
+  const [error, setError] = useState(false)
   const days = useMemo(() => eachDayInRange(range), [range])
 
-  const rateOf = (id: string) =>
-    (MOCK_RATES.find((r) => r.id === id) ?? MOCK_RATES[0]).hourlyRate
+  const estimate = useMemo(
+    () => estimateShifts(range, payCycle, shifts, rateOf, taxContext, holidays),
+    [range, payCycle, shifts, rateOf, taxContext, holidays],
+  )
+  const beforeTax = estimate.grossCents / 100
+  const tax = estimate.taxCents / 100
+  const afterTax = estimate.netCents / 100
 
-  const beforeTax = days.reduce((sum, day) => {
-    const shift = shifts[toIsoDate(day)]
-    return shift ? sum + calcTotalPay(shift, rateOf) : sum
-  }, 0)
-  const tax = beforeTax * TAX_RATE
-  const afterTax = beforeTax - tax
+  if (!loading && rates.length === 0) {
+    return (
+      <div className="mt-6 rounded-xl border border-[#27272A] bg-[#18181B] p-5">
+        <p className="text-sm font-semibold text-[#F4F4F5]">{t('timesheet.noRates.title')}</p>
+        <p className="mt-2 text-sm text-[#A1A1AA]">{t('timesheet.noRates.body')}</p>
+        <Link
+          to="/dashboard/settings"
+          className="mt-4 inline-block text-sm font-medium text-[#C8E664] hover:text-[#B5D350]"
+        >
+          {t('timesheet.noRates.cta')} →
+        </Link>
+      </div>
+    )
+  }
 
   return (
     <>
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_20rem]">
-        <section>
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-6">
+        <section className="order-2 lg:order-none">
           <h2 className="mb-3 text-sm font-semibold text-[#A1A1AA]">
             {t('timesheet.dailyShifts')}
           </h2>
+          {error ? (
+            <p className="mb-3 text-sm text-[#EF4444]" role="alert">
+              {t('timesheet.saveError')}
+            </p>
+          ) : null}
           <div className="space-y-3">
-            {days.map((day) => {
-              const iso = toIsoDate(day)
-              return (
-                <ShiftRow
-                  key={iso}
-                  date={day}
-                  isToday={isSameDay(day, today)}
-                  shift={shifts[iso]}
-                  rates={MOCK_RATES}
-                  open={openDay === iso}
-                  onToggle={() => setOpenDay((cur) => (cur === iso ? null : iso))}
-                  onSave={(shift) => {
-                    onSaveShift(iso, shift)
-                    setOpenDay(null)
-                  }}
-                />
-              )
-            })}
+            {rates.length > 0
+              ? days.map((day) => {
+                  const iso = toIsoDate(day)
+                  return (
+                    <ShiftRow
+                      key={iso}
+                      date={day}
+                      isToday={isSameDay(day, today)}
+                      shift={shifts[iso]}
+                      rates={rates}
+                      rateOf={rateOf}
+                      holidays={holidays}
+                      open={openDay === iso}
+                      onToggle={() => setOpenDay((cur) => (cur === iso ? null : iso))}
+                      onSave={async (shift) => {
+                        setError(false)
+                        try {
+                          await onSaveShift(iso, shift)
+                          setOpenDay(null)
+                        } catch {
+                          setError(true)
+                        }
+                      }}
+                    />
+                  )
+                })
+              : null}
           </div>
         </section>
 
-        <FortnightEstimate
-          beforeTax={beforeTax}
-          tax={tax}
-          afterTax={afterTax}
-          className="lg:sticky lg:top-8 lg:self-start"
-        />
+        <div className="contents lg:sticky lg:top-8 lg:block lg:self-start lg:space-y-4">
+          <FortnightEstimate
+            beforeTax={beforeTax}
+            tax={tax}
+            afterTax={afterTax}
+            compactOnMobile
+            className="order-1 self-start max-lg:sticky max-lg:top-[calc(3.5rem+env(safe-area-inset-top))] max-lg:z-20"
+          />
+          {aside ? <div className="order-3">{aside}</div> : null}
+        </div>
       </div>
 
       <section className="mt-10">
@@ -83,20 +121,23 @@ export function PeriodEditor({ range, shifts, onSaveShift }: PeriodEditorProps) 
             {t('timesheet.earnings.whole')}
           </p>
         </div>
-        <div className="mt-4 grid gap-4 md:grid-cols-3">
+        <div className="mt-4 grid gap-3 sm:grid-cols-3 sm:gap-4">
           <Card
+            layout="responsive"
             label={t('timesheet.earnings.beforeTax')}
             value={formatMoney(beforeTax)}
             prefix="$"
             valueClassName="text-[#F4F4F5]"
           />
           <Card
+            layout="responsive"
             label={t('timesheet.earnings.tax')}
             value={formatMoney(tax)}
             prefix="$"
             valueClassName="text-[#F4F4F5]"
           />
           <Card
+            layout="responsive"
             label={t('timesheet.earnings.afterTax')}
             value={formatMoney(afterTax)}
             prefix="$"

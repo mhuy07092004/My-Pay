@@ -9,6 +9,7 @@ import {
   toIsoDate,
   type Period,
 } from './timesheet'
+import type { ReportResponse } from './api'
 
 export type ReportRange = 'month' | 'threeMonths' | 'annual' | 'year'
 
@@ -229,5 +230,57 @@ export function buildReportStats(
     bestWeek,
     highestFortnight: highest,
     lowestFortnight: lowest,
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Real report: numbers come from the API (cents, ISO dates). The builders above
+ * are flat-rate helpers kept for the public Features page sample only.
+ * ------------------------------------------------------------------------- */
+
+export type LiveReportStats = ReportStats & { taxRatePct: number }
+
+export function fromReportResponse(res: ReportResponse): {
+  series: IncomeSeries
+  stats: LiveReportStats
+  grossToDate: number
+} {
+  const money = (cents: number | null) => (cents === null ? null : cents / 100)
+  const { series, stats } = res
+  const span = (s: { start: string; end: string }) => ({
+    start: parseIsoDate(s.start),
+    end: parseIsoDate(s.end),
+  })
+  return {
+    grossToDate: res.grossToDateCents / 100,
+    series: {
+      granularity: series.granularity,
+      hasData: series.hasData,
+      windowStart: parseIsoDate(series.windowStart),
+      windowEnd: parseIsoDate(series.windowEnd),
+      points: series.points.map((p) => ({
+        start: parseIsoDate(p.start),
+        end: parseIsoDate(p.end),
+        estimated: money(p.estimated),
+        net: money(p.net),
+      })),
+    },
+    stats: {
+      estimated: stats.estimated / 100,
+      net: stats.net / 100,
+      variance: stats.variance / 100,
+      periodsWithActual: stats.periodsWithActual,
+      periodsTotal: stats.periodsTotal,
+      tax: stats.tax / 100,
+      taxRatePct: stats.taxRatePct,
+      minutes: stats.minutes,
+      bestWeek: stats.bestWeek ? { ...span(stats.bestWeek), minutes: stats.bestWeek.minutes } : null,
+      highestFortnight: stats.highestFortnight
+        ? { ...span(stats.highestFortnight), income: stats.highestFortnight.income / 100 }
+        : null,
+      lowestFortnight: stats.lowestFortnight
+        ? { ...span(stats.lowestFortnight), income: stats.lowestFortnight.income / 100 }
+        : null,
+    },
   }
 }

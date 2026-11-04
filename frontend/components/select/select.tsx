@@ -35,7 +35,7 @@ export function Select({
           id={id}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full appearance-none rounded-lg border border-[#27272A] bg-[#09090B] px-3 py-2.5 pr-9 text-sm text-[#F4F4F5] focus:border-[#C8E664] focus:outline-none"
+          className="w-full appearance-none rounded-lg border border-[#27272A] bg-[#09090B] px-3 py-3 pr-9 text-base sm:py-2.5 sm:text-sm text-[#F4F4F5] focus:border-[#C8E664] focus:outline-none"
         >
           {options.map((option) => (
             <option key={option.value} value={option.value}>

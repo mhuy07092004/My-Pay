@@ -1,67 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../src/context/AuthContext'
 import { LanguageSwitchButton } from '../button/swtich_button'
-
-const mobileNavLinkClassName = ({ isActive }: { isActive: boolean }) =>
-  `text-2xl font-bold transition-colors ${
-    isActive ? 'text-[#A1A1AA]' : 'text-[#F4F4F5] hover:text-[#A1A1AA]'
-  }`
-
-function MobileNavContent({ onNavigate }: { onNavigate?: () => void }) {
-  const { logout } = useAuth()
-  const navigate = useNavigate()
-  const { t } = useTranslation()
-
-  function handleLogout() {
-    logout()
-    onNavigate?.()
-    navigate('/login')
-  }
-
-  return (
-    <nav className="flex flex-col items-center gap-8">
-      <NavLink
-        to="/dashboard"
-        end
-        className={mobileNavLinkClassName}
-        onClick={onNavigate}
-      >
-        {t('nav.home')}
-      </NavLink>
-      <NavLink
-        to="/dashboard/timesheet"
-        className={mobileNavLinkClassName}
-        onClick={onNavigate}
-      >
-        {t('nav.timesheet')}
-      </NavLink>
-      <NavLink
-        to="/dashboard/report"
-        className={mobileNavLinkClassName}
-        onClick={onNavigate}
-      >
-        {t('nav.reports')}
-      </NavLink>
-      <NavLink
-        to="/dashboard/settings"
-        className={mobileNavLinkClassName}
-        onClick={onNavigate}
-      >
-        {t('nav.settings')}
-      </NavLink>
-      <LanguageSwitchButton />
-      <button
-        type="button"
-        className="text-2xl font-bold text-[#EF4444] transition-colors hover:text-[#DC2626]"
-        onClick={handleLogout}
-      >
-        {t('nav.logout')}
-      </button>
-    </nav>
-  )
-}
 
 type NavItemKey = 'home' | 'timesheet' | 'reports' | 'settings'
 
@@ -110,7 +51,7 @@ const navItems: { key: NavItemKey; labelKey: `nav.${NavItemKey}` }[] = [
   { key: 'settings', labelKey: 'nav.settings' },
 ]
 
-const navPaths: Partial<Record<NavItemKey, string>> = {
+const navPaths: Record<NavItemKey, string> = {
   home: '/dashboard',
   timesheet: '/dashboard/timesheet',
   reports: '/dashboard/report',
@@ -118,141 +59,174 @@ const navPaths: Partial<Record<NavItemKey, string>> = {
 }
 
 const sidebarItemClassName = (isActive: boolean) =>
-  `flex w-16 flex-col items-center gap-1.5 rounded-xl py-2.5 text-xs transition-colors ${
+  `flex w-16 flex-col items-center gap-1.5 rounded-xl py-2.5 text-xs transition-colors lg:h-11 lg:w-full lg:flex-row lg:gap-3 lg:px-3 lg:py-0 lg:text-sm ${
     isActive
       ? 'bg-[#2A3018] font-semibold text-[#C8E664]'
       : 'text-[#E4E4E7] hover:bg-[#1E1E1E]'
   }`
 
-function NavContent() {
-  const { user, logout } = useAuth()
-  const navigate = useNavigate()
-  const { t } = useTranslation()
+const tabItemClassName = ({ isActive }: { isActive: boolean }) =>
+  `flex min-h-14 flex-col items-center justify-center gap-1 text-[11px] transition-colors ${
+    isActive ? 'font-semibold text-[#C8E664]' : 'text-[#A1A1AA]'
+  }`
 
-  function handleLogout() {
+function useLogout() {
+  const { logout } = useAuth()
+  const navigate = useNavigate()
+  return () => {
     logout()
     navigate('/login')
   }
+}
+
+function Avatar({ className = '' }: { className?: string }) {
+  const { user } = useAuth()
+  const { t } = useTranslation()
+  return (
+    <div
+      className={`flex shrink-0 items-center justify-center bg-[#C8E664] font-extrabold text-black ${className}`}
+    >
+      {(user?.firstName?.[0] ?? t('common.appName')[0]).toUpperCase()}
+    </div>
+  )
+}
+
+function DashboardSidebar() {
+  const { user } = useAuth()
+  const { t } = useTranslation()
+  const handleLogout = useLogout()
 
   return (
-    <>
+    <aside className="sticky top-0 hidden h-svh w-24 shrink-0 flex-col items-center bg-[#121212] px-2 py-5 md:flex lg:w-60 lg:items-stretch lg:px-4">
       <div
-        className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#C8E664] text-xl font-extrabold text-black"
+        className="flex items-center gap-3 lg:px-2"
         title={user?.firstName ?? t('nav.guest')}
       >
-        {(user?.firstName?.[0] ?? t('common.appName')[0]).toUpperCase()}
+        <Avatar className="h-11 w-11 rounded-2xl text-xl" />
+        <p className="hidden text-lg font-semibold tracking-tight lg:block">
+          {t('common.appName')}
+        </p>
       </div>
 
-      <nav className="mt-8 flex w-full flex-col items-center gap-3">
-        {navItems.map(({ key, labelKey }) => {
-          const to = navPaths[key]
-          if (to) {
-            return (
-              <NavLink
-                key={key}
-                to={to}
-                end={key === 'home'}
-                className={({ isActive }) => sidebarItemClassName(isActive)}
-              >
-                {icons[key]}
-                <span>{t(labelKey)}</span>
-              </NavLink>
-            )
-          }
-          return (
-            <button
-              key={key}
-              type="button"
-              className={sidebarItemClassName(false)}
-            >
-              {icons[key]}
-              <span>{t(labelKey)}</span>
-            </button>
-          )
-        })}
+      <nav className="mt-8 flex w-full flex-col items-center gap-3 lg:items-stretch lg:gap-1.5">
+        {navItems.map(({ key, labelKey }) => (
+          <NavLink
+            key={key}
+            to={navPaths[key]}
+            end={key === 'home'}
+            className={({ isActive }) => sidebarItemClassName(isActive)}
+          >
+            {icons[key]}
+            <span>{t(labelKey)}</span>
+          </NavLink>
+        ))}
       </nav>
 
-      <div className="mt-auto flex flex-col items-center gap-3 pt-6">
-        <LanguageSwitchButton />
+      <div className="mt-auto flex flex-col items-center gap-3 pt-6 lg:items-stretch">
+        <div className="hidden min-w-0 px-2 lg:block">
+          <p className="truncate text-sm font-medium">{user?.firstName}</p>
+          <p className="truncate text-xs text-[#A1A1AA]">{user?.email}</p>
+        </div>
+        <LanguageSwitchButton className="lg:mx-2" />
         <button
           type="button"
           onClick={handleLogout}
-          className="rounded-lg px-2 py-1.5 text-xs font-medium text-[#EF4444] transition-colors hover:bg-[#7F1D1D]/30"
+          className="rounded-lg px-2 py-1.5 text-xs font-medium text-[#EF4444] transition-colors hover:bg-[#7F1D1D]/30 lg:text-left lg:text-sm"
         >
           {t('nav.logout')}
         </button>
       </div>
-    </>
+    </aside>
+  )
+}
+
+function MobileTopBar() {
+  const { user } = useAuth()
+  const { t } = useTranslation()
+  const handleLogout = useLogout()
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function onDown(e: MouseEvent | TouchEvent) {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false)
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('touchstart', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('touchstart', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  return (
+    <header className="fixed inset-x-0 top-0 z-40 flex h-[calc(3.5rem+env(safe-area-inset-top))] items-center justify-between border-b border-[#27272A] bg-[#09090B] px-4 pt-[env(safe-area-inset-top)] md:hidden">
+      <p className="text-lg font-semibold tracking-tight text-[#F4F4F5]">
+        {t('common.appName')}
+      </p>
+      <div ref={ref} className="relative">
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-haspopup="menu"
+          aria-label={t('nav.toggleMenu')}
+          onClick={() => setOpen((v) => !v)}
+          className="rounded-xl focus-visible:ring-2 focus-visible:ring-[#C8E664] focus-visible:outline-none"
+        >
+          <Avatar className="h-10 w-10 rounded-xl text-lg" />
+        </button>
+        {open ? (
+          <div
+            role="menu"
+            className="absolute right-0 mt-2 w-64 rounded-2xl border border-[#27272A] bg-[#18181B] p-4 shadow-2xl"
+          >
+            <p className="truncate text-sm font-semibold">
+              {user?.firstName ?? t('nav.guest')}
+            </p>
+            <p className="truncate text-xs text-[#A1A1AA]">{user?.email}</p>
+            <div className="mt-4 flex items-center justify-between gap-3">
+              <LanguageSwitchButton />
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="min-h-11 rounded-lg px-3 text-sm font-medium text-[#EF4444] hover:bg-[#7F1D1D]/30"
+              >
+                {t('nav.logout')}
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </header>
+  )
+}
+
+function MobileTabBar() {
+  const { t } = useTranslation()
+  return (
+    <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-[#27272A] bg-[#09090B]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
+      {navItems.map(({ key, labelKey }) => (
+        <NavLink key={key} to={navPaths[key]} end={key === 'home'} className={tabItemClassName}>
+          {icons[key]}
+          <span>{t(labelKey)}</span>
+        </NavLink>
+      ))}
+    </nav>
   )
 }
 
 export function DashboardNavbar() {
-  const [open, setOpen] = useState(false)
-  const { t } = useTranslation()
-
   return (
     <>
-      <aside className="sticky top-0 hidden h-svh w-24 shrink-0 flex-col items-center bg-[#121212] px-2 py-5 md:flex">
-        <NavContent />
-      </aside>
-
-      <header className="fixed inset-x-0 top-0 z-40 flex h-16 items-center justify-between border-b border-[#27272A] bg-[#09090B] px-4 md:hidden">
-        <p className="text-lg font-semibold tracking-tight text-[#F4F4F5]">
-          {t('common.appName')}
-        </p>
-        <button
-          type="button"
-          className="inline-flex items-center justify-center rounded-md p-2 text-[#F4F4F5]"
-          aria-expanded={open}
-          aria-label={t('nav.openMenu')}
-          onClick={() => setOpen(true)}
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <path
-              d="M4 7h16M4 12h16M4 17h16"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-            />
-          </svg>
-        </button>
-      </header>
-
-      {open ? (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <button
-            type="button"
-            className="absolute inset-0 bg-[#09090B]/70 backdrop-blur-sm"
-            aria-label={t('nav.closeMenu')}
-            onClick={() => setOpen(false)}
-          />
-          <div className="relative flex h-full w-full flex-col bg-[#09090B]/95 backdrop-blur-xl">
-            <div className="flex items-center justify-between px-5 pt-5">
-              <p className="text-lg font-semibold tracking-tight text-[#F4F4F5]">
-                {t('common.appName')}
-              </p>
-              <button
-                type="button"
-                className="inline-flex items-center justify-center rounded-md p-2 text-[#F4F4F5]"
-                aria-label={t('nav.closeMenu')}
-                onClick={() => setOpen(false)}
-              >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-                  <path
-                    d="M6 6l12 12M18 6L6 18"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
-            </div>
-            <div className="flex flex-1 items-center justify-center">
-              <MobileNavContent onNavigate={() => setOpen(false)} />
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <DashboardSidebar />
+      <MobileTopBar />
+      <MobileTabBar />
     </>
   )
 }

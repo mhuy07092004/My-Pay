@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { HTML_LANG, isAppLanguage } from '../../src/i18n/config'
 import {
   MAX_RANGE_DAYS,
+  addDays,
   diffDays,
   isSameDay,
   startOfDay,
@@ -13,6 +14,8 @@ type DateRangePickerProps = {
   value: DateRange | null
   onChange: (range: DateRange) => void
   maxDays?: number
+  /** When set, one click picks the start and the range is exactly this many days. */
+  fixedDays?: number
   className?: string
 }
 
@@ -50,6 +53,7 @@ export function DateRangePicker({
   value,
   onChange,
   maxDays = MAX_RANGE_DAYS,
+  fixedDays,
   className = '',
 }: DateRangePickerProps) {
   const { t, i18n } = useTranslation()
@@ -103,6 +107,11 @@ export function DateRangePicker({
 
   function handleSelect(day: Date) {
     if (isDisabled(day)) return
+    if (fixedDays) {
+      onChange({ start: day, end: addDays(day, fixedDays - 1) })
+      setOpen(false)
+      return
+    }
     if (!pendingStart || day < pendingStart) {
       setPendingStart(day)
       setHover(null)
@@ -115,7 +124,10 @@ export function DateRangePicker({
 
   let shownStart: Date | null = value?.start ?? null
   let shownEnd: Date | null = value?.end ?? null
-  if (pendingStart) {
+  if (fixedDays && hover && open) {
+    shownStart = hover
+    shownEnd = addDays(hover, fixedDays - 1)
+  } else if (pendingStart) {
     shownStart = pendingStart
     shownEnd =
       hover && hover >= pendingStart && !isDisabled(hover) ? hover : pendingStart
@@ -129,7 +141,7 @@ export function DateRangePicker({
 
   function renderMonth(month: Date, extraClass: string) {
     return (
-      <div className={`w-64 ${extraClass}`} key={month.toISOString()}>
+      <div className={`w-full md:w-64 ${extraClass}`} key={month.toISOString()}>
         <p className="mb-3 text-center text-sm font-semibold capitalize text-[#F4F4F5]">
           {monthTitle.format(month)}
         </p>
@@ -158,7 +170,7 @@ export function DateRangePicker({
                 aria-pressed={edge}
                 onClick={() => handleSelect(day)}
                 onMouseEnter={() => setHover(day)}
-                className={`h-9 text-sm transition-colors ${
+                className={`h-11 text-sm transition-colors md:h-9 ${
                   edge
                     ? 'rounded-lg bg-[#C8E664] font-semibold text-black'
                     : inRange
@@ -184,7 +196,7 @@ export function DateRangePicker({
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={toggle}
-        className="inline-flex items-center gap-2 rounded-full border border-[#27272A] bg-[#09090B] px-4 py-2 text-sm font-medium text-[#F4F4F5] transition-colors hover:bg-[#1E1E1E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8E664]"
+        className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full sm:w-auto border border-[#27272A] bg-[#09090B] px-4 py-2 text-sm font-medium text-[#F4F4F5] transition-colors hover:bg-[#1E1E1E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8E664]"
       >
         <svg {...chevronProps} className="text-[#C8E664]">
           <rect x="3" y="5" width="18" height="16" rx="2" />
@@ -198,10 +210,16 @@ export function DateRangePicker({
       </button>
 
       {open ? (
+        <>
+        <div
+          aria-hidden
+          className="fixed inset-0 z-40 bg-black/60 md:hidden"
+          onClick={() => setOpen(false)}
+        />
         <div
           role="dialog"
           aria-label={t('timesheet.picker.label')}
-          className="absolute right-0 z-30 mt-2 rounded-2xl border border-[#27272A] bg-[#18181B] p-4 shadow-2xl"
+          className="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl border border-[#27272A] bg-[#18181B] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl md:absolute md:inset-x-auto md:right-0 md:bottom-auto md:z-30 md:mt-2 md:rounded-2xl md:pb-4"
         >
           <div className="mb-2 flex items-center justify-between">
             <button
@@ -232,13 +250,16 @@ export function DateRangePicker({
           </div>
 
           <p className="mt-3 text-xs text-[#A1A1AA]">
-            {pendingStart
-              ? t('timesheet.picker.pickEnd', { max: maxDays })
-              : t('timesheet.picker.pickStart', { max: maxDays })}
+            {fixedDays
+              ? t('timesheet.picker.pickFixed', { count: fixedDays })
+              : pendingStart
+                ? t('timesheet.picker.pickEnd', { max: maxDays })
+                : t('timesheet.picker.pickStart', { max: maxDays })}
             {' · '}
             {t('timesheet.picker.days', { count: dayCount })}
           </p>
         </div>
+        </>
       ) : null}
     </div>
   )

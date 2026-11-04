@@ -1,8 +1,18 @@
+import type { RateSnapshot } from '@my-pay/engine'
+
+export type PayCycle = 'weekly' | 'fortnightly'
+
 export type ShiftPart = {
   checkIn: string
   checkOut: string
   breakMinutes: number
+  /** Job (rate) id. */
   rateId: string
+  publicHoliday?: boolean
+  /** Minutes at the end of the shift paid at overtime rates. */
+  overtimeMinutes?: number
+  /** Rates frozen when the shift was saved. Absent for unsaved shifts. */
+  rateSnapshot?: RateSnapshot
 }
 
 export type Shift = ShiftPart & {
@@ -24,8 +34,16 @@ export type Period = {
   /** ISO date YYYY-MM-DD */
   end: string
   shifts: Record<string, Shift>
+  /** Net amount received, in dollars. */
   actual?: number
+  /** Absent only on the marketing sample data. */
+  payCycle?: PayCycle
+  /** Server-computed totals in dollars (saved periods only). */
+  totals?: { income: number; tax: number; net: number }
 }
+
+/** Days in a period for each pay cycle (weekly 7, fortnightly 14). */
+export const CYCLE_DAYS: Record<PayCycle, number> = { weekly: 7, fortnightly: 14 }
 
 export function parseIsoDate(iso: string): Date {
   const [y, m, d] = iso.split('-').map(Number)
@@ -40,6 +58,7 @@ export function rangesOverlap(a: DateRange, b: DateRange): boolean {
   return !(a.end < b.start || a.start > b.end)
 }
 
+/** Flat-rate helpers: only for the marketing sample data (real pay uses the engine). */
 export function periodTotals(
   period: Period,
   hourlyRateOf: (rateId: string) => number,

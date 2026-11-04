@@ -22,18 +22,18 @@ export function PeriodCard({ id, start, end, income, tax, actual }: PeriodCardPr
   const stat = (label: string, value: string, className = 'text-[#F4F4F5]') => (
     <div>
       <p className="text-[11px] uppercase tracking-wide text-[#A1A1AA]">{label}</p>
-      <p className={`mt-1 text-sm ${className}`}>{value}</p>
+      <p className={`mt-1 text-sm tabular-nums ${className}`}>{value}</p>
     </div>
   )
 
   return (
     <Link
       to={`/dashboard/timesheet/${id}`}
-      className="flex items-center gap-4 rounded-xl border border-[#27272A] bg-[#18181B] px-5 py-4 transition-colors hover:bg-[#1E1E1E]"
+      className="flex items-center gap-3 rounded-xl border border-[#27272A] bg-[#18181B] px-4 py-4 sm:gap-4 sm:px-5 transition-colors hover:bg-[#1E1E1E]"
     >
       <div className="flex-1">
-        <div className="flex items-start justify-between gap-3">
-          <p className="text-base text-[#F4F4F5]">
+        <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
+          <p className="text-base font-medium text-[#F4F4F5]">
             {fmt.format(range.start)} → {fmt.format(range.end)}
           </p>
           <span

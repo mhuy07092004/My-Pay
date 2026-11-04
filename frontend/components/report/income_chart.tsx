@@ -197,6 +197,8 @@ export function IncomeChart({ series, locale, labels }: IncomeChartProps) {
               width={innerW}
               height={innerH}
               fill="transparent"
+              style={{ touchAction: 'pan-y' }}
+              onPointerDown={handleMove}
               onPointerMove={handleMove}
               onPointerLeave={() => setHover(null)}
             />

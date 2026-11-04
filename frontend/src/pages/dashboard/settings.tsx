@@ -1,17 +1,24 @@
 import { useTranslation } from 'react-i18next'
+import { PageHeader } from '../../../components/layout/page_header'
 import { PersonalInfoCard } from '../../../components/settings/personal_info_card'
 import { RatesCard } from '../../../components/settings/rates_card'
+import { TaxProfileCard } from '../../../components/settings/tax_profile_card'
+import { usePayData } from '../../context/PayDataContext'
 
 export function Settings() {
   const { t } = useTranslation()
+  const { loading } = usePayData()
   return (
     <>
-      <h1 className="text-2xl font-semibold tracking-tight">
-        {t('settings.title')}
-      </h1>
-      <div className="mt-6 max-w-3xl space-y-6 pb-8">
+      <PageHeader title={t('settings.title')} />
+      <div className="max-w-4xl space-y-6">
         <PersonalInfoCard />
-        <RatesCard />
+        {loading ? null : (
+          <>
+            <RatesCard />
+            <TaxProfileCard />
+          </>
+        )}
       </div>
     </>
   )

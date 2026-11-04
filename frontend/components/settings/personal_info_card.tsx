@@ -1,62 +1,60 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../src/context/AuthContext'
+import { usePayData } from '../../src/context/PayDataContext'
+import { AU_STATES, getProfile, updateProfile, type AuState } from '../../src/lib/api'
+import { supabase } from '../../src/lib/supabaseClient'
 import { Button } from '../button/button'
 import { TextInput } from '../input/text_input'
+import { Select } from '../select/select'
 
 export function PersonalInfoCard() {
   const { t } = useTranslation()
   const { user } = useAuth()
+  const { reloadHolidays } = usePayData()
   const [firstName, setFirstName] = useState(user?.firstName ?? '')
-  const [lastName, setLastName] = useState('')
-  const [avatar, setAvatar] = useState<string | null>(null)
-  const fileRef = useRef<HTMLInputElement>(null)
+  const [lastName, setLastName] = useState(user?.lastName ?? '')
+  const [region, setRegion] = useState<AuState>('NSW')
+  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const busy = useRef(false)
 
   useEffect(() => {
+    let cancelled = false
+    getProfile()
+      .then((profile) => {
+        if (cancelled) return
+        setFirstName(profile.firstName || user?.firstName || '')
+        setLastName(profile.lastName || user?.lastName || '')
+        setRegion(profile.state)
+      })
+      .catch(() => undefined)
     return () => {
-      if (avatar) URL.revokeObjectURL(avatar)
+      cancelled = true
     }
-  }, [avatar])
+  }, [user?.email, user?.firstName, user?.lastName])
+
+  async function handleSave() {
+    if (busy.current) return
+    busy.current = true
+    setStatus('saving')
+    try {
+      await updateProfile({ firstName: firstName.trim(), lastName: lastName.trim(), state: region })
+      await supabase.auth.updateUser({
+        data: { first_name: firstName.trim(), last_name: lastName.trim() },
+      })
+      await reloadHolidays()
+      setStatus('saved')
+    } catch {
+      setStatus('error')
+    } finally {
+      busy.current = false
+    }
+  }
 
   return (
-    <section className="rounded-xl border border-[#27272A] bg-[#18181B] p-5">
-      <h2 className="text-lg font-semibold tracking-tight">
-        {t('settings.personal.title')}
-      </h2>
-
-      <div className="mt-5 flex items-center gap-4">
-        <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-[#C8E664] text-2xl font-extrabold text-black">
-          {avatar ? (
-            <img src={avatar} alt="" className="h-full w-full object-cover" />
-          ) : (
-            (firstName[0] ?? t('common.appName')[0]).toUpperCase()
-          )}
-        </div>
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
-            {t('settings.personal.avatar')}
-          </p>
-          <Button
-            variant="white"
-            size="sm"
-            className="mt-2"
-            onClick={() => fileRef.current?.click()}
-          >
-            {t('settings.personal.upload')}
-          </Button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0]
-              if (file) setAvatar(URL.createObjectURL(file))
-              e.target.value = ''
-            }}
-          />
-        </div>
-      </div>
+    <section className="rounded-xl border border-[#27272A] bg-[#18181B] p-4 sm:p-6">
+      <h2 className="text-lg font-semibold tracking-tight">{t('settings.personal.title')}</h2>
+      <p className="mt-1 text-xs text-[#71717A]">{t('settings.personal.stateHint')}</p>
 
       <div className="mt-5 grid gap-4 md:grid-cols-2">
         <TextInput
@@ -76,6 +74,29 @@ export function PersonalInfoCard() {
           value="********"
           readOnly
         />
+        <Select
+          label={t('settings.personal.state')}
+          value={region}
+          options={AU_STATES.map((code) => ({ value: code, label: t(`settings.personal.states.${code}`) }))}
+          onChange={(value) => {
+            setStatus('idle')
+            setRegion(value as AuState)
+          }}
+        />
+      </div>
+
+      <div className="mt-5 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end">
+        {status === 'saved' ? (
+          <span className="text-sm text-[#C8E664]">{t('settings.personal.saved')}</span>
+        ) : null}
+        {status === 'error' ? (
+          <span className="text-sm text-[#EF4444]" role="alert">
+            {t('settings.personal.saveError')}
+          </span>
+        ) : null}
+        <Button className="min-h-11 sm:min-h-0" disabled={status === 'saving'} onClick={() => void handleSave()}>
+          {t('settings.personal.save')}
+        </Button>
       </div>
     </section>
   )

@@ -1,4 +1,3 @@
-import { MOCK_RATES, TAX_RATE } from '../../mock/timesheet'
 import {
   addDays,
   parseIsoDate,
@@ -10,6 +9,9 @@ import {
   type ShiftPart,
 } from './timesheet'
 
+// Sample numbers for the public marketing pages only; not used for real pay.
+const MOCK_RATES = [{ id: 'fast-food', name: 'Fast Food Industry', hourlyRate: 24.5 }]
+const TAX_RATE = 0.1
 const RATE_ID = MOCK_RATES[0].id
 
 export type FeatureSample = {

@@ -26,6 +26,7 @@ export function ScrollbarAutohide() {
 }
 
 /** Height that leaves the last visible item cut through the middle, so a still list shows there is more. */
+// eslint-disable-next-line react-refresh/only-export-components
 export function getPeekListHeight(listElement: HTMLElement, maxHeight: number): number {
   if (listElement.scrollHeight <= maxHeight) return listElement.scrollHeight
 

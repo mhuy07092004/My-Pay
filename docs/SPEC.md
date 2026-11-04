@@ -1,7 +1,8 @@
 # My Pay – Requirements & Specification
 
-> Trạng thái: DRAFT v0.5 – sẽ bổ sung khi scope rõ hơn.
+> Trạng thái: v0.7.
 > Quy ước: `[x]` đã chốt · `[ ]` chưa chốt / cần bổ sung · `(?)` cần xác minh nguồn.
+> **Layout dashboard đã được thiết kế lại responsive (v0.7): tab bar đáy trên mobile, sidebar mở rộng trên laptop; luồng và chức năng giữ nguyên.** Màn hình dưới đây là bản chốt về luồng.
 > **Giao diện dashboard hiện tại là bản chốt.** Timesheet, thêm/sửa ca, report, settings, login giữ layout và luồng sẵn có. Việc sau này chỉ thay số mock bằng engine/DB, không thiết kế lại các màn đó.
 > Công thức PAYG withholding 2026–27 (bảng hệ số, ví dụ, giá trị test): [payg-withholding-2026-27.md](./payg-withholding-2026-27.md).
 
@@ -70,7 +71,7 @@ Module thuần `taxEngine`, không phụ thuộc UI. Hệ số và ví dụ số
 #### Hồ sơ thuế (nhập một lần)
 
 - [x] Resident hoặc **foreign resident**.
-- [x] Có claim **tax-free threshold** hay không (chỉ một job được claim).
+- [x] Có claim **tax-free threshold** hay không. Chỉ một job được tick. Job đó tính theo biểu có ngưỡng miễn thuế, các job khác tính theo biểu cao hơn.
 - [x] Có **study / training support loan** hay không (HELP, VSL, Financial Supplement, SSL, AASL).
 - [x] **Tax offset** năm (số tiền annual, tùy chọn). Chỉ scale 2, 5, 6.
 - [x] **Medicare levy variation** (tùy chọn): full exemption → scale 5; half exemption → scale 6; điều chỉnh theo spouse/con (family income thấp). Nếu app không thu thập family variation thì bỏ bước trừ Medicare levy adjustment.
@@ -196,13 +197,17 @@ Không dùng bảng `tax_brackets` thu nhập cả năm cho withholding. Dự b�
 
 ## 7. Kiến trúc & nguyên tắc kỹ thuật
 
-- `payEngine` và `taxEngine`: hàm thuần, không phụ thuộc UI, có unit test với ca ví dụ, payslip mẫu, và sample data ATO trong tài liệu PAYG.
-- `taxEngine` nhận gross (cent), payment date, chu kỳ, và hồ sơ thuế; trả withholding (đô la nguyên, lưu nội bộ bằng cent). Không đọc hệ số từ hằng số trong code.
-- Component hiện tại (`period_editor`, `shift_row`, `report`, `timesheet`, `rate_form`) giữ nguyên cấu trúc màn hình. Chỉ đổi nguồn số: gọi engine thay cho `TAX_RATE` và nhân giờ × rate phẳng.
-- `MOCK_RATES`, `TAX_RATE`, `getPresetPay` là dữ liệu giả phía sau form và card đã có. Thay bằng DB/engine, không bỏ các ô rate trên Settings.
-- MSW chỉ chạy ở dev (`import.meta.env.DEV`). Kỳ lương đang nằm ở `localStorage` (`my-pay-periods`).
-- Múi giờ cố định theo bang của user khi xác định đêm / cuối tuần / ngày lễ.
-- Lint: sửa 3 lỗi `react-refresh/only-export-components`.
+- Monorepo npm workspaces: `frontend` (React), `backend` (Express + TypeScript), `packages/engine` (`@my-pay/engine`, hàm thuần dùng chung cho FE và BE).
+- Engine: `calcShift` (giá từng ca), `withholdCents` (PAYG), `computePeriod` (gross, tax, net theo từng job), `report`. Tiền là số nguyên cent, làm tròn half-up, không dùng float cho thuế. Có unit test (ví dụ ATO, kịch bản thứ bảy A/B).
+- Hệ số thuế đọc từ DB (`tax_withholding_coefficients`, `tax_study_loan_coefficients`, `tax_offset_rates`), chọn bộ theo ngày trả lương (= ngày cuối kỳ). Không hằng số trong code (trừ bản seed JSON dùng sinh migration).
+- Backend Express: xác thực JWT của Supabase (`getClaims`), mỗi request dùng Supabase client mang Bearer của user nên RLS luôn áp dụng. API: `/api/me`, `/tax-profile`, `/rules`, `/jobs`, `/award-rates`, `/periods`, `/periods/:id/days/:date`, `/report`.
+- Supabase: Auth + Postgres + RLS. Migration ở `supabase/migrations`. Một job duy nhất được claim tax-free threshold (partial unique index + RPC `set_tax_free_threshold`). Kỳ lương không chồng nhau (exclusion constraint).
+- Kỳ lương dài cố định theo chu kỳ (weekly 7 ngày, fortnightly 14 ngày), chọn trong hồ sơ thuế.
+- Rate snapshot: khi lưu ca, rate của job được chụp vào `shifts.rate_snapshot`; ca đã lưu tính theo snapshot, đổi rate không làm đổi ca cũ. Bản nháp tính theo rate hiện tại.
+- Mỗi ngày tối đa 2 ca. Mỗi ca có: Public holiday (bật rate lễ), số giờ overtime do user chọn (là những giờ cuối của ca; 2 giờ OT đầu mỗi ngày/job tính `otFirst2`, sau đó `otAfter2`; Chủ nhật `otSunday`; lễ `otPublicHoliday`).
+- Rate có thêm ô Mon–Fri và checkbox Claim tax-free threshold. Thuế withholding tính riêng từng job.
+- Phần giờ sau 00:00 thuộc ngày kế tiếp khi xác định thứ / ngày lễ.
+- Frontend giữ cấu trúc màn hình; số liệu lấy từ API. MSW và `localStorage` đã bỏ. Dữ liệu mẫu trang Features vẫn dùng helper phẳng cục bộ.
 
 ## 8. Nguồn dữ liệu (D3)
 
@@ -291,3 +296,5 @@ Ví dụ đô la là Level 1, 21+. Casual penalty = (phần trăm + 25 điểm p
 - v0.3 (2026-11-04): đối chiếu frontend mock. Chốt giữ UI timesheet (thêm kỳ, sửa ca, ca thứ 2), report, settings rates, login/signup. Phần còn lại là nối engine/DB, không dựng lại màn.
 - v0.2 (2026-11-04): chốt ước tính thuế = PAYG withholding 2026–27 (Schedule 1 + Schedule 8). Ghi scale, chu kỳ, thứ tự tính, làm tròn, hồ sơ thuế, bảng hệ số, nguồn ATO, và phần WHM / schedule đặc biệt còn ngoài phạm vi. Chi tiết số liệu ở `payg-withholding-2026-27.md`.
 - v0.1 (2026-11-04): tạo từ yêu cầu ban đầu.
+- v0.6 (2026-11-04): thêm backend Express + Supabase, engine dùng chung, nhiều job (thuế tính theo từng job, claim tax-free threshold một job), Public holiday và overtime theo từng ca, ô Mon–Fri, kỳ lương cố định theo chu kỳ, rate snapshot theo ca, tối đa 2 ca/ngày, bỏ MSW.
+- v0.7 (2026-11-04): thuế trên app là PAYG Schedule 1. Chỉ một job claim tax-free threshold. Ngày lễ theo bang (2026–2027). Xóa kỳ và xóa job. Bỏ avatar. Chặn ca chồng giờ trong database. Deploy Vercel cùng domain với API.

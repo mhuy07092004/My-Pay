@@ -85,17 +85,38 @@
       "title": "Three steps, no spreadsheets",
       "body": "Log once, and My Pay does the maths and keeps the record for you.",
       "steps": {
-        "1": { "title": "Log your shifts", "body": "Add start, finish and break times for each day you work." },
-        "2": { "title": "See your pay", "body": "Pay and tax for the fortnight are worked out as you go." },
-        "3": { "title": "Check it", "body": "Enter what you were paid and see the difference straight away." }
+        "1": {
+          "title": "Log your shifts",
+          "body": "Add start, finish and break times for each day you work."
+        },
+        "2": {
+          "title": "See your pay",
+          "body": "Pay and tax for the fortnight are worked out as you go."
+        },
+        "3": {
+          "title": "Check it",
+          "body": "Enter what you were paid and see the difference straight away."
+        }
       }
     },
     "principles": {
       "title": "What we stand for",
-      "simple": { "title": "Simple", "body": "Only what you need to track your pay." },
-      "private": { "title": "Private", "body": "Your shifts and income are yours alone." },
-      "accurate": { "title": "Accurate", "body": "Breaks, split and overnight shifts are handled." },
-      "bilingual": { "title": "Bilingual", "body": "Use it in English or Vietnamese." }
+      "simple": {
+        "title": "Simple",
+        "body": "Only what you need to track your pay."
+      },
+      "private": {
+        "title": "Private",
+        "body": "Your shifts and income are yours alone."
+      },
+      "accurate": {
+        "title": "Accurate",
+        "body": "Breaks, split and overnight shifts are handled."
+      },
+      "bilingual": {
+        "title": "Bilingual",
+        "body": "Use it in English or Vietnamese."
+      }
     },
     "cta": {
       "title": "Know what you are owed",
@@ -161,13 +182,21 @@
     "alreadyMember": "Already a member ?",
     "errors": {
       "invalidCredentials": "Invalid email or password",
-      "unexpected": "Unable to sign in"
-    }
+      "unexpected": "Unable to sign in",
+      "emailInUse": "An account with this email already exists",
+      "weakPassword": "Password is too weak (use at least 6 characters)",
+      "passwordMismatch": "Passwords do not match",
+    "invalidEmail": "This email address is not valid. Check the spelling."
+    },
+    "signingUp": "Creating account…",
+    "checkEmail": "Check your email to confirm your account, then sign in."
   },
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome back, {{name}}.",
-    "totalEarning": "Total Earning Until Now"
+    "totalEarning": "Total Earning Until Now",
+    "recentPeriods": "Recent periods",
+    "viewAll": "View all"
   },
   "timesheet": {
     "title": "Current Period",
@@ -218,7 +247,8 @@
       "pickEnd": "Select an end date (up to {{max}} days)",
       "days_one": "{{count}} day",
       "days_other": "{{count}} days",
-      "placeholder": "Select dates"
+      "placeholder": "Select dates",
+      "pickFixed": "Select a start date ({{count}} days)"
     },
     "addNewShifts": "Add New Shifts",
     "periods": {
@@ -232,14 +262,41 @@
     },
     "newShifts": {
       "title": "Add New Shifts",
-      "hint": "Select a date range to start adding shifts.",
+      "hint": "Select a start date to begin. Each period is {{count}} days, set by your pay cycle in Settings.",
       "savePeriod": "Save period",
       "overlap": "This range overlaps an existing period."
     },
     "detail": {
       "back": "Back",
       "actualReceived": "Actual received",
-      "saveActual": "Save actual"
+      "saveActual": "Save actual",
+      "delete": "Delete period",
+      "deleteConfirm": "Delete this period?"
+    },
+    "publicHoliday": "Public holiday",
+    "saveError": "Could not save. Please try again.",
+    "shiftOverlap": "These hours overlap another shift.",
+    "noRates": {
+      "title": "Add a rate first",
+      "body": "Shifts are paid using a rate (one rate per job). Add your rates in Settings, then come back to log shifts.",
+      "cta": "Go to Settings"
+    },
+    "overtime": {
+      "label": "Overtime",
+      "unit": "hrs",
+      "hint": "Overtime hours are the last hours of this shift. The rest is paid at the normal rate."
+    },
+    "kind": {
+      "weekday": "Ordinary (Mon–Fri)",
+      "night1": "Ordinary 22:00–23:59",
+      "night2": "Ordinary 00:00–06:00",
+      "saturday": "Saturday",
+      "sunday": "Sunday",
+      "publicHoliday": "Public holiday",
+      "otFirst2": "Overtime, first 2 hours",
+      "otAfter2": "Overtime, after 2 hours",
+      "otSunday": "Overtime, Sunday",
+      "otPublicHoliday": "Overtime, public holiday"
     }
   },
   "report": {
@@ -262,7 +319,7 @@
       "net": "Net income",
       "netHint": "Actual amounts you entered",
       "variance": "Difference",
-      "varianceHint": "Net vs estimated · {{done}}/{{total}} fortnights entered",
+      "varianceHint": "Actual vs estimated net · {{done}}/{{total}} periods entered",
       "tax": "Estimated tax",
       "taxHint": "{{rate}}% of estimated earnings",
       "hours": "Total hours worked",
@@ -279,9 +336,22 @@
     "title": "Settings",
     "personal": {
       "title": "Personal Information",
-      "avatar": "Avatar",
-      "upload": "Upload photo",
-      "password": "Password"
+      "password": "Password",
+      "state": "State",
+      "stateHint": "Public holidays follow the state where you work.",
+      "states": {
+        "NSW": "New South Wales",
+        "VIC": "Victoria",
+        "QLD": "Queensland",
+        "SA": "South Australia",
+        "WA": "Western Australia",
+        "TAS": "Tasmania",
+        "ACT": "Australian Capital Territory",
+        "NT": "Northern Territory"
+      },
+      "save": "Save",
+      "saved": "Saved",
+      "saveError": "Could not save"
     },
     "rates": {
       "title": "Rates",
@@ -310,7 +380,34 @@
       "after2": "After 2 Hour",
       "confirm": "Confirm",
       "cancel": "Cancel",
-      "perHour": "/hr"
+      "perHour": "/hr",
+      "weekday": "Mon–Fri",
+      "taxFreeBadge": "Tax-free threshold",
+      "claimTaxFree": "Claim tax-free threshold",
+      "claimTaxFreeHint": "Only one job can claim the tax-free threshold. Ticking this clears it on your other jobs.",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this job?",
+      "saveError": "Could not save this rate"
+    },
+    "tax": {
+      "title": "Tax profile",
+      "note": "Used to estimate PAYG tax withheld for this pay cycle. It is an estimate of what an employer holds back, not your tax return. Estimates only, not tax advice.",
+      "residency": "Residency",
+      "resident": "Australian resident",
+      "foreign": "Foreign resident",
+      "payCycle": "Pay cycle",
+      "weekly": "Weekly (7 days)",
+      "fortnightly": "Fortnightly (14 days)",
+      "medicare": "Medicare levy exemption",
+      "medicareNone": "None",
+      "medicareFull": "Full exemption",
+      "medicareHalf": "Half exemption",
+      "studyLoan": "I have a study or training loan (HELP, VSL, SSL…)",
+      "offset": "Annual tax offsets",
+      "offsetHint": "Optional. The total annual offset you declared to your employer.",
+      "save": "Save tax profile",
+      "saved": "Saved",
+      "saveError": "Could not save"
     }
   },
   "footer": {

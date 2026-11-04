@@ -5,7 +5,13 @@ import { Button } from '../../components/button/button'
 import { useAuth } from '../context/AuthContext'
 
 type AuthMode = 'signin' | 'signup'
-type AuthErrorKey = 'auth.errors.invalidCredentials' | 'auth.errors.unexpected'
+type AuthErrorKey =
+  | 'auth.errors.invalidCredentials'
+  | 'auth.errors.unexpected'
+  | 'auth.errors.emailInUse'
+  | 'auth.errors.weakPassword'
+  | 'auth.errors.passwordMismatch'
+  | 'auth.errors.invalidEmail'
 
 const inputClassName =
   'mt-2 w-full rounded-lg border border-[#27272A] bg-[#18181B] px-3 py-2.5 text-[#F4F4F5] placeholder:text-[#71717A] focus:border-[#22C55E] focus:outline-none'
@@ -13,14 +19,18 @@ const inputClassName =
 function isAuthErrorKey(value: string): value is AuthErrorKey {
   return (
     value === 'auth.errors.invalidCredentials' ||
-    value === 'auth.errors.unexpected'
+    value === 'auth.errors.unexpected' ||
+    value === 'auth.errors.emailInUse' ||
+    value === 'auth.errors.weakPassword' ||
+    value === 'auth.errors.passwordMismatch' ||
+    value === 'auth.errors.invalidEmail'
   )
 }
 
 export function Login() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { login } = useAuth()
+  const { login, signUp } = useAuth()
   const { t } = useTranslation()
   const [mode, setMode] = useState<AuthMode>(() =>
     searchParams.get('mode') === 'signup' ? 'signup' : 'signin',
@@ -29,6 +39,10 @@ export function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [passwordConfirm, setPasswordConfirm] = useState('')
+  const [notice, setNotice] = useState('')
 
   async function handleSignIn(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -37,6 +51,33 @@ export function Login() {
     try {
       await login(email, password)
       navigate('/dashboard')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'auth.errors.unexpected'
+      setError(isAuthErrorKey(message) ? message : 'auth.errors.unexpected')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleSignUp(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError('')
+    setNotice('')
+    if (password !== passwordConfirm) {
+      setError('auth.errors.passwordMismatch')
+      return
+    }
+    setLoading(true)
+    try {
+      const { needsConfirmation } = await signUp({ email, password, firstName, lastName })
+      if (needsConfirmation) {
+        setNotice(t('auth.checkEmail'))
+        setMode('signin')
+        setPassword('')
+        setPasswordConfirm('')
+      } else {
+        navigate('/dashboard')
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'auth.errors.unexpected'
       setError(isAuthErrorKey(message) ? message : 'auth.errors.unexpected')
@@ -98,6 +139,7 @@ export function Login() {
                 className={inputClassName}
               />
             </label>
+            {notice ? <p className="text-sm text-[#22C55E]">{notice}</p> : null}
             {error ? (
               <p className="text-sm text-[#EF4444]" role="alert">
                 {isAuthErrorKey(error) ? t(error) : t('auth.errors.unexpected')}
@@ -116,7 +158,11 @@ export function Login() {
               {t('auth.notAMember')}{' '}
               <button
                 type="button"
-                onClick={() => setMode('signup')}
+                onClick={() => {
+                  setError('')
+                  setNotice('')
+                  setMode('signup')
+                }}
                 className="font-medium text-[#22C55E] hover:text-[#16A34A]"
               >
                 {t('auth.signUpNow')}
@@ -124,13 +170,15 @@ export function Login() {
             </p>
           </form>
         ) : (
-          <form className="mt-8 space-y-4">
+          <form className="mt-8 space-y-4" onSubmit={handleSignUp}>
             <div className="grid grid-cols-2 gap-4">
               <label className="block text-left text-sm text-[#A1A1AA]">
                 {t('auth.firstName')}
                 <input
                   type="text"
                   name="firstName"
+                  value={firstName}
+                  onChange={(event) => setFirstName(event.target.value)}
                   placeholder={t('auth.firstNamePlaceholder')}
                   required
                   className={inputClassName}
@@ -141,6 +189,8 @@ export function Login() {
                 <input
                   type="text"
                   name="lastName"
+                  value={lastName}
+                  onChange={(event) => setLastName(event.target.value)}
                   placeholder={t('auth.lastNamePlaceholder')}
                   required
                   className={inputClassName}
@@ -152,6 +202,8 @@ export function Login() {
               <input
                 type="email"
                 name="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
                 placeholder={t('auth.emailPlaceholder')}
                 required
                 className={inputClassName}
@@ -162,6 +214,8 @@ export function Login() {
               <input
                 type="password"
                 name="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
                 placeholder="••••••••"
                 required
                 className={inputClassName}
@@ -172,19 +226,35 @@ export function Login() {
               <input
                 type="password"
                 name="passwordConfirm"
+                value={passwordConfirm}
+                onChange={(event) => setPasswordConfirm(event.target.value)}
                 placeholder="••••••••"
                 required
                 className={inputClassName}
               />
             </label>
-            <Button variant="green" size="lg" className="w-full" type="submit">
-              {t('auth.signUp')}
+            {error ? (
+              <p className="text-sm text-[#EF4444]" role="alert">
+                {isAuthErrorKey(error) ? t(error) : t('auth.errors.unexpected')}
+              </p>
+            ) : null}
+            <Button
+              variant="green"
+              size="lg"
+              className="w-full"
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? t('auth.signingUp') : t('auth.signUp')}
             </Button>
             <p className="text-center text-sm text-[#A1A1AA]">
               {t('auth.alreadyMember')}{' '}
               <button
                 type="button"
-                onClick={() => setMode('signin')}
+                onClick={() => {
+                  setError('')
+                  setMode('signin')
+                }}
                 className="font-medium text-[#22C55E] hover:text-[#16A34A]"
               >
                 {t('auth.signIn')}

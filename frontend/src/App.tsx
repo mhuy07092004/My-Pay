@@ -15,7 +15,8 @@ import { Settings } from './pages/dashboard/settings'
 import { Timesheet } from './pages/dashboard/timesheet'
 
 function RequireAuth({ children }: { children: ReactNode }) {
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
+  if (loading) return null
   if (!user) {
     return <Navigate to="/login" replace />
   }
@@ -23,7 +24,8 @@ function RequireAuth({ children }: { children: ReactNode }) {
 }
 
 function RedirectIfAuthenticated({ children }: { children: ReactNode }) {
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
+  if (loading) return null
   if (user) {
     return <Navigate to="/dashboard" replace />
   }

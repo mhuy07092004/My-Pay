@@ -7,71 +7,96 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { createSeedPeriods } from '../../mock/timesheet'
-import type { Period, Shift } from '../lib/timesheet'
-
-const STORAGE_KEY = 'my-pay-periods'
+import {
+  createPeriod,
+  deletePeriod,
+  listPeriods,
+  saveActual,
+  saveDay,
+} from '../lib/api'
+import { toIsoDate, type DateRange, type Period, type Shift } from '../lib/timesheet'
+import { useAuth } from './AuthContext'
+import { usePayData } from './PayDataContext'
 
 type TimesheetContextValue = {
   periods: Period[]
-  addPeriod: (period: Omit<Period, 'id'>) => string
-  saveShift: (periodId: string, isoDate: string, shift: Shift) => void
-  setActual: (periodId: string, amount: number | undefined) => void
+  loading: boolean
+  /** Creates the period, then saves each given day. Returns the new period id. */
+  addPeriod: (range: DateRange, shifts: Record<string, Shift>) => Promise<string>
+  removePeriod: (periodId: string) => Promise<void>
+  saveShift: (periodId: string, isoDate: string, shift: Shift) => Promise<void>
+  setActual: (periodId: string, amount: number | undefined) => Promise<void>
 }
 
 const TimesheetContext = createContext<TimesheetContextValue | null>(null)
 
-function readStoredPeriods(): Period[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) {
-      const parsed = JSON.parse(raw) as Period[]
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed
-    }
-  } catch {
-    // fall through to seed
-  }
-  return createSeedPeriods()
-}
-
 export function TimesheetProvider({ children }: { children: ReactNode }) {
-  const [periods, setPeriods] = useState<Period[]>(readStoredPeriods)
+  const { user } = useAuth()
+  const { version } = usePayData()
+  const userEmail = user?.email ?? null
+  const [periods, setPeriods] = useState<Period[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(periods))
-  }, [periods])
+    if (!userEmail) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPeriods([])
+      setLoading(false)
+      return
+    }
+    let cancelled = false
+    setLoading(true)
+    listPeriods()
+      .then((list) => {
+        if (!cancelled) setPeriods(list)
+      })
+      .catch((err) => console.error('Failed to load periods', err))
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [userEmail, version])
 
-  const addPeriod = useCallback((period: Omit<Period, 'id'>) => {
-    const id = `p-${Date.now()}`
-    setPeriods((prev) => [...prev, { ...period, id }])
-    return id
+  const replace = useCallback((next: Period) => {
+    setPeriods((prev) => prev.map((p) => (p.id === next.id ? next : p)))
+  }, [])
+
+  const addPeriod = useCallback(async (range: DateRange, shifts: Record<string, Shift>) => {
+    const period = await createPeriod(toIsoDate(range.start), toIsoDate(range.end), shifts)
+    setPeriods((prev) => [...prev, period])
+    return period.id
+  }, [])
+
+  const removePeriod = useCallback(async (periodId: string) => {
+    await deletePeriod(periodId)
+    setPeriods((prev) => prev.filter((p) => p.id !== periodId))
   }, [])
 
   const saveShift = useCallback(
-    (periodId: string, isoDate: string, shift: Shift) => {
-      setPeriods((prev) =>
-        prev.map((p) =>
-          p.id === periodId ? { ...p, shifts: { ...p.shifts, [isoDate]: shift } } : p,
-        ),
-      )
+    async (periodId: string, isoDate: string, shift: Shift) => {
+      replace(await saveDay(periodId, isoDate, shift))
     },
-    [],
+    [replace],
   )
 
-  const setActual = useCallback((periodId: string, amount: number | undefined) => {
-    setPeriods((prev) =>
-      prev.map((p) => (p.id === periodId ? { ...p, actual: amount } : p)),
-    )
-  }, [])
+  const setActual = useCallback(
+    async (periodId: string, amount: number | undefined) => {
+      replace(await saveActual(periodId, amount))
+    },
+    [replace],
+  )
 
   const value = useMemo(
-    () => ({ periods, addPeriod, saveShift, setActual }),
-    [periods, addPeriod, saveShift, setActual],
+    () => ({ periods, loading, addPeriod, removePeriod, saveShift, setActual }),
+    [periods, loading, addPeriod, removePeriod, saveShift, setActual],
   )
 
   return <TimesheetContext.Provider value={value}>{children}</TimesheetContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTimesheet() {
   const context = useContext(TimesheetContext)
   if (!context) {

@@ -85,17 +85,38 @@
       "title": "Ba bước, không cần bảng tính",
       "body": "Ghi một lần, My Pay tính toán và lưu lại thay bạn.",
       "steps": {
-        "1": { "title": "Ghi ca làm", "body": "Thêm giờ vào, giờ ra và giờ nghỉ cho mỗi ngày đi làm." },
-        "2": { "title": "Xem lương", "body": "Lương và thuế của kỳ hai tuần được tính ngay khi bạn ghi." },
-        "3": { "title": "Đối chiếu", "body": "Nhập số tiền được trả và thấy chênh lệch ngay." }
+        "1": {
+          "title": "Ghi ca làm",
+          "body": "Thêm giờ vào, giờ ra và giờ nghỉ cho mỗi ngày đi làm."
+        },
+        "2": {
+          "title": "Xem lương",
+          "body": "Lương và thuế của kỳ hai tuần được tính ngay khi bạn ghi."
+        },
+        "3": {
+          "title": "Đối chiếu",
+          "body": "Nhập số tiền được trả và thấy chênh lệch ngay."
+        }
       }
     },
     "principles": {
       "title": "Chúng tôi theo đuổi điều gì",
-      "simple": { "title": "Đơn giản", "body": "Chỉ có những gì bạn cần để theo dõi lương." },
-      "private": { "title": "Riêng tư", "body": "Ca làm và thu nhập chỉ thuộc về bạn." },
-      "accurate": { "title": "Chính xác", "body": "Xử lý giờ nghỉ, ca tách đôi và ca qua đêm." },
-      "bilingual": { "title": "Song ngữ", "body": "Dùng bằng tiếng Anh hoặc tiếng Việt." }
+      "simple": {
+        "title": "Đơn giản",
+        "body": "Chỉ có những gì bạn cần để theo dõi lương."
+      },
+      "private": {
+        "title": "Riêng tư",
+        "body": "Ca làm và thu nhập chỉ thuộc về bạn."
+      },
+      "accurate": {
+        "title": "Chính xác",
+        "body": "Xử lý giờ nghỉ, ca tách đôi và ca qua đêm."
+      },
+      "bilingual": {
+        "title": "Song ngữ",
+        "body": "Dùng bằng tiếng Anh hoặc tiếng Việt."
+      }
     },
     "cta": {
       "title": "Biết mình được trả bao nhiêu",
@@ -161,13 +182,21 @@
     "alreadyMember": "Đã là thành viên?",
     "errors": {
       "invalidCredentials": "Email hoặc mật khẩu không đúng",
-      "unexpected": "Không thể đăng nhập"
-    }
+      "unexpected": "Không thể đăng nhập",
+      "emailInUse": "Email này đã có tài khoản",
+      "weakPassword": "Mật khẩu quá yếu (tối thiểu 6 ký tự)",
+      "passwordMismatch": "Mật khẩu nhập lại không khớp",
+    "invalidEmail": "Email không hợp lệ. Hãy kiểm tra lại chính tả."
+    },
+    "signingUp": "Đang tạo tài khoản…",
+    "checkEmail": "Hãy kiểm tra email để xác nhận tài khoản, rồi đăng nhập."
   },
   "dashboard": {
     "title": "Trang Chủ",
     "welcome": "Anh Chào {{name}} Nhá !",
-    "totalEarning": "Tổng thu nhập Đến Hiện Tại"
+    "totalEarning": "Tổng thu nhập Đến Hiện Tại",
+    "recentPeriods": "Kỳ gần đây",
+    "viewAll": "Xem tất cả"
   },
   "timesheet": {
     "title": "Kỳ lương hiện tại",
@@ -217,7 +246,8 @@
       "pickStart": "Chọn ngày bắt đầu (tối đa {{max}} ngày)",
       "pickEnd": "Chọn ngày kết thúc (tối đa {{max}} ngày)",
       "days_other": "{{count}} ngày",
-      "placeholder": "Chọn ngày"
+      "placeholder": "Chọn ngày",
+      "pickFixed": "Chọn ngày bắt đầu ({{count}} ngày)"
     },
     "addNewShifts": "Thêm ca mới",
     "periods": {
@@ -231,14 +261,41 @@
     },
     "newShifts": {
       "title": "Thêm ca mới",
-      "hint": "Chọn khoảng ngày để bắt đầu thêm ca làm.",
+      "hint": "Chọn ngày bắt đầu. Mỗi kỳ dài {{count}} ngày theo chu kỳ lương trong Cài đặt.",
       "savePeriod": "Lưu kỳ lương",
       "overlap": "Khoảng ngày này trùng với một kỳ lương đã có."
     },
     "detail": {
       "back": "Quay lại",
       "actualReceived": "Thực nhận",
-      "saveActual": "Lưu thực nhận"
+      "saveActual": "Lưu thực nhận",
+      "delete": "Xóa kỳ",
+      "deleteConfirm": "Xóa kỳ này?"
+    },
+    "publicHoliday": "Ngày lễ",
+    "saveError": "Không lưu được. Vui lòng thử lại.",
+    "shiftOverlap": "Khung giờ này trùng với một ca khác.",
+    "noRates": {
+      "title": "Hãy thêm rate trước",
+      "body": "Ca làm được tính lương theo rate (mỗi chỗ làm một rate). Thêm rate trong Cài đặt rồi quay lại nhập ca.",
+      "cta": "Đến Cài đặt"
+    },
+    "overtime": {
+      "label": "Overtime",
+      "unit": "giờ",
+      "hint": "Giờ overtime là những giờ cuối của ca này. Phần còn lại tính theo rate thường."
+    },
+    "kind": {
+      "weekday": "Thường (Thứ 2–6)",
+      "night1": "Thường 22:00–23:59",
+      "night2": "Thường 00:00–06:00",
+      "saturday": "Thứ bảy",
+      "sunday": "Chủ nhật",
+      "publicHoliday": "Ngày lễ",
+      "otFirst2": "Overtime, 2 giờ đầu",
+      "otAfter2": "Overtime, sau 2 giờ",
+      "otSunday": "Overtime, Chủ nhật",
+      "otPublicHoliday": "Overtime, ngày lễ"
     }
   },
   "report": {
@@ -261,7 +318,7 @@
       "net": "Thu nhập thực nhận",
       "netHint": "Số tiền thực tế bạn đã nhập",
       "variance": "Chênh lệch",
-      "varianceHint": "Thực nhận so với ước tính · {{done}}/{{total}} kỳ đã nhập",
+      "varianceHint": "Thực nhận so với net ước tính · {{done}}/{{total}} kỳ đã nhập",
       "tax": "Thuế ước tính",
       "taxHint": "{{rate}}% thu nhập ước tính",
       "hours": "Tổng giờ đã làm",
@@ -278,9 +335,22 @@
     "title": "Cài đặt",
     "personal": {
       "title": "Thông tin cá nhân",
-      "avatar": "Ảnh đại diện",
-      "upload": "Tải ảnh lên",
-      "password": "Mật khẩu"
+      "password": "Mật khẩu",
+      "state": "Bang",
+      "stateHint": "Ngày lễ theo bang nơi bạn làm việc.",
+      "states": {
+        "NSW": "New South Wales",
+        "VIC": "Victoria",
+        "QLD": "Queensland",
+        "SA": "South Australia",
+        "WA": "Western Australia",
+        "TAS": "Tasmania",
+        "ACT": "Australian Capital Territory",
+        "NT": "Northern Territory"
+      },
+      "save": "Lưu",
+      "saved": "Đã lưu",
+      "saveError": "Không lưu được"
     },
     "rates": {
       "title": "Mức lương",
@@ -309,7 +379,34 @@
       "after2": "Sau 2 giờ",
       "confirm": "Xác nhận",
       "cancel": "Hủy",
-      "perHour": "/giờ"
+      "perHour": "/giờ",
+      "weekday": "Thứ 2–6",
+      "taxFreeBadge": "Tax-free threshold",
+      "claimTaxFree": "Claim tax-free threshold",
+      "claimTaxFreeHint": "Chỉ một chỗ làm được claim tax-free threshold. Tick chỗ này sẽ bỏ tick các chỗ khác.",
+      "delete": "Xóa",
+      "deleteConfirm": "Xóa chỗ làm này?",
+      "saveError": "Không lưu được rate này"
+    },
+    "tax": {
+      "title": "Hồ sơ thuế",
+      "note": "Dùng để ước tính thuế PAYG bị giữ lại trong kỳ lương này. Đây là ước tính số employer giữ, không phải quyết toán thuế cuối năm. Chỉ là ước tính, không phải tư vấn thuế.",
+      "residency": "Cư trú",
+      "resident": "Resident (cư dân Úc)",
+      "foreign": "Foreign resident",
+      "payCycle": "Chu kỳ trả lương",
+      "weekly": "Hàng tuần (7 ngày)",
+      "fortnightly": "Hai tuần một lần (14 ngày)",
+      "medicare": "Miễn Medicare levy",
+      "medicareNone": "Không",
+      "medicareFull": "Miễn toàn phần",
+      "medicareHalf": "Miễn một nửa",
+      "studyLoan": "Tôi có khoản vay học tập (HELP, VSL, SSL…)",
+      "offset": "Tax offset hàng năm",
+      "offsetHint": "Tùy chọn. Tổng offset hàng năm bạn đã khai với employer.",
+      "save": "Lưu hồ sơ thuế",
+      "saved": "Đã lưu",
+      "saveError": "Không lưu được"
     }
   },
   "footer": {

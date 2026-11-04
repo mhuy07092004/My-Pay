@@ -18,7 +18,7 @@ export function TextInput({ label, className = '', ...props }: TextInputProps) {
       <input
         id={id}
         {...props}
-        className="mt-2 w-full rounded-lg border border-[#27272A] bg-[#09090B] px-3 py-2.5 text-sm text-[#F4F4F5] placeholder:text-[#52525B] read-only:text-[#A1A1AA] focus:border-[#C8E664] focus:outline-none"
+        className="mt-2 w-full rounded-lg border border-[#27272A] bg-[#09090B] px-3 py-3 text-base sm:py-2.5 sm:text-sm text-[#F4F4F5] placeholder:text-[#52525B] read-only:text-[#A1A1AA] focus:border-[#C8E664] focus:outline-none"
       />
     </div>
   )

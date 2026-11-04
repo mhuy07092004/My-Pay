@@ -51,7 +51,7 @@ export function BreakSelector({ value, onChange }: BreakSelectorProps) {
             const parsed = Math.floor(Number(e.target.value))
             onChange(Number.isFinite(parsed) && parsed > 0 ? parsed : 0)
           }}
-          className="mt-2 w-full rounded-lg border border-[#27272A] bg-[#09090B] px-3 py-2.5 text-sm text-[#F4F4F5] focus:border-[#C8E664] focus:outline-none"
+          className="mt-2 w-full rounded-lg border border-[#27272A] bg-[#09090B] px-3 py-3 text-base sm:py-2.5 sm:text-sm text-[#F4F4F5] focus:border-[#C8E664] focus:outline-none"
         />
       ) : null}
     </div>
