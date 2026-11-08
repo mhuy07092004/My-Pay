@@ -18,6 +18,7 @@
     "dashboard": "Dashboard",
     "home": "Home",
     "timesheet": "Timesheet",
+    "calendar": "Calendar",
     "reports": "Reports",
     "history": "History",
     "settings": "Settings",
@@ -200,6 +201,25 @@
     "totalEarning": "Total Earning Until Now",
     "recentPeriods": "Recent periods",
     "viewAll": "View all"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "today": "Today",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "prevYear": "Previous year",
+    "nextYear": "Next year",
+    "backToMonth": "Back to month view",
+    "legend": "Jobs",
+    "viewPeriod": "View pay period",
+    "noShift": "No shift this day",
+    "break": "{{count}} min break",
+    "close": "Close",
+    "stats": {
+      "title": "Hours this month",
+      "vsLastMonth": "Compared to last month",
+      "total": "Total"
+    }
   },
   "timesheet": {
     "title": "Current Period",

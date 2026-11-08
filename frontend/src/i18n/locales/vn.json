@@ -18,6 +18,7 @@
     "dashboard": "Bảng điều khiển",
     "home": "Trang chủ",
     "timesheet": "Chấm công",
+    "calendar": "Lịch",
     "reports": "Báo cáo",
     "history": "Lịch sử",
     "settings": "Cài đặt",
@@ -200,6 +201,25 @@
     "totalEarning": "Tổng thu nhập Đến Hiện Tại",
     "recentPeriods": "Kỳ gần đây",
     "viewAll": "Xem tất cả"
+  },
+  "calendar": {
+    "title": "Lịch",
+    "today": "Hôm nay",
+    "prevMonth": "Tháng trước",
+    "nextMonth": "Tháng sau",
+    "prevYear": "Năm trước",
+    "nextYear": "Năm sau",
+    "backToMonth": "Về xem tháng",
+    "legend": "Công việc",
+    "viewPeriod": "Xem kỳ lương",
+    "noShift": "Không có ca trong ngày này",
+    "break": "Nghỉ {{count}} phút",
+    "close": "Đóng",
+    "stats": {
+      "title": "Giờ làm tháng này",
+      "vsLastMonth": "So với tháng trước",
+      "total": "Tổng"
+    }
   },
   "timesheet": {
     "title": "Kỳ lương hiện tại",
