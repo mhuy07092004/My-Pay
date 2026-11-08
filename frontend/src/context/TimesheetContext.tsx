@@ -24,7 +24,7 @@ type TimesheetContextValue = {
   /** Creates the period, then saves each given day. Returns the new period id. */
   addPeriod: (range: DateRange, shifts: Record<string, Shift>) => Promise<string>
   removePeriod: (periodId: string) => Promise<void>
-  saveShift: (periodId: string, isoDate: string, shift: Shift) => Promise<void>
+  saveShift: (periodId: string, isoDate: string, shift: Shift | null) => Promise<void>
   setActual: (periodId: string, amount: number | undefined) => Promise<void>
 }
 
@@ -75,7 +75,7 @@ export function TimesheetProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const saveShift = useCallback(
-    async (periodId: string, isoDate: string, shift: Shift) => {
+    async (periodId: string, isoDate: string, shift: Shift | null) => {
       replace(await saveDay(periodId, isoDate, shift))
     },
     [replace],

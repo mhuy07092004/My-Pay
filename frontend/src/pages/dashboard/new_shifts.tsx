@@ -78,7 +78,16 @@ export function NewShifts() {
             range={range}
             payCycle={taxProfile.payCycle}
             shifts={shifts}
-            onSaveShift={(iso, shift) => setShifts((prev) => ({ ...prev, [iso]: shift }))}
+            onSaveShift={(iso, shift) =>
+              setShifts((prev) => {
+                if (!shift) {
+                  const { [iso]: _removed, ...rest } = prev
+                  void _removed
+                  return rest
+                }
+                return { ...prev, [iso]: shift }
+              })
+            }
           />
           <div className="sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-20 -mx-4 mt-6 flex flex-col items-stretch gap-2 border-t border-[#27272A] bg-[#18181B]/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 md:static md:mx-0 md:flex-row md:items-center md:justify-end md:gap-4 md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
             {overlaps ? (

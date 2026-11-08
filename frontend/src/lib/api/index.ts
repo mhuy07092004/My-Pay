@@ -156,6 +156,7 @@ function periodFromDto(dto: PeriodDto): Period {
       income: toDollars(dto.totals.grossCents),
       tax: toDollars(dto.totals.taxCents),
       net: toDollars(dto.totals.netCents),
+      minutes: dto.totals.minutes,
     },
   }
 }

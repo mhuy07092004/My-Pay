@@ -6,6 +6,7 @@ import { ApiError } from '../../src/lib/api'
 import { calcDay, type RateLookup } from '../../src/lib/pay'
 import type { SavedRate } from '../../src/lib/rates'
 import {
+  formatHours,
   formatMoney,
   formatTime12h,
   toIsoDate,
@@ -21,12 +22,15 @@ type ShiftRowProps = {
   date: Date
   isToday?: boolean
   shift?: Shift
+  /** Times and rate copied from the latest earlier shift, for an empty day. */
+  template?: Pick<ShiftPart, 'checkIn' | 'checkOut' | 'breakMinutes' | 'rateId'>
   rates: SavedRate[]
   rateOf: RateLookup
   holidays?: PublicHoliday[]
   open: boolean
   onToggle: () => void
   onSave: (shift: Shift) => Promise<void> | void
+  onDelete?: () => Promise<void> | void
 }
 
 type ShiftFieldsProps = {
@@ -173,16 +177,19 @@ export function ShiftRow({
   date,
   isToday = false,
   shift,
+  template,
   rates,
   rateOf,
   holidays = [],
   open,
   onToggle,
   onSave,
+  onDelete,
 }: ShiftRowProps) {
   const { t, i18n } = useTranslation()
   const locale = isAppLanguage(i18n.language) ? HTML_LANG[i18n.language] : 'en'
   const [saving, setSaving] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [error, setError] = useState<'timesheet.shiftOverlap' | 'timesheet.saveError' | null>(null)
   const busy = useRef(false)
   const pickRate = rates.find((r) => !r.archived) ?? rates[0]
@@ -194,9 +201,11 @@ export function ShiftRow({
     publicHoliday: false,
     overtimeMinutes: 0,
   })
-  const [draft, setDraft] = useState<Shift>(
-    shift ?? defaultPart('09:00', '17:00'),
-  )
+  const [draft, setDraft] = useState<Shift>(() => {
+    if (shift) return shift
+    if (template) return { ...template, publicHoliday: false, overtimeMinutes: 0 }
+    return defaultPart('09:00', '17:00')
+  })
 
   const iso = toIsoDate(date)
   const weekday = new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(date)
@@ -241,9 +250,15 @@ export function ShiftRow({
           {heading}
           {shift ? (
             <>
-              <p className="mt-1 text-sm text-[#A1A1AA]">{range(shift)}</p>
+              <p className="mt-1 text-sm text-[#A1A1AA]">
+                {range(shift)}
+                {saved ? ` · ${formatHours(saved.parts[0]?.minutes ?? 0)}h` : ''}
+              </p>
               {shift.second ? (
-                <p className="text-sm text-[#A1A1AA]">{range(shift.second)}</p>
+                <p className="text-sm text-[#A1A1AA]">
+                  {range(shift.second)}
+                  {saved?.parts[1] ? ` · ${formatHours(saved.parts[1].minutes)}h` : ''}
+                </p>
               ) : null}
             </>
           ) : (
@@ -268,6 +283,25 @@ export function ShiftRow({
     setError(null)
     try {
       await onSave(draft)
+    } catch (err) {
+      setError(err instanceof ApiError && err.code === 'shift_overlap' ? 'timesheet.shiftOverlap' : 'timesheet.saveError')
+    } finally {
+      busy.current = false
+      setSaving(false)
+    }
+  }
+
+  async function handleDelete() {
+    if (!onDelete || busy.current) return
+    if (!confirmDelete) {
+      setConfirmDelete(true)
+      return
+    }
+    busy.current = true
+    setSaving(true)
+    setError(null)
+    try {
+      await onDelete()
     } catch (err) {
       setError(err instanceof ApiError && err.code === 'shift_overlap' ? 'timesheet.shiftOverlap' : 'timesheet.saveError')
     } finally {
@@ -345,14 +379,26 @@ export function ShiftRow({
             ${formatMoney(draftPay)}
           </p>
         </div>
-        <Button
-          size="lg"
-          disabled={saving}
-          className="w-full bg-[#C8E664]! hover:bg-[#B5D350]! disabled:opacity-50 sm:w-auto"
-          onClick={() => void handleSave()}
-        >
-          {t('timesheet.saveShift')}
-        </Button>
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+          {onDelete ? (
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => void handleDelete()}
+              className="min-h-11 px-2 text-sm text-[#A1A1AA] hover:text-[#EF4444] disabled:opacity-50"
+            >
+              {confirmDelete ? t('timesheet.deleteShiftConfirm') : t('timesheet.deleteShift')}
+            </button>
+          ) : null}
+          <Button
+            size="lg"
+            disabled={saving}
+            className="w-full bg-[#C8E664]! hover:bg-[#B5D350]! disabled:opacity-50 sm:w-auto"
+            onClick={() => void handleSave()}
+          >
+            {t('timesheet.saveShift')}
+          </Button>
+        </div>
       </div>
       {error ? (
         <p className="mt-3 text-sm text-[#EF4444]" role="alert">

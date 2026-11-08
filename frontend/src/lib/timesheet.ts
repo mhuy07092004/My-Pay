@@ -38,8 +38,8 @@ export type Period = {
   actual?: number
   /** Absent only on the marketing sample data. */
   payCycle?: PayCycle
-  /** Server-computed totals in dollars (saved periods only). */
-  totals?: { income: number; tax: number; net: number }
+  /** Server-computed totals in dollars (saved periods only). `minutes` is worked time. */
+  totals?: { income: number; tax: number; net: number; minutes: number }
 }
 
 /** Days in a period for each pay cycle (weekly 7, fortnightly 14). */
@@ -166,6 +166,48 @@ export function formatMoney(amount: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })
+}
+
+/** Worked minutes as decimal hours, e.g. 330 -> "5.50". */
+export function formatHours(minutes: number): string {
+  return (minutes / 60).toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+}
+
+export type HoursTone = 'green' | 'yellow' | 'red'
+
+/**
+ * Fortnightly: <=48h green, <=76h yellow, above red.
+ * Weekly uses half those thresholds (24h / 38h).
+ */
+export function hoursTone(minutes: number, payCycle: PayCycle = 'fortnightly'): HoursTone {
+  const hours = minutes / 60
+  const yellowAt = payCycle === 'weekly' ? 24 : 48
+  const redAt = payCycle === 'weekly' ? 38 : 76
+  if (hours <= yellowAt) return 'green'
+  if (hours <= redAt) return 'yellow'
+  return 'red'
+}
+
+/** Times, break and rate copied from the latest earlier shift in the period. */
+export function recentShiftTemplate(
+  iso: string,
+  shifts: Record<string, Shift>,
+): Pick<ShiftPart, 'checkIn' | 'checkOut' | 'breakMinutes' | 'rateId'> | undefined {
+  const dates = Object.keys(shifts)
+    .filter((d) => d !== iso && shifts[d])
+    .sort()
+  if (dates.length === 0) return undefined
+  const prior = [...dates].reverse().find((d) => d < iso) ?? dates[dates.length - 1]
+  const source = shifts[prior]
+  return {
+    checkIn: source.checkIn,
+    checkOut: source.checkOut,
+    breakMinutes: source.breakMinutes,
+    rateId: source.rateId,
+  }
 }
 
 export function formatTime12h(time: string, locale: string): string {

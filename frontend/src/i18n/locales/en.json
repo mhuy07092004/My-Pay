@@ -255,6 +255,8 @@
       "title": "Timesheet",
       "empty": "No periods yet. Add your first shifts to get started.",
       "income": "Income",
+      "beforeTax": "Before tax",
+      "afterTax": "After tax",
       "tax": "Tax",
       "actual": "Actual",
       "actualRecorded": "Actual recorded",
@@ -274,6 +276,8 @@
       "deleteConfirm": "Delete this period?"
     },
     "publicHoliday": "Public holiday",
+    "deleteShift": "Delete shift",
+    "deleteShiftConfirm": "Delete this shift?",
     "saveError": "Could not save. Please try again.",
     "shiftOverlap": "These hours overlap another shift.",
     "noRates": {
@@ -285,6 +289,24 @@
       "label": "Overtime",
       "unit": "hrs",
       "hint": "Overtime hours are the last hours of this shift. The rest is paid at the normal rate."
+    },
+    "hours": {
+      "badge": "{{hours}} hrs",
+      "total": "Total hours",
+      "summaryTitle": "Hours to match your payslip",
+      "week": "Week {{n}}"
+    },
+    "summaryKind": {
+      "weekday": "Ordinary Hour",
+      "night1": "22:00–0:00",
+      "night2": "0:00–6:00",
+      "saturday": "Saturday",
+      "sunday": "Sunday",
+      "publicHoliday": "Public Holiday",
+      "otFirst2": "Overtime, first 2 hours",
+      "otAfter2": "Overtime, after 2 hours",
+      "otSunday": "Overtime, Sunday",
+      "otPublicHoliday": "Overtime, public holiday"
     },
     "kind": {
       "weekday": "Ordinary (Mon–Fri)",

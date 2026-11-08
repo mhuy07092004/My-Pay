@@ -254,6 +254,8 @@
       "title": "Chấm công",
       "empty": "Chưa có kỳ lương nào. Hãy thêm ca làm đầu tiên.",
       "income": "Thu nhập",
+      "beforeTax": "Trước thuế",
+      "afterTax": "Sau thuế",
       "tax": "Thuế",
       "actual": "Thực nhận",
       "actualRecorded": "Đã ghi thực nhận",
@@ -273,6 +275,8 @@
       "deleteConfirm": "Xóa kỳ này?"
     },
     "publicHoliday": "Ngày lễ",
+    "deleteShift": "Xóa ca",
+    "deleteShiftConfirm": "Xóa ca này?",
     "saveError": "Không lưu được. Vui lòng thử lại.",
     "shiftOverlap": "Khung giờ này trùng với một ca khác.",
     "noRates": {
@@ -284,6 +288,24 @@
       "label": "Overtime",
       "unit": "giờ",
       "hint": "Giờ overtime là những giờ cuối của ca này. Phần còn lại tính theo rate thường."
+    },
+    "hours": {
+      "badge": "{{hours}} giờ",
+      "total": "Tổng giờ",
+      "summaryTitle": "Tổng giờ để đối soát payslip",
+      "week": "Tuần {{n}}"
+    },
+    "summaryKind": {
+      "weekday": "Ordinary Hour",
+      "night1": "22:00–0:00",
+      "night2": "0:00–6:00",
+      "saturday": "Saturday",
+      "sunday": "Sunday",
+      "publicHoliday": "Public Holiday",
+      "otFirst2": "Overtime, 2 giờ đầu",
+      "otAfter2": "Overtime, sau 2 giờ",
+      "otSunday": "Overtime, Chủ nhật",
+      "otPublicHoliday": "Overtime, ngày lễ"
     },
     "kind": {
       "weekday": "Thường (Thứ 2–6)",

@@ -1,10 +1,14 @@
 import { useTranslation } from 'react-i18next'
-import { formatMoney } from '../../src/lib/timesheet'
+import { HoursBadge } from '../timesheet/hours_badge'
+import { formatMoney, type PayCycle } from '../../src/lib/timesheet'
 
 type FortnightEstimateProps = {
   beforeTax: number
   tax: number
   afterTax: number
+  /** Omit on marketing previews, which have no worked-hours total. */
+  minutes?: number
+  payCycle?: PayCycle
   className?: string
   showLive?: boolean
   showNote?: boolean
@@ -16,16 +20,30 @@ export function FortnightEstimate({
   beforeTax,
   tax,
   afterTax,
+  minutes,
+  payCycle = 'fortnightly',
   className = '',
   showLive = true,
   showNote = true,
   compactOnMobile = false,
 }: FortnightEstimateProps) {
   const { t } = useTranslation()
-  const row = compactOnMobile ? 'flex flex-col gap-0.5 lg:flex-row lg:justify-between' : 'flex justify-between'
+  const row = compactOnMobile
+    ? 'flex flex-col gap-0.5 lg:flex-row lg:justify-between'
+    : 'flex justify-between'
   const lastRow = compactOnMobile
     ? 'flex flex-col gap-0.5 lg:flex-row lg:justify-between lg:border-t lg:border-[#27272A] lg:pt-3'
     : 'flex justify-between border-t border-[#27272A] pt-3'
+  const showHours = minutes !== undefined
+
+  const hours = showHours ? (
+    <div className={compactOnMobile ? `${row} order-3 lg:order-1` : row}>
+      <dt className="text-[#A1A1AA]">{t('timesheet.hours.total')}</dt>
+      <dd>
+        <HoursBadge minutes={minutes} payCycle={payCycle} />
+      </dd>
+    </div>
+  ) : null
 
   return (
     <aside className={`space-y-4 ${className}`}>
@@ -46,18 +64,19 @@ export function FortnightEstimate({
         </div>
         <dl
           className={`mt-4 text-sm ${
-            compactOnMobile ? 'mt-2 grid grid-cols-3 gap-2 lg:mt-4 lg:block lg:space-y-3' : 'space-y-3'
+            compactOnMobile ? 'mt-2 grid grid-cols-3 gap-2 lg:mt-4 lg:grid-cols-1 lg:gap-3' : 'space-y-3'
           }`}
         >
-          <div className={row}>
+          {hours}
+          <div className={compactOnMobile ? `${row} order-1 lg:order-2` : row}>
             <dt className="text-[#A1A1AA]">{t('timesheet.estimate.beforeTax')}</dt>
             <dd className="tabular-nums text-[#F4F4F5]">${formatMoney(beforeTax)}</dd>
           </div>
-          <div className={row}>
+          <div className={compactOnMobile ? `${row} order-4 max-lg:hidden lg:order-3` : row}>
             <dt className="text-[#A1A1AA]">{t('timesheet.estimate.tax')}</dt>
             <dd className="tabular-nums text-[#F4F4F5]">${formatMoney(tax)}</dd>
           </div>
-          <div className={lastRow}>
+          <div className={compactOnMobile ? `${lastRow} order-2 lg:order-4` : lastRow}>
             <dt className="text-[#A1A1AA]">{t('timesheet.estimate.afterTax')}</dt>
             <dd className="font-semibold text-[#C8E664]">${formatMoney(afterTax)}</dd>
           </div>

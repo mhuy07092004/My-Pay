@@ -4,6 +4,7 @@ import {
   computePeriod,
   shiftKey,
   type CoeffSet,
+  type HourKind,
   type JobTaxInfo,
   type PeriodResult,
   type PeriodShift,
@@ -96,6 +97,50 @@ export function estimateShifts(
     tax.coeffSets,
     { holidays },
   )
+}
+
+/** Payslip row order. Zero-minute kinds are omitted by the summary. */
+export const SUMMARY_KINDS: HourKind[] = [
+  'weekday',
+  'night1',
+  'night2',
+  'saturday',
+  'sunday',
+  'publicHoliday',
+  'otFirst2',
+  'otAfter2',
+  'otSunday',
+  'otPublicHoliday',
+]
+
+export type RateHours = {
+  rateId: string
+  minutes: number
+  byKind: Partial<Record<HourKind, number>>
+}
+
+/** Worked minutes per rate, split by hour kind, for the payslip check. */
+export function hoursByRate(shifts: Record<string, Shift>, estimate: PeriodResult): RateHours[] {
+  const grouped = new Map<string, RateHours>()
+  for (const iso of Object.keys(shifts).sort()) {
+    const shift = shifts[iso]
+    const parts: Array<[1 | 2, ShiftPart]> = [[1, shift]]
+    if (shift.second) parts.push([2, shift.second])
+    for (const [partNo, part] of parts) {
+      const calc = estimate.byShift[shiftKey(iso, partNo)]
+      if (!calc) continue
+      let row = grouped.get(part.rateId)
+      if (!row) {
+        row = { rateId: part.rateId, minutes: 0, byKind: {} }
+        grouped.set(part.rateId, row)
+      }
+      for (const line of calc.lines) {
+        row.byKind[line.kind] = (row.byKind[line.kind] ?? 0) + line.minutes
+        row.minutes += line.minutes
+      }
+    }
+  }
+  return [...grouped.values()]
 }
 
 export { shiftKey }

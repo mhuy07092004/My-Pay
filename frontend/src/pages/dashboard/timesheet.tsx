@@ -45,7 +45,9 @@ export function Timesheet() {
                     start={period.start}
                     end={period.end}
                     income={period.totals?.income ?? 0}
-                    tax={period.totals?.tax ?? 0}
+                    net={period.totals?.net ?? 0}
+                    minutes={period.totals?.minutes ?? 0}
+                    payCycle={period.payCycle ?? 'fortnightly'}
                     actual={period.actual}
                   />
                 ))}
