@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '../../components/button/button'
 import { useAuth } from '../context/AuthContext'
 
-type AuthMode = 'signin' | 'signup'
+type AuthMode = 'signin' | 'signup' | 'forgot'
 type AuthErrorKey =
   | 'auth.errors.invalidCredentials'
   | 'auth.errors.unexpected'
@@ -12,6 +12,8 @@ type AuthErrorKey =
   | 'auth.errors.weakPassword'
   | 'auth.errors.passwordMismatch'
   | 'auth.errors.invalidEmail'
+  | 'auth.errors.samePassword'
+  | 'auth.errors.rateLimited'
 
 const inputClassName =
   'mt-2 w-full rounded-lg border border-[#27272A] bg-[#18181B] px-3 py-2.5 text-[#F4F4F5] placeholder:text-[#71717A] focus:border-[#22C55E] focus:outline-none'
@@ -23,18 +25,23 @@ function isAuthErrorKey(value: string): value is AuthErrorKey {
     value === 'auth.errors.emailInUse' ||
     value === 'auth.errors.weakPassword' ||
     value === 'auth.errors.passwordMismatch' ||
-    value === 'auth.errors.invalidEmail'
+    value === 'auth.errors.invalidEmail' ||
+    value === 'auth.errors.samePassword' ||
+    value === 'auth.errors.rateLimited'
   )
 }
 
 export function Login() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { login, signUp } = useAuth()
+  const { login, signUp, requestPasswordReset } = useAuth()
   const { t } = useTranslation()
-  const [mode, setMode] = useState<AuthMode>(() =>
-    searchParams.get('mode') === 'signup' ? 'signup' : 'signin',
-  )
+  const [mode, setMode] = useState<AuthMode>(() => {
+    const m = searchParams.get('mode')
+    if (m === 'signup') return 'signup'
+    if (m === 'forgot') return 'forgot'
+    return 'signin'
+  })
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -51,6 +58,22 @@ export function Login() {
     try {
       await login(email, password)
       navigate('/dashboard')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'auth.errors.unexpected'
+      setError(isAuthErrorKey(message) ? message : 'auth.errors.unexpected')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleForgotPassword(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError('')
+    setNotice('')
+    setLoading(true)
+    try {
+      await requestPasswordReset(email)
+      setNotice(t('auth.resetLinkSent'))
     } catch (err) {
       const message = err instanceof Error ? err.message : 'auth.errors.unexpected'
       setError(isAuthErrorKey(message) ? message : 'auth.errors.unexpected')
@@ -110,10 +133,57 @@ export function Login() {
         </Link>
 
         <h1 className="mt-4 text-center text-2xl font-semibold tracking-tight">
-          {mode === 'signin' ? t('auth.signIn') : t('auth.signUp')}
+          {mode === 'signin'
+            ? t('auth.signIn')
+            : mode === 'signup'
+              ? t('auth.signUp')
+              : t('auth.forgotTitle')}
         </h1>
 
-        {mode === 'signin' ? (
+        {mode === 'forgot' ? (
+          <form className="mt-8 space-y-4" onSubmit={handleForgotPassword}>
+            <label className="block text-left text-sm text-[#A1A1AA]">
+              {t('auth.email')}
+              <input
+                type="email"
+                name="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder={t('auth.emailPlaceholder')}
+                required
+                className={inputClassName}
+              />
+            </label>
+            {notice ? <p className="text-sm text-[#22C55E]">{notice}</p> : null}
+            {error ? (
+              <p className="text-sm text-[#EF4444]" role="alert">
+                {isAuthErrorKey(error) ? t(error) : t('auth.errors.unexpected')}
+              </p>
+            ) : null}
+            <Button
+              variant="green"
+              size="lg"
+              className="w-full"
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? t('auth.sendingResetLink') : t('auth.sendResetLink')}
+            </Button>
+            <p className="text-center text-sm text-[#A1A1AA]">
+              <button
+                type="button"
+                onClick={() => {
+                  setError('')
+                  setNotice('')
+                  setMode('signin')
+                }}
+                className="font-medium text-[#22C55E] hover:text-[#16A34A]"
+              >
+                {t('auth.backToSignIn')}
+              </button>
+            </p>
+          </form>
+        ) : mode === 'signin' ? (
           <form className="mt-8 space-y-4" onSubmit={handleSignIn}>
             <label className="block text-left text-sm text-[#A1A1AA]">
               {t('auth.email')}
@@ -139,6 +209,19 @@ export function Login() {
                 className={inputClassName}
               />
             </label>
+            <p className="-mt-1 text-right">
+              <button
+                type="button"
+                onClick={() => {
+                  setError('')
+                  setNotice('')
+                  setMode('forgot')
+                }}
+                className="text-sm text-[#22C55E] hover:text-[#16A34A]"
+              >
+                {t('auth.forgotPassword')}
+              </button>
+            </p>
             {notice ? <p className="text-sm text-[#22C55E]">{notice}</p> : null}
             {error ? (
               <p className="text-sm text-[#EF4444]" role="alert">

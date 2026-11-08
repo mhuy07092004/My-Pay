@@ -20,7 +20,12 @@ export type AppSupabase = {
       options?: { data?: { first_name?: string; last_name?: string } }
     }): Promise<{ data: { session: Session | null }; error: AuthFailure | null }>
     signOut(): Promise<{ error: AuthFailure | null }>
+    resetPasswordForEmail(
+      email: string,
+      options?: { redirectTo?: string },
+    ): Promise<{ error: AuthFailure | null }>
     updateUser(attributes: {
+      password?: string
       data?: { first_name?: string; last_name?: string }
     }): Promise<{ error: AuthFailure | null }>
   }

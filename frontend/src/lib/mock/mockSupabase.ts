@@ -146,12 +146,23 @@ export const mockSupabase: AppSupabase = {
       emit(null)
       return { error: null }
     },
+    async resetPasswordForEmail() {
+      return { error: null }
+    },
     async updateUser(attributes) {
       const session = readSession()
       const email = session?.user?.email
       const users = loadUsers()
       const user = email ? users.find((item) => item.email === email) : undefined
       if (!user) return { error: { message: 'No session' } }
+      if (attributes.password !== undefined) {
+        if (attributes.password.length < 6) {
+          return {
+            error: { code: 'weak_password', message: 'Password should be at least 6 characters' },
+          }
+        }
+        user.password = attributes.password
+      }
       if (attributes.data?.first_name !== undefined) user.firstName = attributes.data.first_name
       if (attributes.data?.last_name !== undefined) user.lastName = attributes.data.last_name
       writeJson(USERS_KEY, users)

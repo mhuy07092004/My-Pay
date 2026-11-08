@@ -33,6 +33,8 @@ type AuthContextValue = {
   /** Resolves true when the project requires email confirmation first. */
   signUp: (input: SignUpInput) => Promise<{ needsConfirmation: boolean }>
   logout: () => Promise<void>
+  requestPasswordReset: (email: string) => Promise<void>
+  updatePassword: (password: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -59,6 +61,10 @@ function authError(error: { code?: string; message: string }): Error {
       return new Error('auth.errors.weakPassword')
     case 'email_address_invalid':
       return new Error('auth.errors.invalidEmail')
+    case 'same_password':
+      return new Error('auth.errors.samePassword')
+    case 'over_email_send_rate_limit':
+      return new Error('auth.errors.rateLimited')
     default:
       return new Error('auth.errors.unexpected')
   }
@@ -107,9 +113,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut()
   }, [])
 
+  const requestPasswordReset = useCallback(async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+    if (error) throw authError(error)
+  }, [])
+
+  const updatePassword = useCallback(async (password: string) => {
+    const { error } = await supabase.auth.updateUser({ password })
+    if (error) throw authError(error)
+  }, [])
+
   const value = useMemo<AuthContextValue>(
-    () => ({ user: toUser(session), loading, login, signUp, logout }),
-    [session, loading, login, signUp, logout],
+    () => ({
+      user: toUser(session),
+      loading,
+      login,
+      signUp,
+      logout,
+      requestPasswordReset,
+      updatePassword,
+    }),
+    [session, loading, login, signUp, logout, requestPasswordReset, updatePassword],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

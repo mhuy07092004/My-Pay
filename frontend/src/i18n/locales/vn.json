@@ -184,13 +184,26 @@
     "notAMember": "Chưa là thành viên?",
     "signUpNow": "Đăng ký ngay!",
     "alreadyMember": "Đã là thành viên?",
+    "forgotPassword": "Quên mật khẩu?",
+    "forgotTitle": "Đặt lại mật khẩu",
+    "sendResetLink": "Gửi liên kết đặt lại",
+    "sendingResetLink": "Đang gửi liên kết…",
+    "resetLinkSent": "Nếu email đã đăng ký, chúng tôi đã gửi liên kết đặt lại mật khẩu.",
+    "backToSignIn": "Quay lại đăng nhập",
+    "resetTitle": "Nhập mật khẩu mới",
+    "newPassword": "Mật khẩu mới",
+    "updatePassword": "Cập nhật mật khẩu",
+    "updatingPassword": "Đang cập nhật mật khẩu…",
+    "resetLinkInvalid": "Liên kết đặt lại không hợp lệ hoặc đã hết hạn.",
     "errors": {
       "invalidCredentials": "Email hoặc mật khẩu không đúng",
       "unexpected": "Không thể đăng nhập",
       "emailInUse": "Email này đã có tài khoản",
       "weakPassword": "Mật khẩu quá yếu (tối thiểu 6 ký tự)",
       "passwordMismatch": "Mật khẩu nhập lại không khớp",
-    "invalidEmail": "Email không hợp lệ. Hãy kiểm tra lại chính tả."
+      "invalidEmail": "Email không hợp lệ. Hãy kiểm tra lại chính tả.",
+      "samePassword": "Mật khẩu mới phải khác mật khẩu hiện tại",
+      "rateLimited": "Đã gửi quá nhiều email. Vui lòng thử lại sau."
     },
     "signingUp": "Đang tạo tài khoản…",
     "checkEmail": "Hãy kiểm tra email để xác nhận tài khoản, rồi đăng nhập."

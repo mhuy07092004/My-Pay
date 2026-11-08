@@ -6,6 +6,7 @@ import { About } from './pages/About'
 import { Feature } from './pages/Feature'
 import { Landing } from './pages/Landing'
 import { Login } from './pages/Login'
+import { ResetPassword } from './pages/ResetPassword'
 import { Pricing } from './pages/Pricing'
 import { Dashboard } from './pages/dashboard/dashboard'
 import { DashboardLayout } from './pages/dashboard/DashboardLayout'
@@ -60,6 +61,7 @@ function App() {
             </RedirectIfAuthenticated>
           }
         />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route
           path="/dashboard"
           element={

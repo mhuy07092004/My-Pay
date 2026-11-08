@@ -184,13 +184,26 @@
     "notAMember": "Not A Member with us ?",
     "signUpNow": "Sign Up now !",
     "alreadyMember": "Already a member ?",
+    "forgotPassword": "Forgot password?",
+    "forgotTitle": "Reset your password",
+    "sendResetLink": "Send reset link",
+    "sendingResetLink": "Sending reset link…",
+    "resetLinkSent": "If an account exists for that email, we've sent a password reset link.",
+    "backToSignIn": "Back to sign in",
+    "resetTitle": "Choose a new password",
+    "newPassword": "New password",
+    "updatePassword": "Update password",
+    "updatingPassword": "Updating password…",
+    "resetLinkInvalid": "This reset link is invalid or has expired.",
     "errors": {
       "invalidCredentials": "Invalid email or password",
       "unexpected": "Unable to sign in",
       "emailInUse": "An account with this email already exists",
       "weakPassword": "Password is too weak (use at least 6 characters)",
       "passwordMismatch": "Passwords do not match",
-    "invalidEmail": "This email address is not valid. Check the spelling."
+      "invalidEmail": "This email address is not valid. Check the spelling.",
+      "samePassword": "New password must be different from your current password",
+      "rateLimited": "Too many emails sent. Please try again later."
     },
     "signingUp": "Creating account…",
     "checkEmail": "Check your email to confirm your account, then sign in."
