@@ -1,6 +1,9 @@
+import { Skeleton } from '../skeleton/skeleton'
+
 type CardProps = {
   label: string
-  value: string | number
+  /** null means the number is not known yet. */
+  value: string | number | null
   prefix?: string
   suffix?: string
   hint?: string
@@ -21,7 +24,10 @@ export function Card({
   layout = 'stack',
 }: CardProps) {
   const responsive = layout === 'responsive'
-  const valueNode = (
+  const pending = value === null
+  const valueNode = pending ? (
+    <Skeleton className={responsive ? 'h-7 w-24 sm:mt-2 sm:h-9' : 'mt-2 h-9 w-28'} />
+  ) : (
     <p
       className={`font-semibold tracking-tight tabular-nums ${
         responsive ? 'shrink-0 text-xl sm:mt-2 sm:text-3xl' : 'mt-2 text-3xl'
@@ -38,7 +44,7 @@ export function Card({
       <div className={`rounded-xl border border-[#27272A] bg-[#18181B] p-5 ${className}`}>
         <p className="text-sm text-[#A1A1AA]">{label}</p>
         {valueNode}
-        {hint ? <p className="mt-1 text-pretty text-xs text-[#A1A1AA]">{hint}</p> : null}
+        {hint && !pending ? <p className="mt-1 text-pretty text-xs text-[#A1A1AA]">{hint}</p> : null}
       </div>
     )
   }
@@ -49,12 +55,12 @@ export function Card({
     >
       <div className="min-w-0">
         <p className="text-sm text-[#A1A1AA]">{label}</p>
-        {hint ? (
+        {hint && !pending ? (
           <p className="mt-0.5 text-pretty text-xs text-[#A1A1AA] sm:hidden">{hint}</p>
         ) : null}
       </div>
       {valueNode}
-      {hint ? (
+      {hint && !pending ? (
         <p className="mt-1 hidden text-pretty text-xs text-[#A1A1AA] sm:block">{hint}</p>
       ) : null}
     </div>

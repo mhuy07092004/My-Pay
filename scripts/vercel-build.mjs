@@ -37,6 +37,7 @@ writeFileSync(resolve(fn, '.vc-config.json'), JSON.stringify({
   handler: 'index.mjs',
   launcherType: 'Nodejs',
   shouldAddHelpers: false,
+  regions: ['syd1'],
 }, null, 2))
 
 writeFileSync(

@@ -6,6 +6,7 @@ type IncomeChartProps = {
   series: IncomeSeries
   locale: string
   labels: { estimated: string; net: string; empty: string }
+  loading?: boolean
 }
 
 const HEIGHT = 240
@@ -36,7 +37,7 @@ function linePath(values: (number | null)[], x: (i: number) => number, y: (v: nu
   return d.trim()
 }
 
-export function IncomeChart({ series, locale, labels }: IncomeChartProps) {
+export function IncomeChart({ series, locale, labels, loading = false }: IncomeChartProps) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(0)
   const { points, granularity } = series
@@ -81,6 +82,15 @@ export function IncomeChart({ series, locale, labels }: IncomeChartProps) {
   }
 
   const activePoint = active !== null ? points[active] : null
+
+  if (loading) {
+    return (
+      <div
+        className="h-[240px] animate-pulse rounded-lg bg-[#27272A]/70 motion-reduce:animate-none"
+        aria-hidden
+      />
+    )
+  }
 
   return (
     <div>

@@ -12,16 +12,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@my-pay/engine": "*",
     "@supabase/supabase-js": "^2.117.3",
     "@tailwindcss/vite": "^4.3.3",
+    "@tanstack/react-query": "^5.107.1",
     "framer-motion": "^13.4.0",
     "i18next": "^26.4.2",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-i18next": "^17.0.14",
     "react-router-dom": "^7.18.4",
-    "tailwindcss": "^4.3.3",
-    "@my-pay/engine": "*"
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

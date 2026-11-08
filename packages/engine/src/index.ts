@@ -2,6 +2,7 @@ import payg202627 from './data/payg-2026-27.json'
 import type { CoeffSet } from './tax'
 
 export * from './dates'
+export * from './dto'
 export * from './pay'
 export * from './period'
 export * from './report'

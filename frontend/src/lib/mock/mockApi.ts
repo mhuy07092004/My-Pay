@@ -485,6 +485,18 @@ function dispatch(
     return { rate }
   }
 
+  if (pathname === '/bootstrap' && method === 'GET') {
+    const periods = [...store.periods].sort((a, b) => b.startDate.localeCompare(a.startDate))
+    return {
+      profile: store.profile,
+      taxProfile: store.tax,
+      jobs: store.jobs,
+      holidays: HOLIDAYS,
+      coeffSets: [PAYG_2026_27],
+      periods: periods.map((period) => toPeriodDto(period, store)),
+    }
+  }
+
   if (pathname === '/periods' && method === 'GET') {
     const periods = [...store.periods].sort((a, b) => b.startDate.localeCompare(a.startDate))
     return { periods: periods.map((period) => toPeriodDto(period, store)) }

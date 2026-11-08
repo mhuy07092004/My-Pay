@@ -3,6 +3,7 @@ import express, { type NextFunction, type Request, type Response } from 'express
 import type { AppDeps } from './deps'
 import { errorHandler } from './errors'
 import { accountRouter } from './routes/account'
+import { bootstrapRouter } from './routes/bootstrap'
 import { jobsRouter } from './routes/jobs'
 import { periodsRouter } from './routes/periods'
 import { reportRouter } from './routes/report'
@@ -33,7 +34,7 @@ export function createApp(deps: AppDeps) {
     req.db = deps.createDb(token)
     next()
   })
-  api.use(accountRouter(), jobsRouter(), periodsRouter(), reportRouter())
+  api.use(accountRouter(), bootstrapRouter(), jobsRouter(), periodsRouter(), reportRouter())
 
   app.use('/api', api)
   app.use((_req, res) => {

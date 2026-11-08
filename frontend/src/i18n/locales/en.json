@@ -1,6 +1,9 @@
 {
   "common": {
     "appName": "My Pay",
+    "loading": "Loading",
+    "retry": "Try again",
+    "loadError": "Couldn't load your data.",
     "language": {
       "switchTo": "Switch to {{language}}",
       "en": "English",

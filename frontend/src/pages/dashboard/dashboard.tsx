@@ -1,33 +1,30 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../../../components/button/button'
 import { Card } from '../../../components/card/card'
 import { PageHeader } from '../../../components/layout/page_header'
-import { PeriodCard } from '../../../components/timesheet/period_card'
+import { LoadError } from '../../../components/skeleton/load_error'
+import { LoadingRegion } from '../../../components/skeleton/skeleton'
+import { PeriodCard, PeriodCardSkeleton } from '../../../components/timesheet/period_card'
 import { useAuth } from '../../context/AuthContext'
+import { usePayData } from '../../context/PayDataContext'
 import { useTimesheet } from '../../context/TimesheetContext'
-import { useTranslation } from 'react-i18next'
-import { getReport } from '../../lib/api'
+import { toReportContext } from '../../lib/pay'
+import { reportFromPeriods } from '../../lib/report'
 import { formatMoney, startOfDay, toIsoDate } from '../../lib/timesheet'
 
 export function Dashboard() {
   const { user } = useAuth()
-  const { periods, loading } = useTimesheet()
+  const { periods, loading, error, retry } = useTimesheet()
+  const { taxContext, holidays } = usePayData()
   const { t } = useTranslation()
-  const [total, setTotal] = useState(0)
+  const today = useMemo(() => toIsoDate(startOfDay(new Date())), [])
 
-  // Gross earned from every shift up to today; reloads when periods change.
-  useEffect(() => {
-    let cancelled = false
-    getReport('year', toIsoDate(startOfDay(new Date())))
-      .then((res) => {
-        if (!cancelled) setTotal(res.grossToDateCents / 100)
-      })
-      .catch((err) => console.error('Failed to load dashboard total', err))
-    return () => {
-      cancelled = true
-    }
-  }, [periods])
+  const total = useMemo(() => {
+    if (loading || error) return null
+    return reportFromPeriods(periods, 'year', today, toReportContext(taxContext, holidays)).grossToDate
+  }, [loading, error, periods, today, taxContext, holidays])
 
   const recent = useMemo(
     () => [...periods].sort((a, b) => b.start.localeCompare(a.start)).slice(0, 3),
@@ -44,8 +41,8 @@ export function Dashboard() {
         <div className="space-y-4">
           <Card
             label={t('dashboard.totalEarning')}
-            value={formatMoney(total)}
-            prefix="$"
+            value={total === null ? (error ? '—' : null) : formatMoney(total)}
+            prefix={total === null ? undefined : '$'}
             valueClassName="text-[#C8E664]"
             className="[&>p:nth-of-type(2)]:text-4xl"
           />
@@ -70,7 +67,17 @@ export function Dashboard() {
               {t('dashboard.viewAll')} →
             </Link>
           </div>
-          {loading ? null : recent.length === 0 ? (
+          {loading ? (
+            <LoadingRegion label={t('common.loading')}>
+              <div className="space-y-3">
+                <PeriodCardSkeleton />
+                <PeriodCardSkeleton />
+                <PeriodCardSkeleton />
+              </div>
+            </LoadingRegion>
+          ) : error ? (
+            <LoadError onRetry={retry} />
+          ) : recent.length === 0 ? (
             <p className="text-[#A1A1AA]">{t('timesheet.periods.empty')}</p>
           ) : (
             <div className="space-y-3">

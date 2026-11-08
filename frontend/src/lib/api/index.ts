@@ -1,14 +1,14 @@
 import type {
   CoeffSet,
-  IncomeSeriesDto,
   MedicareVariation,
+  PeriodTotalsDto,
   PublicHoliday,
   RateSnapshot,
+  RawPeriodDto,
   Residency,
-  ReportStatsDto,
 } from '@my-pay/engine'
-import { jobBodyFromRate, savedRateFromJob, toDollars, type JobDto, type SavedRate } from '../rates'
-import type { PayCycle, Period, Shift, ShiftPart } from '../timesheet'
+import { jobBodyFromRate, savedRateFromJob, type JobDto, type SavedRate } from '../rates'
+import type { PayCycle, Shift } from '../timesheet'
 import { api } from './client'
 
 export { ApiError } from './client'
@@ -31,6 +31,22 @@ export async function updateProfile(
 
 export async function getHolidays(): Promise<PublicHoliday[]> {
   return (await api<{ holidays: PublicHoliday[] }>('/holidays')).holidays
+}
+
+export type BootstrapResponse = {
+  profile: Profile
+  taxProfile: TaxProfileDto
+  jobs: JobDto[]
+  holidays: PublicHoliday[]
+  coeffSets: CoeffSet[]
+  periods: PeriodPayload[]
+}
+
+/** Stored period plus the server totals from a write, when the server sent them. */
+export type PeriodPayload = RawPeriodDto & { totals?: PeriodTotalsDto }
+
+export async function getBootstrap(): Promise<BootstrapResponse> {
+  return api<BootstrapResponse>('/bootstrap')
 }
 
 export type TaxProfileDto = {
@@ -105,66 +121,6 @@ export async function getAwardRate(
 }
 
 /* ------------------------------------------------------------------ periods */
-type ShiftDto = {
-  date: string
-  part: 1 | 2
-  jobId: string
-  checkIn: string
-  checkOut: string
-  breakMinutes: number
-  publicHoliday: boolean
-  overtimeMinutes: number
-  rate: RateSnapshot
-}
-
-type PeriodDto = {
-  id: string
-  startDate: string
-  endDate: string
-  payCycle: PayCycle
-  actualCents: number | null
-  shifts: ShiftDto[]
-  totals: { grossCents: number; taxCents: number; netCents: number; minutes: number }
-}
-
-function partFromDto(s: ShiftDto): ShiftPart {
-  return {
-    checkIn: s.checkIn,
-    checkOut: s.checkOut,
-    breakMinutes: s.breakMinutes,
-    rateId: s.jobId,
-    publicHoliday: s.publicHoliday,
-    overtimeMinutes: s.overtimeMinutes,
-    rateSnapshot: s.rate,
-  }
-}
-
-function periodFromDto(dto: PeriodDto): Period {
-  const shifts: Record<string, Shift> = {}
-  for (const s of dto.shifts.filter((x) => x.part === 1)) shifts[s.date] = partFromDto(s)
-  for (const s of dto.shifts.filter((x) => x.part === 2)) {
-    if (shifts[s.date]) shifts[s.date] = { ...shifts[s.date], second: partFromDto(s) }
-  }
-  return {
-    id: dto.id,
-    start: dto.startDate,
-    end: dto.endDate,
-    payCycle: dto.payCycle,
-    shifts,
-    actual: dto.actualCents === null ? undefined : toDollars(dto.actualCents),
-    totals: {
-      income: toDollars(dto.totals.grossCents),
-      tax: toDollars(dto.totals.taxCents),
-      net: toDollars(dto.totals.netCents),
-      minutes: dto.totals.minutes,
-    },
-  }
-}
-
-export async function listPeriods(): Promise<Period[]> {
-  return (await api<{ periods: PeriodDto[] }>('/periods')).periods.map(periodFromDto)
-}
-
 function shiftPayload(shift: Shift) {
   const parts = shift.second ? [shift, shift.second] : [shift]
   return parts.map((p) => ({
@@ -181,8 +137,8 @@ export async function createPeriod(
   startDate: string,
   endDate: string,
   shifts: Record<string, Shift>,
-): Promise<Period> {
-  const { period } = await api<{ period: PeriodDto }>('/periods', {
+): Promise<PeriodPayload> {
+  const { period } = await api<{ period: PeriodPayload }>('/periods', {
     method: 'POST',
     body: {
       startDate,
@@ -190,36 +146,25 @@ export async function createPeriod(
       days: Object.entries(shifts).map(([date, shift]) => ({ date, shifts: shiftPayload(shift) })),
     },
   })
-  return periodFromDto(period)
+  return period
 }
 
 export async function deletePeriod(id: string): Promise<void> {
   await api(`/periods/${id}`, { method: 'DELETE' })
 }
 
-export async function saveDay(periodId: string, isoDate: string, shift: Shift | null): Promise<Period> {
-  const { period } = await api<{ period: PeriodDto }>(`/periods/${periodId}/days/${isoDate}`, {
+export async function saveDay(periodId: string, isoDate: string, shift: Shift | null): Promise<PeriodPayload> {
+  const { period } = await api<{ period: PeriodPayload }>(`/periods/${periodId}/days/${isoDate}`, {
     method: 'PUT',
     body: { shifts: shift ? shiftPayload(shift) : [] },
   })
-  return periodFromDto(period)
+  return period
 }
 
-export async function saveActual(periodId: string, dollars: number | undefined): Promise<Period> {
-  const { period } = await api<{ period: PeriodDto }>(`/periods/${periodId}`, {
+export async function saveActual(periodId: string, dollars: number | undefined): Promise<PeriodPayload> {
+  const { period } = await api<{ period: PeriodPayload }>(`/periods/${periodId}`, {
     method: 'PATCH',
     body: { actualCents: dollars === undefined ? null : Math.round(dollars * 100) },
   })
-  return periodFromDto(period)
-}
-
-/* ------------------------------------------------------------------- report */
-export type ReportResponse = {
-  series: IncomeSeriesDto
-  stats: ReportStatsDto
-  grossToDateCents: number
-}
-
-export async function getReport(range: string, today: string): Promise<ReportResponse> {
-  return api<ReportResponse>(`/report?range=${range}&today=${today}`)
+  return period
 }

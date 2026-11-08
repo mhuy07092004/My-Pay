@@ -1,48 +1,68 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../src/context/AuthContext'
 import { usePayData } from '../../src/context/PayDataContext'
-import { AU_STATES, getProfile, updateProfile, type AuState } from '../../src/lib/api'
+import { AU_STATES, type AuState, type Profile } from '../../src/lib/api'
 import { supabase } from '../../src/lib/supabaseClient'
 import { Button } from '../button/button'
 import { TextInput } from '../input/text_input'
 import { Select } from '../select/select'
+import { LoadingRegion, Skeleton } from '../skeleton/skeleton'
 
 export function PersonalInfoCard() {
   const { t } = useTranslation()
+  const { profile, loading, error, saveProfile } = usePayData()
+
+  if (error) return null
+  if (loading || !profile) {
+    return (
+      <section className="rounded-xl border border-[#27272A] bg-[#18181B] p-4 sm:p-6">
+        <h2 className="text-lg font-semibold tracking-tight">{t('settings.personal.title')}</h2>
+        <LoadingRegion label={t('common.loading')}>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </LoadingRegion>
+      </section>
+    )
+  }
+
+  return <PersonalForm profile={profile} saveProfile={saveProfile} />
+}
+
+function PersonalForm({
+  profile,
+  saveProfile,
+}: {
+  profile: Profile
+  saveProfile: (body: Pick<Profile, 'firstName' | 'lastName' | 'state'>) => Promise<Profile>
+}) {
+  const { t } = useTranslation()
   const { user } = useAuth()
-  const { reloadHolidays } = usePayData()
-  const [firstName, setFirstName] = useState(user?.firstName ?? '')
-  const [lastName, setLastName] = useState(user?.lastName ?? '')
-  const [region, setRegion] = useState<AuState>('NSW')
+  const [firstName, setFirstName] = useState(profile.firstName || user?.firstName || '')
+  const [lastName, setLastName] = useState(profile.lastName || user?.lastName || '')
+  const [region, setRegion] = useState<AuState>(profile.state)
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const busy = useRef(false)
-
-  useEffect(() => {
-    let cancelled = false
-    getProfile()
-      .then((profile) => {
-        if (cancelled) return
-        setFirstName(profile.firstName || user?.firstName || '')
-        setLastName(profile.lastName || user?.lastName || '')
-        setRegion(profile.state)
-      })
-      .catch(() => undefined)
-    return () => {
-      cancelled = true
-    }
-  }, [user?.email, user?.firstName, user?.lastName])
 
   async function handleSave() {
     if (busy.current) return
     busy.current = true
     setStatus('saving')
     try {
-      await updateProfile({ firstName: firstName.trim(), lastName: lastName.trim(), state: region })
+      const next = {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        state: region,
+      }
+      await saveProfile(next)
       await supabase.auth.updateUser({
-        data: { first_name: firstName.trim(), last_name: lastName.trim() },
+        data: { first_name: next.firstName, last_name: next.lastName },
       })
-      await reloadHolidays()
       setStatus('saved')
     } catch {
       setStatus('error')
@@ -67,7 +87,7 @@ export function PersonalInfoCard() {
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
         />
-        <TextInput label={t('auth.email')} value={user?.email ?? ''} readOnly />
+        <TextInput label={t('auth.email')} value={user?.email ?? profile.email} readOnly />
         <TextInput
           label={t('settings.personal.password')}
           type="password"

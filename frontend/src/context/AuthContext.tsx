@@ -1,10 +1,12 @@
 import type { Session } from '@supabase/supabase-js'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react'
@@ -63,8 +65,16 @@ function authError(error: { code?: string; message: string }): Error {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient()
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const seenUser = useRef<string | null | undefined>(undefined)
+
+  useEffect(() => {
+    const id = session?.user?.id ?? null
+    if (seenUser.current !== undefined && seenUser.current !== id) queryClient.clear()
+    seenUser.current = id
+  }, [session, queryClient])
 
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => {

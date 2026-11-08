@@ -1,7 +1,8 @@
 import request from 'supertest'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { createApp } from './app'
 import type { AppDeps, Db } from './deps'
+import { clearRulesCache } from './services/periods'
 
 type Rows = Record<string, unknown[]>
 
@@ -60,6 +61,10 @@ function makeApp(tables: Rows = {}) {
 
 const auth = { Authorization: 'Bearer good' }
 
+beforeEach(() => {
+  clearRulesCache()
+})
+
 describe('auth', () => {
   it('rejects requests without a token', async () => {
     const { app } = makeApp()
@@ -105,6 +110,69 @@ describe('validation', () => {
       .send({ startDate: '2026-11-02', endDate: '2026-11-08' })
     expect(res.status).toBe(400)
     expect(res.body.error).toBe('invalid_period_length')
+  })
+})
+
+describe('bootstrap', () => {
+  it('rejects a request without a token', async () => {
+    const { app } = makeApp()
+    const res = await request(app).get('/api/bootstrap')
+    expect(res.status).toBe(401)
+    expect(res.body).toEqual({ error: 'unauthorized' })
+  })
+
+  it('returns one payload and refuses caches', async () => {
+    const { app } = makeApp({
+      profiles: [{ id: 'user-1', first_name: 'Ada', last_name: 'Lovelace', state: 'VIC' }],
+      tax_profiles: [{ pay_cycle: 'weekly', residency: 'resident' }],
+      jobs: [
+        {
+          id: 'j1',
+          name: 'Cafe',
+          kind: 'custom',
+          status: '',
+          level: '',
+          age: '',
+          overtime_enabled: false,
+          claims_tax_free_threshold: false,
+        },
+      ],
+      pay_periods: [
+        {
+          id: 'p1',
+          start_date: '2026-11-02',
+          end_date: '2026-11-08',
+          pay_cycle: 'weekly',
+          actual_net_cents: null,
+        },
+      ],
+      shifts: [],
+      public_holidays: [{ holiday_date: '2026-11-03', name: 'Cup Day', starts_at: null }],
+    })
+    const res = await request(app).get('/api/bootstrap').set(auth)
+    expect(res.status).toBe(200)
+    expect(res.headers['cache-control']).toBe('private, no-store')
+    expect(res.body.profile).toEqual({
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+      email: 'a@b.com',
+      state: 'VIC',
+    })
+    expect(res.body.taxProfile.payCycle).toBe('weekly')
+    expect(res.body.jobs[0]).toMatchObject({ id: 'j1', name: 'Cafe' })
+    expect(res.body.holidays).toEqual([{ date: '2026-11-03', name: 'Cup Day', fromMinute: null }])
+    expect(res.body.periods).toEqual([
+      {
+        id: 'p1',
+        startDate: '2026-11-02',
+        endDate: '2026-11-08',
+        payCycle: 'weekly',
+        actualCents: null,
+        shifts: [],
+      },
+    ])
+    expect(res.body.periods[0].totals).toBeUndefined()
+    expect(Array.isArray(res.body.coeffSets)).toBe(true)
   })
 })
 

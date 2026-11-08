@@ -2,14 +2,16 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../../../components/button/button'
 import { PageHeader } from '../../../components/layout/page_header'
-import { PeriodCard } from '../../../components/timesheet/period_card'
+import { LoadError } from '../../../components/skeleton/load_error'
+import { LoadingRegion } from '../../../components/skeleton/skeleton'
+import { PeriodCard, PeriodCardSkeleton } from '../../../components/timesheet/period_card'
 import { HTML_LANG, isAppLanguage } from '../../i18n/config'
 import { useTimesheet } from '../../context/TimesheetContext'
 import { groupPeriodsByMonth } from '../../lib/timesheet'
 
 export function Timesheet() {
   const { t, i18n } = useTranslation()
-  const { periods, loading } = useTimesheet()
+  const { periods, loading, error, retry } = useTimesheet()
   const locale = isAppLanguage(i18n.language) ? HTML_LANG[i18n.language] : 'en'
   const monthTitle = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' })
   const groups = useMemo(() => groupPeriodsByMonth(periods), [periods])
@@ -28,7 +30,18 @@ export function Timesheet() {
         }
       />
 
-      {loading ? null : groups.length === 0 ? (
+      {loading ? (
+        <LoadingRegion label={t('common.loading')}>
+          <div className="grid gap-3 lg:grid-cols-2">
+            <PeriodCardSkeleton />
+            <PeriodCardSkeleton />
+            <PeriodCardSkeleton />
+            <PeriodCardSkeleton />
+          </div>
+        </LoadingRegion>
+      ) : error ? (
+        <LoadError onRetry={retry} />
+      ) : groups.length === 0 ? (
         <p className="text-[#A1A1AA]">{t('timesheet.periods.empty')}</p>
       ) : (
         <div className="space-y-6">

@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '../../../components/button/button'
 import { MoneyField } from '../../../components/input/money_field'
 import { PageHeader } from '../../../components/layout/page_header'
+import { LoadError } from '../../../components/skeleton/load_error'
+import { LoadingRegion, Skeleton } from '../../../components/skeleton/skeleton'
 import { PeriodEditor } from '../../../components/timesheet/period_editor'
 import { useTimesheet } from '../../context/TimesheetContext'
 import { HTML_LANG, isAppLanguage } from '../../i18n/config'
@@ -13,7 +15,7 @@ export function PeriodDetail() {
   const { periodId } = useParams()
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
-  const { periods, loading, saveShift, setActual, removePeriod } = useTimesheet()
+  const { periods, loading, error, retry, saveShift, setActual, removePeriod } = useTimesheet()
   const period = periods.find((p) => p.id === periodId)
   const [actualDraft, setActualDraft] = useState<number | null>(null)
   const [saveFailed, setSaveFailed] = useState(false)
@@ -21,7 +23,15 @@ export function PeriodDetail() {
   const [deleteFailed, setDeleteFailed] = useState(false)
   const busy = useRef(false)
 
-  if (loading) return null
+  if (loading) {
+    return (
+      <LoadingRegion label={t('common.loading')}>
+        <Skeleton className="mb-6 h-8 w-48" />
+        <Skeleton className="h-64 w-full" />
+      </LoadingRegion>
+    )
+  }
+  if (error) return <LoadError onRetry={retry} />
   if (!period) return <Navigate to="/dashboard/timesheet" replace />
   const actualValue = actualDraft ?? period.actual ?? 0
 

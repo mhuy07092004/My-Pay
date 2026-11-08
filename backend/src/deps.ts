@@ -27,6 +27,8 @@ export function supabaseDeps(env: Env): AppDeps {
   return {
     corsOrigin: env.CORS_ORIGIN,
     async verifyToken(token) {
+      // Local check once asymmetric JWT signing keys are on in the Supabase dashboard.
+      // Until then, getClaims still asks the Auth server on a cold key cache.
       const { data, error } = await base.auth.getClaims(token)
       if (error || !data?.claims?.sub) return null
       const email = data.claims.email

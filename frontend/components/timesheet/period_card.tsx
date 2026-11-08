@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { HTML_LANG, isAppLanguage } from '../../src/i18n/config'
 import { formatMoney, periodRange, type PayCycle } from '../../src/lib/timesheet'
+import { Skeleton } from '../skeleton/skeleton'
 import { HoursBadge } from './hours_badge'
 
 type PeriodCardProps = {
@@ -13,6 +14,21 @@ type PeriodCardProps = {
   minutes: number
   payCycle: PayCycle
   actual?: number
+}
+
+export function PeriodCardSkeleton() {
+  return (
+    <div className="rounded-xl border border-[#27272A] bg-[#18181B] px-4 py-4 sm:px-5">
+      <div className="flex items-start justify-between gap-3">
+        <Skeleton className="h-5 w-40" />
+        <Skeleton className="h-6 w-16 rounded-full" />
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-4">
+        <Skeleton className="h-9 w-16" />
+        <Skeleton className="h-9 w-16" />
+      </div>
+    </div>
+  )
 }
 
 export function PeriodCard({

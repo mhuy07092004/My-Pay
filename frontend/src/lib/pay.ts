@@ -2,6 +2,7 @@ import {
   EMPTY_RATE,
   calcShift,
   computePeriod,
+  periodInputFromDto,
   shiftKey,
   type CoeffSet,
   type HourKind,
@@ -10,10 +11,15 @@ import {
   type PeriodShift,
   type PublicHoliday,
   type RateSnapshot,
+  type ReportContext,
+  type ReportPeriod,
+  type ShiftDto,
   type ShiftResult,
   type TaxProfile,
 } from '@my-pay/engine'
-import { toIsoDate, type PayCycle, type Shift, type ShiftPart } from './timesheet'
+import type { PeriodPayload } from './api'
+import { toCents, toDollars } from './rates'
+import { toIsoDate, type PayCycle, type Period, type Shift, type ShiftPart } from './timesheet'
 
 export type RateLookup = (rateId: string) => RateSnapshot | undefined
 
@@ -69,6 +75,15 @@ export type TaxContext = {
   jobTax: JobTaxInfo[]
   profile: TaxProfile
   coeffSets: CoeffSet[]
+}
+
+export function toReportContext(tax: TaxContext, holidays: PublicHoliday[] = []): ReportContext {
+  return {
+    jobs: tax.jobTax,
+    profile: tax.profile,
+    coeffSets: tax.coeffSets,
+    holidays,
+  }
 }
 
 /** Live estimate for the shifts in an editor (saved shifts use their snapshot). */
@@ -141,6 +156,82 @@ export function hoursByRate(shifts: Record<string, Shift>, estimate: PeriodResul
     }
   }
   return [...grouped.values()]
+}
+
+function partFromDto(shift: ShiftDto): ShiftPart {
+  return {
+    checkIn: shift.checkIn,
+    checkOut: shift.checkOut,
+    breakMinutes: shift.breakMinutes,
+    rateId: shift.jobId,
+    publicHoliday: shift.publicHoliday,
+    overtimeMinutes: shift.overtimeMinutes,
+    rateSnapshot: shift.rate,
+  }
+}
+
+/**
+ * Prices a stored period in the browser. When a write included server totals
+ * and they differ, the server figures are kept and the mismatch is logged.
+ */
+export function periodFromPayload(dto: PeriodPayload, ctx: ReportContext): Period {
+  const result = computePeriod(periodInputFromDto(dto), ctx.jobs, ctx.profile, ctx.coeffSets, {
+    holidays: ctx.holidays,
+  })
+  const server = dto.totals
+  const diverged =
+    server !== undefined &&
+    (server.grossCents !== result.grossCents ||
+      server.taxCents !== result.taxCents ||
+      server.netCents !== result.netCents ||
+      server.minutes !== result.minutes)
+  if (diverged && server) {
+    console.warn('Client pay totals differ from the server', dto.id, {
+      client: {
+        grossCents: result.grossCents,
+        taxCents: result.taxCents,
+        netCents: result.netCents,
+        minutes: result.minutes,
+      },
+      server,
+    })
+  }
+  const totals = diverged && server ? server : result
+  const shifts: Record<string, Shift> = {}
+  for (const shift of dto.shifts.filter((item) => item.part === 1)) shifts[shift.date] = partFromDto(shift)
+  for (const shift of dto.shifts.filter((item) => item.part === 2)) {
+    if (shifts[shift.date]) shifts[shift.date] = { ...shifts[shift.date], second: partFromDto(shift) }
+  }
+  return {
+    id: dto.id,
+    start: dto.startDate,
+    end: dto.endDate,
+    payCycle: dto.payCycle,
+    shifts,
+    actual: dto.actualCents === null ? undefined : toDollars(dto.actualCents),
+    totals: {
+      income: toDollars(totals.grossCents),
+      tax: toDollars(totals.taxCents),
+      net: toDollars(totals.netCents),
+      minutes: totals.minutes,
+    },
+  }
+}
+
+export function toReportPeriod(period: Period): ReportPeriod {
+  const shifts: PeriodShift[] = []
+  for (const [iso, shift] of Object.entries(period.shifts)) {
+    shifts.push(toEngineShift(iso, 1, shift, () => undefined, true))
+    if (shift.second) shifts.push(toEngineShift(iso, 2, shift.second, () => undefined, true))
+  }
+  return {
+    id: period.id,
+    startDate: period.start,
+    endDate: period.end,
+    payCycle: period.payCycle ?? 'fortnightly',
+    actualCents: period.actual === undefined ? null : toCents(period.actual),
+    shifts,
+  }
 }
 
 export { shiftKey }

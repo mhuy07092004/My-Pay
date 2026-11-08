@@ -1,6 +1,9 @@
 {
   "common": {
     "appName": "My Pay",
+    "loading": "Đang tải",
+    "retry": "Thử lại",
+    "loadError": "Không tải được dữ liệu.",
     "language": {
       "switchTo": "Chuyển sang {{language}}",
       "en": "Tiếng Anh",

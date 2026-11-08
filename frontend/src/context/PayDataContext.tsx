@@ -1,33 +1,40 @@
 import type { CoeffSet, JobTaxInfo, PublicHoliday, RateSnapshot, TaxProfile } from '@my-pay/engine'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
-  useState,
   type ReactNode,
 } from 'react'
 import {
-  DEFAULT_TAX_PROFILE_DTO,
   createJob,
   deleteJob,
   getHolidays,
-  getRules,
-  getTaxProfile,
-  listJobs,
   saveTaxProfile as saveTaxProfileApi,
   updateJob,
+  updateProfile,
+  type Profile,
   type TaxProfileDto,
 } from '../lib/api'
 import type { TaxContext, RateLookup } from '../lib/pay'
+import { bootstrapKey, useBootstrap, usePatchBootstrap } from '../lib/queries'
 import { snapshotFromRate, type SavedRate } from '../lib/rates'
 import { useAuth } from './AuthContext'
 
+const EMPTY_PROFILE: TaxProfileDto = {
+  residency: 'resident',
+  studyLoan: false,
+  annualOffsetCents: 0,
+  medicareVariation: 'none',
+  payCycle: 'fortnightly',
+}
+
 type PayDataValue = {
   loading: boolean
-  /** Bumps whenever rates or the tax profile change, so dependent data can reload. */
-  version: number
+  error: boolean
+  retry: () => void
+  profile: Profile | null
   rates: SavedRate[]
   taxProfile: TaxProfileDto
   coeffSets: CoeffSet[]
@@ -38,109 +45,110 @@ type PayDataValue = {
   updateRate: (rate: SavedRate) => Promise<void>
   removeRate: (id: string) => Promise<void>
   saveTaxProfile: (profile: TaxProfileDto) => Promise<void>
+  saveProfile: (body: Pick<Profile, 'firstName' | 'lastName' | 'state'>) => Promise<Profile>
   reloadHolidays: () => Promise<void>
 }
 
 const PayDataContext = createContext<PayDataValue | null>(null)
 
+function withClaim(jobs: SavedRate[], job: SavedRate): SavedRate[] {
+  const next = jobs.some((item) => item.id === job.id)
+    ? jobs.map((item) => (item.id === job.id ? job : item))
+    : [...jobs, job]
+  if (!job.claimsTaxFreeThreshold) return next
+  return next.map((item) =>
+    item.id === job.id ? item : { ...item, claimsTaxFreeThreshold: false },
+  )
+}
+
 export function PayDataProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
-  const userEmail = user?.email ?? null
-  const [loading, setLoading] = useState(true)
-  const [version, setVersion] = useState(0)
-  const [rates, setRates] = useState<SavedRate[]>([])
-  const [taxProfile, setTaxProfile] = useState<TaxProfileDto>(DEFAULT_TAX_PROFILE_DTO)
-  const [coeffSets, setCoeffSets] = useState<CoeffSet[]>([])
-  const [holidays, setHolidays] = useState<PublicHoliday[]>([])
+  const query = useBootstrap()
+  const patch = usePatchBootstrap()
+  const queryClient = useQueryClient()
+  const email = user?.email ?? null
+  const data = query.data
 
-  useEffect(() => {
-    if (!userEmail) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setRates([])
-      setTaxProfile(DEFAULT_TAX_PROFILE_DTO)
-      setCoeffSets([])
-      setHolidays([])
-      setLoading(false)
-      return
-    }
-    let cancelled = false
-    setLoading(true)
-    Promise.all([listJobs(true), getTaxProfile(), getRules(), getHolidays()])
-      .then(([jobs, tp, rules, days]) => {
-        if (cancelled) return
-        setRates(jobs)
-        setTaxProfile(tp)
-        setCoeffSets(rules)
-        setHolidays(days)
-      })
-      .catch((err) => console.error('Failed to load pay data', err))
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [userEmail])
-
-  const reloadJobs = useCallback(async () => {
-    setRates(await listJobs(true))
-    setVersion((v) => v + 1)
-  }, [])
+  const retry = useCallback(() => {
+    void query.refetch()
+  }, [query])
 
   const addRate = useCallback(
     async (rate: Omit<SavedRate, 'id'>) => {
-      await createJob(rate)
-      await reloadJobs()
+      const job = await createJob(rate)
+      patch((prev) => ({ ...prev, jobs: withClaim(prev.jobs, job) }))
     },
-    [reloadJobs],
+    [patch],
   )
 
   const updateRate = useCallback(
     async (rate: SavedRate) => {
-      await updateJob(rate)
-      await reloadJobs()
+      const job = await updateJob(rate)
+      patch((prev) => ({ ...prev, jobs: withClaim(prev.jobs, job) }))
     },
-    [reloadJobs],
+    [patch],
   )
 
   const removeRate = useCallback(
     async (id: string) => {
       await deleteJob(id)
-      await reloadJobs()
+      if (email) await queryClient.invalidateQueries({ queryKey: bootstrapKey(email) })
     },
-    [reloadJobs],
+    [email, queryClient],
   )
 
   const reloadHolidays = useCallback(async () => {
-    setHolidays(await getHolidays())
-    setVersion((v) => v + 1)
-  }, [])
+    const holidays = await getHolidays()
+    patch((prev) => ({ ...prev, holidays }))
+  }, [patch])
 
   const saveTaxProfile = useCallback(
     async (profile: TaxProfileDto) => {
-      setTaxProfile(await saveTaxProfileApi(profile))
-      await reloadJobs()
+      const taxProfile = await saveTaxProfileApi(profile)
+      patch((prev) => ({
+        ...prev,
+        taxProfile,
+        jobs:
+          taxProfile.residency === 'foreign'
+            ? prev.jobs.map((job) => ({ ...job, claimsTaxFreeThreshold: false }))
+            : prev.jobs,
+      }))
     },
-    [reloadJobs],
+    [patch],
+  )
+
+  const saveProfile = useCallback(
+    async (body: Pick<Profile, 'firstName' | 'lastName' | 'state'>) => {
+      const profile = await updateProfile(body)
+      const stateChanged = data?.profile.state !== profile.state
+      patch((prev) => ({ ...prev, profile }))
+      if (stateChanged) await reloadHolidays()
+      return profile
+    },
+    [data?.profile.state, patch, reloadHolidays],
   )
 
   const value = useMemo<PayDataValue>(() => {
-    const snapshots = new Map<string, RateSnapshot>(
-      rates.map((r) => [r.id, snapshotFromRate(r)]),
-    )
+    const rates = data?.jobs ?? []
+    const taxProfile = data?.taxProfile ?? EMPTY_PROFILE
+    const coeffSets = data?.coeffSets ?? []
+    const holidays = data?.holidays ?? []
+    const snapshots = new Map<string, RateSnapshot>(rates.map((rate) => [rate.id, snapshotFromRate(rate)]))
     const profile: TaxProfile = {
       residency: taxProfile.residency,
       studyLoan: taxProfile.studyLoan,
       annualOffsetCents: taxProfile.annualOffsetCents,
       medicareVariation: taxProfile.medicareVariation,
     }
-    const jobTax: JobTaxInfo[] = rates.map((r) => ({
-      id: r.id,
-      claimsTaxFreeThreshold: r.claimsTaxFreeThreshold,
+    const jobTax: JobTaxInfo[] = rates.map((rate) => ({
+      id: rate.id,
+      claimsTaxFreeThreshold: rate.claimsTaxFreeThreshold,
     }))
     return {
-      loading,
-      version,
+      loading: query.isLoading,
+      error: query.isError,
+      retry,
+      profile: data?.profile ?? null,
       rates,
       taxProfile,
       coeffSets,
@@ -151,9 +159,21 @@ export function PayDataProvider({ children }: { children: ReactNode }) {
       updateRate,
       removeRate,
       saveTaxProfile,
+      saveProfile,
       reloadHolidays,
     }
-  }, [loading, version, rates, taxProfile, coeffSets, holidays, addRate, updateRate, removeRate, saveTaxProfile, reloadHolidays])
+  }, [
+    data,
+    query.isLoading,
+    query.isError,
+    retry,
+    addRate,
+    updateRate,
+    removeRate,
+    saveTaxProfile,
+    saveProfile,
+    reloadHolidays,
+  ])
 
   return <PayDataContext.Provider value={value}>{children}</PayDataContext.Provider>
 }

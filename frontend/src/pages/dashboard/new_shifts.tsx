@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader } from '../../../components/layout/page_header'
+import { LoadError } from '../../../components/skeleton/load_error'
+import { LoadingRegion, Skeleton } from '../../../components/skeleton/skeleton'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../../../components/button/button'
 import { DateRangePicker } from '../../../components/date_range_picker/date_range_picker'
@@ -20,8 +22,8 @@ import {
 export function NewShifts() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { periods, addPeriod } = useTimesheet()
-  const { taxProfile } = usePayData()
+  const { periods, loading: periodsLoading, error, retry, addPeriod } = useTimesheet()
+  const { taxProfile, loading: payLoading } = usePayData()
   const [range, setRange] = useState<DateRange | null>(null)
   const [shifts, setShifts] = useState<Record<string, Shift>>({})
   const [saving, setSaving] = useState(false)
@@ -61,6 +63,16 @@ export function NewShifts() {
       setSaving(false)
     }
   }
+
+  if (payLoading || periodsLoading) {
+    return (
+      <LoadingRegion label={t('common.loading')}>
+        <Skeleton className="mb-6 h-8 w-48" />
+        <Skeleton className="h-64 w-full" />
+      </LoadingRegion>
+    )
+  }
+  if (error) return <LoadError onRetry={retry} />
 
   return (
     <>

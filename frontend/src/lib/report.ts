@@ -9,7 +9,15 @@ import {
   toIsoDate,
   type Period,
 } from './timesheet'
-import type { ReportResponse } from './api'
+import {
+  buildIncomeSeries as buildEngineSeries,
+  buildReportStats as buildEngineStats,
+  computePeriod,
+  type IncomeSeriesDto,
+  type ReportContext,
+  type ReportStatsDto,
+} from '@my-pay/engine'
+import { toReportPeriod } from './pay'
 
 export type ReportRange = 'month' | 'threeMonths' | 'annual' | 'year'
 
@@ -234,13 +242,39 @@ export function buildReportStats(
 }
 
 /* ---------------------------------------------------------------------------
- * Real report: numbers come from the API (cents, ISO dates). The builders above
+ * Real report: priced in the browser from loaded periods. The builders above
  * are flat-rate helpers kept for the public Features page sample only.
  * ------------------------------------------------------------------------- */
 
 export type LiveReportStats = ReportStats & { taxRatePct: number }
 
-export function fromReportResponse(res: ReportResponse): {
+/** Chart and year-to-date stats, priced in the browser from periods already loaded. */
+export function reportFromPeriods(
+  periods: Period[],
+  range: ReportRange,
+  today: string,
+  ctx: ReportContext,
+) {
+  const reportPeriods = periods.map(toReportPeriod)
+  let grossToDateCents = 0
+  for (const period of reportPeriods) {
+    grossToDateCents += computePeriod(period, ctx.jobs, ctx.profile, ctx.coeffSets, {
+      upTo: today,
+      holidays: ctx.holidays,
+    }).grossCents
+  }
+  return fromReportResponse({
+    series: buildEngineSeries(reportPeriods, range, today, ctx),
+    stats: buildEngineStats(reportPeriods, today, ctx),
+    grossToDateCents,
+  })
+}
+
+export function fromReportResponse(res: {
+  series: IncomeSeriesDto
+  stats: ReportStatsDto
+  grossToDateCents: number
+}): {
   series: IncomeSeries
   stats: LiveReportStats
   grossToDate: number
