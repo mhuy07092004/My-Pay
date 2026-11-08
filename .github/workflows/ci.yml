@@ -19,3 +19,11 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build -w frontend
+        env:
+          VITE_MOCK: 'on'
+      - name: Production bundle excludes mock modules
+        run: |
+          if grep -R -I -n -F "mypay-mock:" frontend/dist; then
+            echo "mock modules leaked into frontend/dist"
+            exit 1
+          fi

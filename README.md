@@ -150,6 +150,18 @@ npm run dev
 
 Vite proxies `/api` to the API.
 
+### Local mock data
+
+`npm run dev` uses Supabase and the API. To work on the UI without either:
+
+```bash
+npm run dev:mock -w frontend
+```
+
+Sign in as `demo@mypay.test` / `demopass`, or create an account. Accounts and pay data stay in this browser's `localStorage`. `npm run dev:live -w frontend` forces the real backend.
+
+`VITE_MOCK` is read only by the Vite dev server. `vite build`, GitHub Actions, and Vercel ignore it and always call Supabase, even if the variable is set to `on` during the build. Do not put `VITE_MOCK` in `.env.local` or on Vercel. Restart the dev server after changing it.
+
 ## Environment Variables
 
 **`frontend/.env.local`**
@@ -158,6 +170,8 @@ Vite proxies `/api` to the API.
 |---|---|
 | `VITE_SUPABASE_URL` | Supabase project URL |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable (anon) key |
+
+`VITE_MOCK` is not a project variable. See [Local mock data](#local-mock-data).
 
 **`backend/.env`**
 
@@ -174,7 +188,9 @@ Vite proxies `/api` to the API.
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Run API and web together |
+| `npm run dev` | Run API and web together (real Supabase data) |
+| `npm run dev:mock -w frontend` | Web only, with local mock data |
+| `npm run dev:live -w frontend` | Web only, against the real API and Supabase |
 | `npm run build` | Typecheck the backend and build the frontend |
 | `npm test` | Run engine and backend tests |
 | `npm run lint` | Lint the frontend |
@@ -225,6 +241,7 @@ One Vercel project serves both the web app and the API on the same domain.
    - `SUPABASE_PUBLISHABLE_KEY`
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_PUBLISHABLE_KEY`
+   Do not set `VITE_MOCK`. Production always uses Supabase.
 3. In Supabase, go to **Authentication → URL Configuration** and set the Site URL and Redirect URL to your Vercel domain.
 
 Do not set `CORS_ORIGIN` when the web app and API share one domain.
@@ -399,6 +416,18 @@ npm run dev
 
 Vite chuyển `/api` sang API.
 
+### Dữ liệu mock trên máy local
+
+`npm run dev` dùng Supabase và API. Muốn sửa giao diện mà không cần cả hai:
+
+```bash
+npm run dev:mock -w frontend
+```
+
+Đăng nhập `demo@mypay.test` / `demopass`, hoặc tạo tài khoản mới. Tài khoản và dữ liệu lương chỉ nằm trong `localStorage` của trình duyệt này. `npm run dev:live -w frontend` buộc dùng backend thật.
+
+`VITE_MOCK` chỉ có tác dụng với Vite dev server. `vite build`, GitHub Actions và Vercel bỏ qua biến này và luôn gọi Supabase, kể cả khi build có `VITE_MOCK=on`. Không ghi `VITE_MOCK` vào `.env.local` hay project Vercel. Đổi biến thì phải khởi động lại dev server.
+
 ## Biến môi trường
 
 **`frontend/.env.local`**
@@ -407,6 +436,8 @@ Vite chuyển `/api` sang API.
 |---|---|
 | `VITE_SUPABASE_URL` | URL project Supabase |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Publishable (anon) key của Supabase |
+
+`VITE_MOCK` không phải biến của project. Xem [Dữ liệu mock trên máy local](#dữ-liệu-mock-trên-máy-local).
 
 **`backend/.env`**
 
@@ -423,7 +454,9 @@ Vite chuyển `/api` sang API.
 
 | Lệnh | Mô tả |
 |---|---|
-| `npm run dev` | Chạy API và web cùng lúc |
+| `npm run dev` | Chạy API và web cùng lúc (dữ liệu Supabase thật) |
+| `npm run dev:mock -w frontend` | Chỉ web, dùng dữ liệu mock trên máy |
+| `npm run dev:live -w frontend` | Chỉ web, gọi API và Supabase thật |
 | `npm run build` | Typecheck backend và build frontend |
 | `npm test` | Chạy test của engine và backend |
 | `npm run lint` | Lint frontend |
@@ -443,6 +476,7 @@ Một project Vercel phục vụ cả web và API trên cùng domain.
    - `SUPABASE_PUBLISHABLE_KEY`
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_PUBLISHABLE_KEY`
+   Không đặt `VITE_MOCK`. Bản production luôn dùng Supabase.
 3. Trong Supabase, mục **Authentication → URL Configuration**, đặt Site URL và Redirect URL là domain Vercel.
 
 Không đặt `CORS_ORIGIN` khi web và API cùng một domain.

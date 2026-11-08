@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
+import { USE_MOCK } from './lib/mock/flag'
 import { About } from './pages/About'
 import { Feature } from './pages/Feature'
 import { Landing } from './pages/Landing'
@@ -32,37 +33,49 @@ function RedirectIfAuthenticated({ children }: { children: ReactNode }) {
   return children
 }
 
+function MockDataBadge() {
+  if (!USE_MOCK) return null
+  return (
+    <div className="pointer-events-none fixed top-2 left-1/2 z-[80] -translate-x-1/2 rounded-full bg-[#C8E664] px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-[#18181B]">
+      MOCK DATA
+    </div>
+  )
+}
+
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/pricing" element={<Pricing />} />
-      <Route path="/features" element={<Feature />} />
-      <Route path="/about" element={<About />} />
-      <Route
-        path="/login"
-        element={
-          <RedirectIfAuthenticated>
-            <Login />
-          </RedirectIfAuthenticated>
-        }
-      />
-      <Route
-        path="/dashboard"
-        element={
-          <RequireAuth>
-            <DashboardLayout />
-          </RequireAuth>
-        }
-      >
-        <Route index element={<Dashboard />} />
-        <Route path="timesheet" element={<Timesheet />} />
-        <Route path="timesheet/newshifts" element={<NewShifts />} />
-        <Route path="timesheet/:periodId" element={<PeriodDetail />} />
-        <Route path="report" element={<Report />} />
-        <Route path="settings" element={<Settings />} />
-      </Route>
-    </Routes>
+    <>
+      <MockDataBadge />
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/features" element={<Feature />} />
+        <Route path="/about" element={<About />} />
+        <Route
+          path="/login"
+          element={
+            <RedirectIfAuthenticated>
+              <Login />
+            </RedirectIfAuthenticated>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <RequireAuth>
+              <DashboardLayout />
+            </RequireAuth>
+          }
+        >
+          <Route index element={<Dashboard />} />
+          <Route path="timesheet" element={<Timesheet />} />
+          <Route path="timesheet/newshifts" element={<NewShifts />} />
+          <Route path="timesheet/:periodId" element={<PeriodDetail />} />
+          <Route path="report" element={<Report />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
+      </Routes>
+    </>
   )
 }
 

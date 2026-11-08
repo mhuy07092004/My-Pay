@@ -1,3 +1,4 @@
+import { USE_MOCK } from '../mock/flag'
 import { supabase } from '../supabaseClient'
 
 export class ApiError extends Error {
@@ -14,6 +15,10 @@ export async function api<T>(
   path: string,
   options: { method?: string; body?: unknown } = {},
 ): Promise<T> {
+  if (USE_MOCK) {
+    const { handleMock } = await import('../mock/mockApi')
+    return handleMock<T>(path, options)
+  }
   const { data } = await supabase.auth.getSession()
   const token = data.session?.access_token
   const response = await fetch(`/api${path}`, {
