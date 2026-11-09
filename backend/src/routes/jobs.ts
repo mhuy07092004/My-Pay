@@ -131,6 +131,7 @@ export function jobsRouter(): Router {
       await req.db!
         .from('award_rates')
         .select('*')
+        .eq('award', 'MA000003')
         .eq('status', q.status)
         .eq('level', q.level)
         .eq('age', age)
