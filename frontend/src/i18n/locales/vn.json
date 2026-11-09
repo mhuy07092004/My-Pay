@@ -259,6 +259,7 @@
     "estimate": {
       "title": "Ước tính kỳ lương",
       "live": "TRỰC TIẾP",
+      "estimated": "ƯỚC TÍNH",
       "beforeTax": "Trước thuế",
       "tax": "Thuế ước tính",
       "afterTax": "Sau thuế"

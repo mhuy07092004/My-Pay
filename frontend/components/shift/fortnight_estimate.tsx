@@ -11,6 +11,8 @@ type FortnightEstimateProps = {
   payCycle?: PayCycle
   className?: string
   showLive?: boolean
+  /** 'estimated' when no actual amount has been entered yet. */
+  status?: 'live' | 'estimated'
   showNote?: boolean
   /** Below lg: render the three figures in one compact row and hide the note. */
   compactOnMobile?: boolean
@@ -24,6 +26,7 @@ export function FortnightEstimate({
   payCycle = 'fortnightly',
   className = '',
   showLive = true,
+  status = 'live',
   showNote = true,
   compactOnMobile = false,
 }: FortnightEstimateProps) {
@@ -58,7 +61,7 @@ export function FortnightEstimate({
           </p>
           {showLive ? (
             <span className="rounded-full bg-[#2A3018] px-2 py-0.5 text-[10px] font-semibold text-[#C8E664]">
-              {t('timesheet.estimate.live')}
+              {t(status === 'estimated' ? 'timesheet.estimate.estimated' : 'timesheet.estimate.live')}
             </span>
           ) : null}
         </div>

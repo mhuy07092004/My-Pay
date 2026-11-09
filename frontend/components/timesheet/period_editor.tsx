@@ -25,9 +25,11 @@ type PeriodEditorProps = {
   onSaveShift: (isoDate: string, shift: Shift | null) => Promise<void> | void
   /** Extra panel shown under the estimate on laptop, after the days on mobile. */
   aside?: ReactNode
+  /** Saved actual amount received; undefined means the user hasn't entered one. */
+  actual?: number
 }
 
-export function PeriodEditor({ range, payCycle, shifts, onSaveShift, aside }: PeriodEditorProps) {
+export function PeriodEditor({ range, payCycle, shifts, onSaveShift, aside, actual }: PeriodEditorProps) {
   const { t } = useTranslation()
   const { rates, rateOf, taxContext, loading, holidays } = usePayData()
   const today = useMemo(() => startOfDay(new Date()), [])
@@ -115,11 +117,11 @@ export function PeriodEditor({ range, payCycle, shifts, onSaveShift, aside }: Pe
                   return (
                     <div key={week.n} className="space-y-3">
                       {payCycle === 'fortnightly' ? (
-                        <div className="flex items-center justify-between px-1">
-                          <h3 className="text-xs font-semibold uppercase tracking-wider text-[#A1A1AA]">
+                        <div className="flex items-center justify-between rounded-lg border border-[#C8E664]/30 border-l-4 border-l-[#C8E664] bg-[#2A3018] px-3 py-2.5">
+                          <h3 className="text-sm font-bold uppercase tracking-wider text-[#C8E664]">
                             {t('timesheet.hours.week', { n: week.n })}
                           </h3>
-                          <p className="text-xs tabular-nums text-[#A1A1AA]">
+                          <p className="text-sm font-semibold tabular-nums text-[#F4F4F5]">
                             {t('timesheet.hours.badge', { hours: formatHours(minutes) })}
                           </p>
                         </div>
@@ -163,6 +165,7 @@ export function PeriodEditor({ range, payCycle, shifts, onSaveShift, aside }: Pe
             afterTax={afterTax}
             minutes={estimate.minutes}
             payCycle={payCycle}
+            status={actual !== undefined ? 'live' : 'estimated'}
             compactOnMobile
             className="order-1 self-start max-lg:sticky max-lg:top-[calc(3.5rem+env(safe-area-inset-top))] max-lg:z-20"
           />

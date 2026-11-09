@@ -259,6 +259,7 @@
     "estimate": {
       "title": "Period estimate",
       "live": "LIVE",
+      "estimated": "ESTIMATED",
       "beforeTax": "Before tax",
       "tax": "Est. tax",
       "afterTax": "After tax"

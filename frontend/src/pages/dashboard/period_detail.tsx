@@ -77,6 +77,7 @@ export function PeriodDetail() {
         range={range}
         payCycle={period.payCycle ?? 'fortnightly'}
         shifts={period.shifts}
+        actual={period.actual}
         onSaveShift={(iso, shift) => saveShift(period.id, iso, shift)}
         aside={
           <section className="rounded-xl border border-[#27272A] bg-[#18181B] p-4 sm:p-5">
