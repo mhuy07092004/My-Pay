@@ -5,7 +5,6 @@
 **Track your shifts. Estimate your pay. Know your PAYG tax before payday.**
 
 A pay and tax estimator for shift workers in Australia, built around the official ATO PAYG withholding formulas and the Fast Food Industry Award.
-
 [![CI](https://github.com/mhuy07092004/My-Pay/actions/workflows/ci.yml/badge.svg)](https://github.com/mhuy07092004/My-Pay/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 ![Node](https://img.shields.io/badge/node-%3E%3D22-339933?logo=node.js&logoColor=white)
