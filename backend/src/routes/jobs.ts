@@ -88,7 +88,13 @@ export function jobsRouter(): Router {
     const row = check(
       await req.db!
         .from('jobs')
-        .insert({ user_id: req.user!.id, ...jobColumns(body) })
+        .insert({
+          user_id: req.user!.id,
+          ...jobColumns(body),
+          pay_cycle: body.payCycle,
+          schedule_start: body.scheduleStart,
+          schedule_pay_date: body.payDate,
+        })
         .select('*')
         .single(),
     )
