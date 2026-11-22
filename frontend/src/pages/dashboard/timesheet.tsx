@@ -27,7 +27,14 @@ import {
   type PaydayMark,
 } from '../../lib/calendar'
 import { monthEndIso, monthStartIso } from '@my-pay/engine'
-import { compareStart, parseIsoDate, recentShiftTemplate, startOfDay, type Shift } from '../../lib/timesheet'
+import {
+  compareStart,
+  parseIsoDate,
+  recentShiftTemplate,
+  startOfDay,
+  toIsoDate,
+  type Shift,
+} from '../../lib/timesheet'
 
 type ViewMode = 'month' | 'year'
 
@@ -90,8 +97,8 @@ export function Timesheet() {
   const monthFrom = monthStartIso(viewMonth.getFullYear(), viewMonth.getMonth())
   const monthTo = monthEndIso(viewMonth.getFullYear(), viewMonth.getMonth())
   const paydays = useMemo(
-    () => paydaysInRange(rates, periods, monthFrom, monthTo),
-    [rates, periods, monthFrom, monthTo],
+    () => paydaysInRange(rates, periods, monthFrom, monthTo, toIsoDate(today)),
+    [rates, periods, monthFrom, monthTo, today],
   )
   const paydayMap = useMemo(() => {
     const map = new Map<string, string[]>()

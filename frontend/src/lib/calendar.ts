@@ -178,12 +178,16 @@ function scheduleOf(rate: SavedRate): PaySchedule | null {
   return { payCycle: rate.payCycle, startDate: rate.scheduleStart, payDate: rate.payDate }
 }
 
-/** Saved and upcoming paydays whose payment date falls in [from, to]. */
+/**
+ * Saved and upcoming paydays whose payment date falls in [from, to]. Periods without shifts
+ * are projected only from the schedule start on, and only while their payday is not past.
+ */
 export function paydaysInRange(
   rates: SavedRate[],
   periods: Period[],
   from: string,
   to: string,
+  today: string,
 ): PaydayMark[] {
   const marks: PaydayMark[] = []
   for (const rate of rates) {
@@ -195,6 +199,7 @@ export function paydaysInRange(
         (period) =>
           period.jobId === rate.id && period.start === bounds.startDate && period.end === bounds.endDate,
       )
+      if (!saved && (bounds.startDate < schedule.startDate || bounds.paymentDate < today)) continue
       marks.push({
         jobId: rate.id,
         paymentDate: bounds.paymentDate,

@@ -78,10 +78,17 @@ export function PayDataProvider({ children }: { children: ReactNode }) {
 
   const updateRate = useCallback(
     async (rate: SavedRate) => {
+      const before = data?.jobs.find((item) => item.id === rate.id)
       const job = await updateJob(rate)
       patch((prev) => ({ ...prev, jobs: withClaim(prev.jobs, job) }))
+      const rescheduled =
+        !before ||
+        before.payCycle !== job.payCycle ||
+        before.scheduleStart !== job.scheduleStart ||
+        before.payDate !== job.payDate
+      if (rescheduled && email) await queryClient.invalidateQueries({ queryKey: bootstrapKey(email) })
     },
-    [patch],
+    [data?.jobs, email, patch, queryClient],
   )
 
   const removeRate = useCallback(

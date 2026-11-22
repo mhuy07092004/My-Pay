@@ -125,6 +125,51 @@ describe('validation', () => {
   })
 })
 
+describe('job update', () => {
+  const jobId = '22222222-2222-4222-8222-222222222222'
+  const row = {
+    id: jobId,
+    name: 'Logistics',
+    kind: 'custom',
+    status: '',
+    level: '',
+    age: '',
+    overtime_enabled: false,
+    claims_tax_free_threshold: false,
+    pay_cycle: 'fortnightly',
+    schedule_start: '2026-11-16',
+    schedule_pay_date: '2026-12-04',
+  }
+  const zero = {
+    weekday: 0, night1: 0, night2: 0, saturday: 0, sunday: 0, publicHoliday: 0,
+    otFirst2: 0, otAfter2: 0, otSunday: 0, otPublicHoliday: 0,
+  }
+  const body = (payDate: string) => ({
+    name: 'Logistics',
+    kind: 'custom',
+    overtimeEnabled: false,
+    claimsTaxFreeThreshold: true,
+    payCycle: 'fortnightly',
+    scheduleStart: '2026-11-16',
+    payDate,
+    rate: zero,
+  })
+
+  it('keeps periods when the schedule is unchanged', async () => {
+    const { app, rpcs } = makeApp({ jobs: [row] })
+    const res = await request(app).patch(`/api/jobs/${jobId}`).set(auth).send(body('2026-12-04'))
+    expect(res.status).toBe(200)
+    expect(rpcs.map((r) => r.fn)).toEqual(['set_tax_free_threshold'])
+  })
+
+  it('rebuilds periods when the schedule changes', async () => {
+    const { app, rpcs } = makeApp({ jobs: [row] })
+    const res = await request(app).patch(`/api/jobs/${jobId}`).set(auth).send(body('2026-12-02'))
+    expect(res.status).toBe(200)
+    expect(rpcs.map((r) => r.fn)).toContain('set_job_schedule')
+  })
+})
+
 describe('bootstrap', () => {
   it('rejects a request without a token', async () => {
     const { app } = makeApp()

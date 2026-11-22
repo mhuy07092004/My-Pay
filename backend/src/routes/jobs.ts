@@ -106,9 +106,17 @@ export function jobsRouter(): Router {
   router.patch('/jobs/:id', async (req, res) => {
     const id = idParam.parse(req.params.id)
     const body = jobInput.parse(req.body)
+    const current = await getJob(req.db!, id)
     check(await req.db!.from('jobs').update(jobColumns(body)).eq('id', id).select('id').single())
     if (body.claimsTaxFreeThreshold !== undefined) await setClaim(req.db!, id, body.claimsTaxFreeThreshold)
-    await setSchedule(req.db!, id, body)
+    // set_job_schedule rebuilds every period of the job under new ids.
+    if (
+      current.payCycle !== body.payCycle ||
+      current.scheduleStart !== body.scheduleStart ||
+      current.payDate !== body.payDate
+    ) {
+      await setSchedule(req.db!, id, body)
+    }
     res.json({ job: await getJob(req.db!, id) })
   })
 
