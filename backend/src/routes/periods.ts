@@ -87,10 +87,13 @@ export function periodsRouter(): Router {
   router.put('/days/:date', async (req, res) => {
     const date = isoDate.parse(req.params.date)
     const body = z.object({ shifts: z.array(shiftInput).max(2) }).parse(req.body)
+    const ordered = [...body.shifts].sort(
+      (a, b) => a.checkIn.localeCompare(b.checkIn) || a.checkOut.localeCompare(b.checkOut),
+    )
     const raw = check(
       await req.db!.rpc('save_day', {
         p_date: date,
-        p_shifts: body.shifts,
+        p_shifts: ordered,
       }),
     )
     const saved = saveDayResult.parse(raw)

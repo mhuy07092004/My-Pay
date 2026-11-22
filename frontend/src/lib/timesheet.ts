@@ -18,8 +18,11 @@ export type ShiftPart = {
 export type Shift = ShiftPart & {
   /** Optional second shift on the same day (e.g. morning + afternoon). */
   second?: ShiftPart
-  /** Stored part number. 2 when the day's first shift belongs to another job's period. */
-  part?: 1 | 2
+}
+
+/** Earlier start first, then earlier finish. */
+export function compareStart(a: ShiftPart, b: ShiftPart): number {
+  return a.checkIn.localeCompare(b.checkIn) || a.checkOut.localeCompare(b.checkOut)
 }
 
 export type DateRange = {

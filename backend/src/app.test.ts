@@ -96,6 +96,25 @@ describe('validation', () => {
     expect(res.body.error).toBe('invalid_request')
   })
 
+  it('saves the earlier shift as part 1 whatever the input order', async () => {
+    const { app, rpcs } = makeApp()
+    const shift = (checkIn: string, checkOut: string) => ({
+      jobId: '11111111-1111-4111-8111-111111111111',
+      checkIn,
+      checkOut,
+      breakMinutes: 0,
+      publicHoliday: false,
+      overtimeMinutes: 0,
+    })
+    const res = await request(app)
+      .put('/api/days/2026-11-07')
+      .set(auth)
+      .send({ shifts: [shift('14:00', '22:00'), shift('06:00', '10:00')] })
+    expect(res.status).toBe(200)
+    const args = rpcs[0].args as { p_shifts: Array<{ checkIn: string }> }
+    expect(args.p_shifts.map((s) => s.checkIn)).toEqual(['06:00', '14:00'])
+  })
+
   it('400 on a bad shift body', async () => {
     const { app } = makeApp()
     const res = await request(app)

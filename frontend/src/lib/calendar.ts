@@ -2,6 +2,7 @@ import { paydaysBetween, type PaySchedule } from '@my-pay/engine'
 import type { SavedRate } from './rates'
 import {
   calcShiftMinutes,
+  compareStart,
   toIsoDate,
   type Period,
   type Shift,
@@ -19,10 +20,12 @@ export const JOB_COLORS = [
 
 export type JobHours = { jobId: string; minutes: number }
 
-export type DayPartDetail = ShiftPart & { minutes: number; periodId: string; part: 1 | 2 }
+export type DayPartDetail = ShiftPart & { minutes: number; periodId: string }
 
 export type DayEntry = {
+  /** Earliest start first. */
   parts: DayPartDetail[]
+  /** In the order each job first starts that day. */
   byJob: JobHours[]
 }
 
@@ -84,9 +87,7 @@ function aggregateByJob(parts: DayPartDetail[]): JobHours[] {
   for (const part of parts) {
     map.set(part.rateId, (map.get(part.rateId) ?? 0) + part.minutes)
   }
-  return [...map.entries()]
-    .map(([jobId, minutes]) => ({ jobId, minutes }))
-    .sort((a, b) => a.jobId.localeCompare(b.jobId))
+  return [...map.entries()].map(([jobId, minutes]) => ({ jobId, minutes }))
 }
 
 function addMonthMinutes(
@@ -112,16 +113,13 @@ export function indexShifts(periods: Period[]): ShiftIndex {
   for (const period of periods) {
     for (const [iso, shift] of Object.entries(period.shifts)) {
       if (!shift) continue
-      const raw = partsOfShift(shift)
-      const parts: DayPartDetail[] = raw.map((part, index) => ({
+      const parts: DayPartDetail[] = partsOfShift(shift).map((part) => ({
         ...part,
         minutes: calcShiftMinutes(part),
         periodId: period.id,
-        part: index === 0 ? (shift.part ?? 1) : 2,
       }))
       const existing = byDate.get(iso)
-      const merged = existing ? [...existing.parts, ...parts] : parts
-      merged.sort((a, b) => a.part - b.part)
+      const merged = [...(existing?.parts ?? []), ...parts].sort(compareStart)
       byDate.set(iso, { parts: merged, byJob: aggregateByJob(merged) })
       addMonthMinutes(byMonth, iso, aggregateByJob(parts))
     }

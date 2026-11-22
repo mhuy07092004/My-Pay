@@ -27,7 +27,7 @@ import {
   type PaydayMark,
 } from '../../lib/calendar'
 import { monthEndIso, monthStartIso } from '@my-pay/engine'
-import { parseIsoDate, recentShiftTemplate, startOfDay, type Shift } from '../../lib/timesheet'
+import { compareStart, parseIsoDate, recentShiftTemplate, startOfDay, type Shift } from '../../lib/timesheet'
 
 type ViewMode = 'month' | 'year'
 
@@ -64,7 +64,10 @@ function flatShifts(periods: { shifts: Record<string, Shift> }[]): Record<string
     for (const [iso, shift] of Object.entries(period.shifts)) {
       const current = flat[iso]
       if (!current) flat[iso] = shift
-      else if (!current.second) flat[iso] = shift.part === 2 ? { ...current, second: shift } : { ...shift, second: current }
+      else if (!current.second) {
+        const [first, second] = [current, shift].sort(compareStart)
+        flat[iso] = { ...first, second }
+      }
     }
   }
   return flat
