@@ -35,9 +35,16 @@ export type SavedRate = {
   level: string
   age: string
   claimsTaxFreeThreshold: boolean
+  payCycle: PayCycle
+  /** First day of one pay period. Later periods repeat from here. */
+  scheduleStart: string
+  /** Payday of the period that starts on scheduleStart. */
+  payDate: string
   /** Set when the job was hidden because shifts still use it. */
   archived?: boolean
 }
+
+type PayCycle = 'weekly' | 'fortnightly'
 
 export const PRESET_ID = 'fast-food'
 export const CUSTOM_ID = 'custom'
@@ -60,6 +67,9 @@ export type JobDto = {
   age: string
   claimsTaxFreeThreshold: boolean
   archived?: boolean
+  payCycle: 'weekly' | 'fortnightly'
+  scheduleStart: string
+  payDate: string
   rate: RateSnapshot
 }
 
@@ -93,6 +103,9 @@ export function savedRateFromJob(job: JobDto): SavedRate {
     level: job.level,
     age: job.age,
     claimsTaxFreeThreshold: job.claimsTaxFreeThreshold,
+    payCycle: job.payCycle,
+    scheduleStart: job.scheduleStart,
+    payDate: job.payDate,
     archived: job.archived ?? false,
   }
 }
@@ -127,6 +140,9 @@ export function jobBodyFromRate(rate: Omit<SavedRate, 'id'>) {
     age: rate.age,
     overtimeEnabled: rate.overtimeEnabled,
     claimsTaxFreeThreshold: rate.claimsTaxFreeThreshold,
+    payCycle: rate.payCycle,
+    scheduleStart: rate.scheduleStart,
+    payDate: rate.payDate,
     rate: cents,
   }
 }

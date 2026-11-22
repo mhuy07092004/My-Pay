@@ -52,15 +52,6 @@ export function TaxProfileCard() {
           ]}
           onChange={(v) => set('residency', v as TaxProfileDto['residency'])}
         />
-        <Select
-          label={t('settings.tax.payCycle')}
-          value={draft.payCycle}
-          options={[
-            { value: 'weekly', label: t('settings.tax.weekly') },
-            { value: 'fortnightly', label: t('settings.tax.fortnightly') },
-          ]}
-          onChange={(v) => set('payCycle', v as TaxProfileDto['payCycle'])}
-        />
         {noExemption ? null : (
           <Select
             label={t('settings.tax.medicare')}

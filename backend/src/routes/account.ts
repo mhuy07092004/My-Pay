@@ -15,7 +15,6 @@ const taxProfileInput = z.object({
   studyLoan: z.boolean(),
   annualOffsetCents: z.number().int().min(0).max(100_000_000),
   medicareVariation: z.enum(['none', 'full', 'half']),
-  payCycle: z.enum(['weekly', 'fortnightly']),
 })
 
 export function accountRouter(): Router {
@@ -79,7 +78,6 @@ export function accountRouter(): Router {
           study_loan: body.studyLoan,
           annual_offset_cents: body.annualOffsetCents,
           medicare_variation: body.medicareVariation,
-          pay_cycle: body.payCycle,
           updated_at: new Date().toISOString(),
         })
         .select('*')

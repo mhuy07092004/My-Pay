@@ -8,7 +8,7 @@ import type {
   Residency,
 } from '@my-pay/engine'
 import { jobBodyFromRate, savedRateFromJob, type JobDto, type SavedRate } from '../rates'
-import type { PayCycle, Shift } from '../timesheet'
+import type { Shift } from '../timesheet'
 import { api } from './client'
 
 export { ApiError } from './client'
@@ -54,7 +54,6 @@ export type TaxProfileDto = {
   studyLoan: boolean
   annualOffsetCents: number
   medicareVariation: MedicareVariation
-  payCycle: PayCycle
 }
 
 export const DEFAULT_TAX_PROFILE_DTO: TaxProfileDto = {
@@ -62,7 +61,6 @@ export const DEFAULT_TAX_PROFILE_DTO: TaxProfileDto = {
   studyLoan: false,
   annualOffsetCents: 0,
   medicareVariation: 'none',
-  payCycle: 'fortnightly',
 }
 
 export async function getTaxProfile(): Promise<TaxProfileDto> {
@@ -116,6 +114,9 @@ export async function getAwardRate(
     level,
     age: String(age),
     claimsTaxFreeThreshold: false,
+    payCycle: 'fortnightly',
+    scheduleStart: '',
+    payDate: '',
     rate,
   }).pay
 }
@@ -133,32 +134,13 @@ function shiftPayload(shift: Shift) {
   }))
 }
 
-export async function createPeriod(
-  startDate: string,
-  endDate: string,
-  shifts: Record<string, Shift>,
-): Promise<PeriodPayload> {
-  const { period } = await api<{ period: PeriodPayload }>('/periods', {
-    method: 'POST',
-    body: {
-      startDate,
-      endDate,
-      days: Object.entries(shifts).map(([date, shift]) => ({ date, shifts: shiftPayload(shift) })),
-    },
-  })
-  return period
-}
+export type SaveDayResult = { periods: PeriodPayload[]; deleted: string[] }
 
-export async function deletePeriod(id: string): Promise<void> {
-  await api(`/periods/${id}`, { method: 'DELETE' })
-}
-
-export async function saveDay(periodId: string, isoDate: string, shift: Shift | null): Promise<PeriodPayload> {
-  const { period } = await api<{ period: PeriodPayload }>(`/periods/${periodId}/days/${isoDate}`, {
+export async function saveDay(isoDate: string, shift: Shift | null): Promise<SaveDayResult> {
+  return api<SaveDayResult>(`/days/${isoDate}`, {
     method: 'PUT',
     body: { shifts: shift ? shiftPayload(shift) : [] },
   })
-  return period
 }
 
 export async function saveActual(periodId: string, dollars: number | undefined): Promise<PeriodPayload> {

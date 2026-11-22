@@ -29,6 +29,7 @@ export function fromDbError(error: DbError): AppError {
       if (message.includes('invalid_break')) return new AppError(400, 'invalid_break')
       if (message.includes('date_outside_period')) return new AppError(400, 'date_outside_period')
       if (message.includes('invalid_period_length')) return new AppError(400, 'invalid_period_length')
+      if (message.includes('invalid_schedule')) return new AppError(400, 'invalid_schedule')
       return new AppError(400, 'invalid_value')
     case 'P0001':
       return new AppError(400, message.includes('foreign_resident') ? 'foreign_resident' : 'invalid_value')
@@ -40,6 +41,8 @@ export function fromDbError(error: DbError): AppError {
       return new AppError(400, 'invalid_value')
     case 'P0002':
       return new AppError(404, 'not_found')
+    case 'P0003':
+      return new AppError(400, 'job_schedule_missing')
     case 'PGRST116':
       return new AppError(404, 'not_found')
     case '42501':

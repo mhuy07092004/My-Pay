@@ -27,6 +27,9 @@ const jobInput = z.object({
   age: z.string().max(5).default(''),
   overtimeEnabled: z.boolean(),
   claimsTaxFreeThreshold: z.boolean().optional(),
+  payCycle: z.enum(['weekly', 'fortnightly']),
+  scheduleStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  payDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   rate: rateInput,
 })
 
@@ -42,6 +45,20 @@ function jobColumns(body: z.infer<typeof jobInput>) {
     overtime_enabled: body.overtimeEnabled,
     ...rateToColumns(body.rate),
   }
+}
+
+async function setSchedule(
+  db: Db,
+  jobId: string,
+  body: { payCycle: 'weekly' | 'fortnightly'; scheduleStart: string; payDate: string },
+) {
+  const { error } = await db.rpc('set_job_schedule', {
+    p_job_id: jobId,
+    p_cycle: body.payCycle,
+    p_start: body.scheduleStart,
+    p_pay_date: body.payDate,
+  })
+  if (error) check({ data: null, error })
 }
 
 async function setClaim(db: Db, jobId: string, claim: boolean) {
@@ -76,6 +93,7 @@ export function jobsRouter(): Router {
         .single(),
     )
     if (body.claimsTaxFreeThreshold) await setClaim(req.db!, row.id, true)
+    await setSchedule(req.db!, row.id, body)
     res.status(201).json({ job: await getJob(req.db!, row.id) })
   })
 
@@ -84,6 +102,7 @@ export function jobsRouter(): Router {
     const body = jobInput.parse(req.body)
     check(await req.db!.from('jobs').update(jobColumns(body)).eq('id', id).select('id').single())
     if (body.claimsTaxFreeThreshold !== undefined) await setClaim(req.db!, id, body.claimsTaxFreeThreshold)
+    await setSchedule(req.db!, id, body)
     res.json({ job: await getJob(req.db!, id) })
   })
 

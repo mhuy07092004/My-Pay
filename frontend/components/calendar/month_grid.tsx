@@ -11,6 +11,8 @@ type MonthGridProps = {
   viewMonth: Date
   index: ShiftIndex
   jobColors: Map<string, string>
+  /** Job ids paid on each ISO date. */
+  paydays: Map<string, string[]>
   locale: string
   today: Date
   onDayClick: (iso: string, entry: DayEntry | undefined, anchor: DOMRect) => void
@@ -21,6 +23,7 @@ type DayCellProps = {
   viewMonth: Date
   entry: DayEntry | undefined
   jobColors: Map<string, string>
+  paydayJobIds: string[]
   isToday: boolean
   onDayClick: (iso: string, entry: DayEntry | undefined, anchor: DOMRect) => void
 }
@@ -38,6 +41,7 @@ const DayCell = memo(function DayCell({
   viewMonth,
   entry,
   jobColors,
+  paydayJobIds,
   isToday,
   onDayClick,
 }: DayCellProps) {
@@ -72,6 +76,17 @@ const DayCell = memo(function DayCell({
       >
         {date.getDate()}
       </span>
+      {paydayJobIds.length > 0 ? (
+        <span className="flex gap-0.5">
+          {paydayJobIds.map((jobId) => (
+            <span
+              key={jobId}
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ backgroundColor: jobColors.get(jobId) ?? '#C8E664' }}
+            />
+          ))}
+        </span>
+      ) : null}
       <div className="mt-auto flex min-w-0 flex-col gap-0.5">
         {entry?.byJob.map(({ jobId, minutes }) => {
           const color = jobColors.get(jobId) ?? '#C8E664'
@@ -94,6 +109,7 @@ export function MonthGrid({
   viewMonth,
   index,
   jobColors,
+  paydays,
   locale,
   today,
   onDayClick,
@@ -133,6 +149,7 @@ export function MonthGrid({
               viewMonth={viewMonth}
               entry={index.byDate.get(iso)}
               jobColors={jobColors}
+              paydayJobIds={paydays.get(iso) ?? []}
               isToday={isSameDay(date, startOfDay(today))}
               onDayClick={onDayClick}
             />

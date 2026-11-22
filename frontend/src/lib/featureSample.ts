@@ -65,8 +65,10 @@ function makePeriod(start: Date, kind: Kind, today: Date, delta: number | null):
   const end = addDays(start, 13)
   const period: Period = {
     id: `sample-${toIsoDate(start)}`,
+    jobId: 'sample-job',
     start: toIsoDate(start),
     end: toIsoDate(end),
+    paymentDate: toIsoDate(end),
     shifts: shiftsFor(start, kind, today),
   }
   if (delta !== null) {

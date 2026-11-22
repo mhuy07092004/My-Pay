@@ -6,6 +6,7 @@ export * from './dto'
 export * from './pay'
 export * from './period'
 export * from './report'
+export * from './schedule'
 export * from './tax'
 
 /** Reference coefficient set (same data as the DB seed). Used by tests. */

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../src/context/AuthContext'
 import { LanguageSwitchButton } from '../button/swtich_button'
 
-type NavItemKey = 'home' | 'timesheet' | 'calendar' | 'reports' | 'settings'
+type NavItemKey = 'home' | 'timesheet' | 'reports' | 'settings'
 
 const iconProps = {
   width: 24,
@@ -31,12 +31,6 @@ const icons: Record<NavItemKey, React.ReactNode> = {
       <path d="M12 7v5l3 2" />
     </svg>
   ),
-  calendar: (
-    <svg {...iconProps}>
-      <rect x="3" y="5" width="18" height="16" rx="2" />
-      <path d="M3 10h18M8 3v4M16 3v4" />
-    </svg>
-  ),
   reports: (
     <svg {...iconProps}>
       <path d="M6 20v-7M12 20V5M18 20v-11" />
@@ -53,7 +47,6 @@ const icons: Record<NavItemKey, React.ReactNode> = {
 const navItems: { key: NavItemKey; labelKey: `nav.${NavItemKey}` }[] = [
   { key: 'home', labelKey: 'nav.home' },
   { key: 'timesheet', labelKey: 'nav.timesheet' },
-  { key: 'calendar', labelKey: 'nav.calendar' },
   { key: 'reports', labelKey: 'nav.reports' },
   { key: 'settings', labelKey: 'nav.settings' },
 ]
@@ -61,7 +54,6 @@ const navItems: { key: NavItemKey; labelKey: `nav.${NavItemKey}` }[] = [
 const navPaths: Record<NavItemKey, string> = {
   home: '/dashboard',
   timesheet: '/dashboard/timesheet',
-  calendar: '/dashboard/calendar',
   reports: '/dashboard/report',
   settings: '/dashboard/settings',
 }

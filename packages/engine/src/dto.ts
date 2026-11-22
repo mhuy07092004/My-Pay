@@ -25,8 +25,10 @@ export type PeriodTotalsDto = {
 /** A pay period as stored. Totals are not part of this shape. */
 export type RawPeriodDto = {
   id: string
+  jobId: string
   startDate: string
   endDate: string
+  paymentDate: string
   payCycle: Extract<PayCycle, 'weekly' | 'fortnightly'>
   actualCents: number | null
   shifts: ShiftDto[]
@@ -34,7 +36,7 @@ export type RawPeriodDto = {
 
 /** Maps a stored period onto the engine input. Server and browser share this. */
 export function periodInputFromDto(
-  dto: Pick<RawPeriodDto, 'startDate' | 'endDate' | 'payCycle' | 'shifts'>,
+  dto: Pick<RawPeriodDto, 'startDate' | 'endDate' | 'paymentDate' | 'payCycle' | 'shifts'>,
 ): PeriodInput {
   const shifts: PeriodShift[] = dto.shifts.map((shift) => ({
     date: shift.date,
@@ -50,6 +52,7 @@ export function periodInputFromDto(
   return {
     startDate: dto.startDate,
     endDate: dto.endDate,
+    paymentDate: dto.paymentDate,
     payCycle: dto.payCycle,
     shifts,
   }

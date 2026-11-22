@@ -1,3 +1,4 @@
+import { paydaysBetween, type PaySchedule } from '@my-pay/engine'
 import type { SavedRate } from './rates'
 import {
   calcShiftMinutes,
@@ -18,13 +19,23 @@ export const JOB_COLORS = [
 
 export type JobHours = { jobId: string; minutes: number }
 
-export type DayPartDetail = ShiftPart & { minutes: number }
+export type DayPartDetail = ShiftPart & { minutes: number; periodId: string; part: 1 | 2 }
 
 export type DayEntry = {
-  periodId: string
-  shift: Shift
   parts: DayPartDetail[]
   byJob: JobHours[]
+}
+
+export type PaydayMark = {
+  jobId: string
+  paymentDate: string
+  startDate: string
+  endDate: string
+  periodId?: string
+  gross: number
+  tax: number
+  net: number
+  projected: boolean
 }
 
 export type ShiftIndex = {
@@ -102,13 +113,17 @@ export function indexShifts(periods: Period[]): ShiftIndex {
     for (const [iso, shift] of Object.entries(period.shifts)) {
       if (!shift) continue
       const raw = partsOfShift(shift)
-      const parts: DayPartDetail[] = raw.map((part) => ({
+      const parts: DayPartDetail[] = raw.map((part, index) => ({
         ...part,
         minutes: calcShiftMinutes(part),
+        periodId: period.id,
+        part: (index + 1) as 1 | 2,
       }))
-      const byJob = aggregateByJob(parts)
-      byDate.set(iso, { periodId: period.id, shift, parts, byJob })
-      addMonthMinutes(byMonth, iso, byJob)
+      const existing = byDate.get(iso)
+      const merged = existing ? [...existing.parts, ...parts] : parts
+      merged.sort((a, b) => a.part - b.part)
+      byDate.set(iso, { parts: merged, byJob: aggregateByJob(merged) })
+      addMonthMinutes(byMonth, iso, aggregateByJob(parts))
     }
   }
 
@@ -158,4 +173,59 @@ export function dayGradient(colors: string[]): string {
 
 export function isoFromDate(date: Date): string {
   return toIsoDate(date)
+}
+
+function scheduleOf(rate: SavedRate): PaySchedule | null {
+  if (!rate.scheduleStart || !rate.payDate) return null
+  return { payCycle: rate.payCycle, startDate: rate.scheduleStart, payDate: rate.payDate }
+}
+
+/** Saved and upcoming paydays whose payment date falls in [from, to]. */
+export function paydaysInRange(
+  rates: SavedRate[],
+  periods: Period[],
+  from: string,
+  to: string,
+): PaydayMark[] {
+  const marks: PaydayMark[] = []
+  for (const rate of rates) {
+    if (rate.archived) continue
+    const schedule = scheduleOf(rate)
+    if (!schedule) continue
+    for (const bounds of paydaysBetween(schedule, from, to)) {
+      const saved = periods.find(
+        (period) =>
+          period.jobId === rate.id && period.start === bounds.startDate && period.end === bounds.endDate,
+      )
+      marks.push({
+        jobId: rate.id,
+        paymentDate: bounds.paymentDate,
+        startDate: bounds.startDate,
+        endDate: bounds.endDate,
+        periodId: saved?.id,
+        gross: saved?.totals?.income ?? 0,
+        tax: saved?.totals?.tax ?? 0,
+        net: saved?.totals?.net ?? 0,
+        projected: saved === undefined,
+      })
+    }
+  }
+  for (const period of periods) {
+    if (period.paymentDate < from || period.paymentDate > to) continue
+    if (marks.some((mark) => mark.periodId === period.id)) continue
+    marks.push({
+      jobId: period.jobId,
+      paymentDate: period.paymentDate,
+      startDate: period.start,
+      endDate: period.end,
+      periodId: period.id,
+      gross: period.totals?.income ?? 0,
+      tax: period.totals?.tax ?? 0,
+      net: period.totals?.net ?? 0,
+      projected: false,
+    })
+  }
+  return marks.sort(
+    (a, b) => a.paymentDate.localeCompare(b.paymentDate) || a.jobId.localeCompare(b.jobId),
+  )
 }

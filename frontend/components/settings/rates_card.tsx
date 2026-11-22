@@ -24,6 +24,10 @@ export function RatesCard() {
             <div className="flex flex-col gap-2 rounded-lg border border-[#27272A] bg-[#09090B] px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-3">
               <span className="flex flex-wrap items-center gap-2 font-medium">
                 {rate.name}
+                <span className="text-xs font-normal text-[#71717A]">
+                  {t(rate.payCycle === 'weekly' ? 'settings.tax.weekly' : 'settings.tax.fortnightly')}
+                  {rate.payDate ? ` · ${rate.payDate}` : ''}
+                </span>
                 {rate.claimsTaxFreeThreshold ? (
                   <span className="rounded-full bg-[#2A3018] px-2 py-0.5 text-[10px] font-semibold text-[#C8E664]">
                     {t('settings.rates.taxFreeBadge')}

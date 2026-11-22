@@ -5,16 +5,10 @@ import {
   useMemo,
   type ReactNode,
 } from 'react'
-import {
-  createPeriod,
-  deletePeriod,
-  saveActual,
-  saveDay,
-  type PeriodPayload,
-} from '../lib/api'
+import { saveActual, saveDay, type PeriodPayload } from '../lib/api'
 import { periodFromPayload, toReportContext } from '../lib/pay'
 import { useBootstrap, usePatchBootstrap } from '../lib/queries'
-import { toIsoDate, type DateRange, type Period, type Shift } from '../lib/timesheet'
+import type { Period, Shift } from '../lib/timesheet'
 import { useAuth } from './AuthContext'
 import { usePayData } from './PayDataContext'
 
@@ -23,19 +17,18 @@ type TimesheetContextValue = {
   loading: boolean
   error: boolean
   retry: () => void
-  /** Creates the period, then saves each given day. Returns the new period id. */
-  addPeriod: (range: DateRange, shifts: Record<string, Shift>) => Promise<string>
-  removePeriod: (periodId: string) => Promise<void>
-  saveShift: (periodId: string, isoDate: string, shift: Shift | null) => Promise<void>
+  /** Saves the one or two shifts of a day. Periods are created and removed per job. */
+  saveDay: (isoDate: string, shift: Shift | null) => Promise<void>
   setActual: (periodId: string, amount: number | undefined) => Promise<void>
 }
 
 const TimesheetContext = createContext<TimesheetContextValue | null>(null)
 
-function upsert(periods: PeriodPayload[], next: PeriodPayload): PeriodPayload[] {
-  return periods.some((period) => period.id === next.id)
-    ? periods.map((period) => (period.id === next.id ? next : period))
-    : [...periods, next]
+function upsertMany(periods: PeriodPayload[], next: PeriodPayload[], deleted: string[]): PeriodPayload[] {
+  const gone = new Set(deleted)
+  const byId = new Map(periods.filter((period) => !gone.has(period.id)).map((period) => [period.id, period]))
+  for (const period of next) byId.set(period.id, period)
+  return [...byId.values()]
 }
 
 export function TimesheetProvider({ children }: { children: ReactNode }) {
@@ -58,27 +51,10 @@ export function TimesheetProvider({ children }: { children: ReactNode }) {
     return query.data.periods.map((period) => periodFromPayload(period, ctx))
   }, [query.data, user, ctx])
 
-  const addPeriod = useCallback(
-    async (range: DateRange, shifts: Record<string, Shift>) => {
-      const period = await createPeriod(toIsoDate(range.start), toIsoDate(range.end), shifts)
-      patch((prev) => ({ ...prev, periods: upsert(prev.periods, period) }))
-      return period.id
-    },
-    [patch],
-  )
-
-  const removePeriod = useCallback(
-    async (periodId: string) => {
-      await deletePeriod(periodId)
-      patch((prev) => ({ ...prev, periods: prev.periods.filter((period) => period.id !== periodId) }))
-    },
-    [patch],
-  )
-
-  const saveShift = useCallback(
-    async (periodId: string, isoDate: string, shift: Shift | null) => {
-      const period = await saveDay(periodId, isoDate, shift)
-      patch((prev) => ({ ...prev, periods: upsert(prev.periods, period) }))
+  const saveDayShift = useCallback(
+    async (isoDate: string, shift: Shift | null) => {
+      const saved = await saveDay(isoDate, shift)
+      patch((prev) => ({ ...prev, periods: upsertMany(prev.periods, saved.periods, saved.deleted) }))
     },
     [patch],
   )
@@ -86,7 +62,10 @@ export function TimesheetProvider({ children }: { children: ReactNode }) {
   const setActual = useCallback(
     async (periodId: string, amount: number | undefined) => {
       const period = await saveActual(periodId, amount)
-      patch((prev) => ({ ...prev, periods: upsert(prev.periods, period) }))
+      patch((prev) => ({
+        ...prev,
+        periods: prev.periods.map((item) => (item.id === period.id ? period : item)),
+      }))
     },
     [patch],
   )
@@ -97,12 +76,10 @@ export function TimesheetProvider({ children }: { children: ReactNode }) {
       loading: query.isLoading,
       error: query.isError,
       retry,
-      addPeriod,
-      removePeriod,
-      saveShift,
+      saveDay: saveDayShift,
       setActual,
     }),
-    [periods, query.isLoading, query.isError, retry, addPeriod, removePeriod, saveShift, setActual],
+    [periods, query.isLoading, query.isError, retry, saveDayShift, setActual],
   )
 
   return <TimesheetContext.Provider value={value}>{children}</TimesheetContext.Provider>

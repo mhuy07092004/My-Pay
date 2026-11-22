@@ -29,10 +29,13 @@ export const MAX_RANGE_DAYS = 14
 
 export type Period = {
   id: string
+  jobId: string
   /** ISO date YYYY-MM-DD */
   start: string
   /** ISO date YYYY-MM-DD */
   end: string
+  /** ISO date the employer pays this period. */
+  paymentDate: string
   shifts: Record<string, Shift>
   /** Net amount received, in dollars. */
   actual?: number

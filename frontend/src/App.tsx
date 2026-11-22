@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import { USE_MOCK } from './lib/mock/flag'
 import { About } from './pages/About'
@@ -10,10 +10,7 @@ import { ResetPassword } from './pages/ResetPassword'
 import { Pricing } from './pages/Pricing'
 import { Dashboard } from './pages/dashboard/dashboard'
 import { DashboardLayout } from './pages/dashboard/DashboardLayout'
-import { NewShifts } from './pages/dashboard/new_shifts'
-import { PeriodDetail } from './pages/dashboard/period_detail'
 import { Report } from './pages/dashboard/report'
-import { Calendar } from './pages/dashboard/calendar'
 import { Settings } from './pages/dashboard/settings'
 import { Timesheet } from './pages/dashboard/timesheet'
 
@@ -33,6 +30,11 @@ function RedirectIfAuthenticated({ children }: { children: ReactNode }) {
     return <Navigate to="/dashboard" replace />
   }
   return children
+}
+
+function PeriodLink() {
+  const { periodId } = useParams()
+  return <Navigate to={`/dashboard/timesheet?period=${periodId ?? ''}`} replace />
 }
 
 function MockDataBadge() {
@@ -71,10 +73,10 @@ function App() {
           }
         >
           <Route index element={<Dashboard />} />
-          <Route path="calendar" element={<Calendar />} />
+          <Route path="calendar" element={<Navigate to="/dashboard/timesheet" replace />} />
           <Route path="timesheet" element={<Timesheet />} />
-          <Route path="timesheet/newshifts" element={<NewShifts />} />
-          <Route path="timesheet/:periodId" element={<PeriodDetail />} />
+          <Route path="timesheet/newshifts" element={<Navigate to="/dashboard/timesheet" replace />} />
+          <Route path="timesheet/:periodId" element={<PeriodLink />} />
           <Route path="report" element={<Report />} />
           <Route path="settings" element={<Settings />} />
         </Route>

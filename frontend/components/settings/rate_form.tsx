@@ -1,6 +1,10 @@
+import { addDaysIso, cycleLength, isValidSchedule, periodFor } from '@my-pay/engine'
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { DatePicker } from '../date_picker/date_picker'
 import { usePayData } from '../../src/context/PayDataContext'
+import { useTimesheet } from '../../src/context/TimesheetContext'
+import { toIsoDate } from '../../src/lib/timesheet'
 import { getAwardRate } from '../../src/lib/api'
 import {
   CUSTOM_ID,
@@ -23,9 +27,19 @@ type RateFormProps = {
   onCancel: () => void
 }
 
+function defaultSchedule() {
+  const today = new Date()
+  const monday = new Date(today)
+  monday.setDate(today.getDate() - ((today.getDay() + 6) % 7))
+  const start = toIsoDate(monday)
+  return { start, pay: addDaysIso(start, 13) }
+}
+
 export function RateForm({ initial, onConfirm, onCancel }: RateFormProps) {
   const { t } = useTranslation()
   const { rates, taxProfile } = usePayData()
+  const { periods } = useTimesheet()
+  const defaults = defaultSchedule()
   const [rateId, setRateId] = useState(
     initial?.kind === 'custom' ? CUSTOM_ID : PRESET_ID,
   )
@@ -35,6 +49,9 @@ export function RateForm({ initial, onConfirm, onCancel }: RateFormProps) {
   const [age, setAge] = useState(initial?.age ?? '')
   const [pay, setPay] = useState<PayRates>(initial?.pay ?? EMPTY_PAY)
   const [overtime, setOvertime] = useState(initial?.overtimeEnabled ?? false)
+  const [payCycle, setPayCycle] = useState<'weekly' | 'fortnightly'>(initial?.payCycle ?? 'fortnightly')
+  const [scheduleStart, setScheduleStart] = useState(initial?.scheduleStart || defaults.start)
+  const [payDate, setPayDate] = useState(initial?.payDate || defaults.pay)
   const isForeign = taxProfile.residency === 'foreign'
   const [claimTft, setClaimTft] = useState(
     initial?.claimsTaxFreeThreshold ??
@@ -75,7 +92,20 @@ export function RateForm({ initial, onConfirm, onCancel }: RateFormProps) {
     setPay((p) => ({ ...p, overtime: { ...p.overtime, [key]: v } }))
 
   const name = customName.trim() || (isCustom ? '' : t('settings.rates.fastFood'))
-  const canConfirm = isCustom ? name !== '' : Boolean(status && level && age)
+  const schedule = { payCycle, startDate: scheduleStart, payDate }
+  const scheduleOk = Boolean(scheduleStart && payDate && isValidSchedule(schedule))
+  const preview = scheduleOk ? periodFor(schedule, scheduleStart) : null
+  const nextPreview = preview ? periodFor(schedule, addDaysIso(preview.endDate, 1)) : null
+  const scheduleChanged =
+    Boolean(initial) &&
+    (payCycle !== initial?.payCycle || scheduleStart !== initial?.scheduleStart || payDate !== initial?.payDate)
+  const hasShifts = Boolean(
+    initial && periods.some((period) => period.jobId === initial.id && Object.keys(period.shifts).length > 0),
+  )
+  const otherClaim = rates.some(
+    (rate) => rate.id !== initial?.id && !rate.archived && rate.claimsTaxFreeThreshold,
+  )
+  const canConfirm = (isCustom ? name !== '' : Boolean(status && level && age)) && scheduleOk
 
   const pick = [{ value: '', label: t('settings.rates.select') }]
 
@@ -95,6 +125,9 @@ export function RateForm({ initial, onConfirm, onCancel }: RateFormProps) {
         level,
         age,
         claimsTaxFreeThreshold: !isForeign && claimTft,
+        payCycle,
+        scheduleStart,
+        payDate,
       })
     } catch {
       setFailed(true)
@@ -195,6 +228,40 @@ export function RateForm({ initial, onConfirm, onCancel }: RateFormProps) {
         </div>
       ) : null}
 
+      <h3 className="mt-6 text-sm font-semibold text-[#A1A1AA]">{t('settings.rates.scheduleTitle')}</h3>
+      <div className="mt-3 grid gap-4 md:grid-cols-2">
+        <Select
+          label={t('settings.rates.payCycle')}
+          value={payCycle}
+          options={[
+            { value: 'weekly', label: t('settings.tax.weekly') },
+            { value: 'fortnightly', label: t('settings.tax.fortnightly') },
+          ]}
+          onChange={(value) => {
+            const next = value as 'weekly' | 'fortnightly'
+            setPayCycle(next)
+            if (scheduleStart) setPayDate(addDaysIso(scheduleStart, cycleLength(next) - 1))
+          }}
+        />
+        <DatePicker label={t('settings.rates.scheduleStart')} value={scheduleStart} onChange={setScheduleStart} />
+        <DatePicker label={t('settings.rates.payDate')} value={payDate} onChange={setPayDate} />
+      </div>
+      {preview && nextPreview ? (
+        <p className="mt-2 text-xs text-[#A1A1AA]">
+          {t('settings.rates.schedulePreview', {
+            start: preview.startDate,
+            end: preview.endDate,
+            pay: preview.paymentDate,
+            nextPay: nextPreview.paymentDate,
+          })}
+        </p>
+      ) : (
+        <p className="mt-2 text-xs text-[#EF4444]">{t('settings.rates.scheduleInvalid')}</p>
+      )}
+      {scheduleChanged && hasShifts ? (
+        <p className="mt-2 text-xs text-[#FCD34D]">{t('settings.rates.scheduleReshuffle')}</p>
+      ) : null}
+
       {isForeign ? null : (
         <div className="mt-6">
           <label className="flex cursor-pointer items-center gap-2 text-sm text-[#F4F4F5]">
@@ -207,6 +274,9 @@ export function RateForm({ initial, onConfirm, onCancel }: RateFormProps) {
             {t('settings.rates.claimTaxFree')}
           </label>
           <p className="mt-1.5 text-xs text-[#71717A]">{t('settings.rates.claimTaxFreeHint')}</p>
+          {claimTft && otherClaim ? (
+            <p className="mt-2 text-xs text-[#FCD34D]">{t('settings.rates.claimTaxFreeWarn')}</p>
+          ) : null}
         </div>
       )}
 

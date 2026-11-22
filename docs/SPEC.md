@@ -71,7 +71,7 @@ Module thuần `taxEngine`, không phụ thuộc UI. Hệ số và ví dụ số
 #### Hồ sơ thuế (nhập một lần)
 
 - [x] Resident hoặc **foreign resident**.
-- [x] Có claim **tax-free threshold** hay không. Chỉ một job được tick. Job đó tính theo biểu có ngưỡng miễn thuế, các job khác tính theo biểu cao hơn.
+- [x] Có claim **tax-free threshold** hay không, theo từng job. Nhiều job có thể cùng tick. Mỗi job tính theo biểu của chính nó. Form cảnh báo ATO chỉ cho claim ở một employer.
 - [x] Có **study / training support loan** hay không (HELP, VSL, Financial Supplement, SSL, AASL).
 - [x] **Tax offset** năm (số tiền annual, tùy chọn). Chỉ scale 2, 5, 6.
 - [x] **Medicare levy variation** (tùy chọn): full exemption → scale 5; half exemption → scale 6; điều chỉnh theo spouse/con (family income thấp). Nếu app không thu thập family variation thì bỏ bước trừ Medicare levy adjustment.
@@ -179,7 +179,7 @@ Study loan chỉ áp dụng khi user khai có nợ study/training, và **không*
 | Bảng | Mục đích |
 |---|---|
 | `profiles` | Thông tin user, bang, timezone |
-| `tax_profiles` | Residency (resident / foreign resident), claim tax-free threshold, study/training loan, annual tax offset, Medicare levy variation (none / full / half), family variation (spouse, số con) nếu có, chu kỳ trả lương. Không lưu số TFN |
+| `tax_profiles` | Residency (resident / foreign resident), study/training loan, annual tax offset, Medicare levy variation (none / full / half). Không lưu số TFN và không lưu chu kỳ trả lương |
 | `jobs` | Job/employer, award, status, level, tuổi, rate đang dùng. Tax-free threshold chỉ claim ở một job |
 | `award_rates` | $/giờ theo status, level, tuổi, loại giờ (ordinary, thứ bảy, chủ nhật, ngày lễ, overtime) + `effective_from`. Số mục 9 |
 | `tax_withholding_coefficients` | Hệ số PAYG: năm tài chính, scale (1–3, 5–6), ngưỡng `x less than`, `a`, `b`, `effective_from` |
@@ -201,7 +201,7 @@ Không dùng bảng `tax_brackets` thu nhập cả năm cho withholding. Dự b�
 - Engine: `calcShift` (giá từng ca), `withholdCents` (PAYG), `computePeriod` (gross, tax, net theo từng job), `report`. Tiền là số nguyên cent, làm tròn half-up, không dùng float cho thuế. Có unit test (ví dụ ATO, kịch bản thứ bảy A/B).
 - Hệ số thuế đọc từ DB (`tax_withholding_coefficients`, `tax_study_loan_coefficients`, `tax_offset_rates`), chọn bộ theo ngày trả lương (= ngày cuối kỳ). Không hằng số trong code (trừ bản seed JSON dùng sinh migration).
 - Backend Express: xác thực JWT của Supabase (`getClaims`), mỗi request dùng Supabase client mang Bearer của user nên RLS luôn áp dụng. API: `/api/me`, `/tax-profile`, `/rules`, `/jobs`, `/award-rates`, `/periods`, `/periods/:id/days/:date`, `/report`.
-- Supabase: Auth + Postgres + RLS. Migration ở `supabase/migrations`. Một job duy nhất được claim tax-free threshold (partial unique index + RPC `set_tax_free_threshold`). Kỳ lương không chồng nhau (exclusion constraint).
+- Supabase: Auth + Postgres + RLS. Migration ở `supabase/migrations`. Mỗi job có lịch trả lương riêng. Nhiều job được claim tax-free threshold (RPC `set_tax_free_threshold`). Kỳ lương của cùng một job không chồng nhau.
 - Kỳ lương dài cố định theo chu kỳ (weekly 7 ngày, fortnightly 14 ngày), chọn trong hồ sơ thuế.
 - Rate snapshot: khi lưu ca, rate của job được chụp vào `shifts.rate_snapshot`; ca đã lưu tính theo snapshot, đổi rate không làm đổi ca cũ. Bản nháp tính theo rate hiện tại.
 - Mỗi ngày tối đa 2 ca. Mỗi ca có: Public holiday (bật rate lễ), số giờ overtime do user chọn (là những giờ cuối của ca; 2 giờ OT đầu mỗi ngày/job tính `otFirst2`, sau đó `otAfter2`; Chủ nhật `otSunday`; lễ `otPublicHoliday`).
@@ -298,3 +298,4 @@ Ví dụ đô la là Level 1, 21+. Casual penalty = (phần trăm + 25 điểm p
 - v0.1 (2026-11-04): tạo từ yêu cầu ban đầu.
 - v0.6 (2026-11-04): thêm backend Express + Supabase, engine dùng chung, nhiều job (thuế tính theo từng job, claim tax-free threshold một job), Public holiday và overtime theo từng ca, ô Mon–Fri, kỳ lương cố định theo chu kỳ, rate snapshot theo ca, tối đa 2 ca/ngày, bỏ MSW.
 - v0.7 (2026-11-04): thuế trên app là PAYG Schedule 1. Chỉ một job claim tax-free threshold. Ngày lễ theo bang (2026–2027). Xóa kỳ và xóa job. Bỏ avatar. Chặn ca chồng giờ trong database. Deploy Vercel cùng domain với API.
+- v0.8 (2026-11-22): mỗi job có pay cycle, ngày bắt đầu kỳ và ngày trả lương. Kỳ lương tạo khi lưu ca. Nhiều job được claim tax-free threshold, kèm cảnh báo. Chấm công trên lịch tháng.

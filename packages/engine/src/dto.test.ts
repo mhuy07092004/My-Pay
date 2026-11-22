@@ -6,8 +6,10 @@ describe('periodInputFromDto', () => {
   it('copies stored shifts into an engine period', () => {
     const dto: RawPeriodDto = {
       id: 'p1',
+      jobId: 'j1',
       startDate: '2026-11-02',
       endDate: '2026-11-08',
+      paymentDate: '2026-11-08',
       payCycle: 'weekly',
       actualCents: 100,
       shifts: [
@@ -27,6 +29,7 @@ describe('periodInputFromDto', () => {
     expect(periodInputFromDto(dto)).toEqual({
       startDate: '2026-11-02',
       endDate: '2026-11-08',
+      paymentDate: '2026-11-08',
       payCycle: 'weekly',
       shifts: dto.shifts,
     })

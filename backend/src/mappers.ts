@@ -43,6 +43,9 @@ export type JobDto = {
   age: string
   claimsTaxFreeThreshold: boolean
   archived: boolean
+  payCycle: 'weekly' | 'fortnightly'
+  scheduleStart: string
+  payDate: string
   rate: RateSnapshot
 }
 
@@ -56,17 +59,19 @@ export function jobFromRow(row: Row): JobDto {
     age: row.age,
     claimsTaxFreeThreshold: Boolean(row.claims_tax_free_threshold),
     archived: row.archived_at != null,
+    payCycle: row.pay_cycle === 'weekly' ? 'weekly' : 'fortnightly',
+    scheduleStart: row.schedule_start ?? '',
+    payDate: row.schedule_pay_date ?? '',
     rate: rateFromRow(row),
   }
 }
 
-export function taxProfileFromRow(row: Row | null): TaxProfile & { payCycle: 'weekly' | 'fortnightly' } {
+export function taxProfileFromRow(row: Row | null): TaxProfile {
   return {
     residency: row?.residency ?? 'resident',
     studyLoan: Boolean(row?.study_loan),
     annualOffsetCents: Number(row?.annual_offset_cents ?? 0),
     medicareVariation: row?.medicare_variation ?? 'none',
-    payCycle: row?.pay_cycle ?? 'fortnightly',
   }
 }
 

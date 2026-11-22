@@ -33,6 +33,8 @@ export type PeriodShift = {
 export type PeriodInput = {
   startDate: string
   endDate: string
+  /** Payday. Tax coefficients are the set in force on this date. */
+  paymentDate: string
   payCycle: PayCycle
   shifts: PeriodShift[]
 }
@@ -89,8 +91,8 @@ export function pickCoeffSet(sets: CoeffSet[], paymentDate: string): CoeffSet {
 /**
  * Gross, estimated PAYG withholding and net for a pay period. Tax is worked
  * out per job: the scale follows residency, the tax-free-threshold claim and
- * the Medicare variation. Coefficients are the set in force on the period's
- * end date (the payment date). `upTo` ignores shifts after that date.
+ * the Medicare variation. Coefficients are the set in force on the payday.
+ * `upTo` ignores shifts after that date.
  */
 export function computePeriod(
   period: PeriodInput,
@@ -99,7 +101,7 @@ export function computePeriod(
   coeffSets: CoeffSet[],
   opts: { upTo?: string; holidays?: PublicHoliday[] } = {},
 ): PeriodResult {
-  const coeffs = pickCoeffSet(coeffSets, period.endDate)
+  const coeffs = pickCoeffSet(coeffSets, period.paymentDate)
   const claims = new Map(jobs.map((j) => [j.id, j.claimsTaxFreeThreshold]))
   const shifts = period.shifts
     .filter((s) => !opts.upTo || s.date <= opts.upTo)

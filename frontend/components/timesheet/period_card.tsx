@@ -7,6 +7,9 @@ import { HoursBadge } from './hours_badge'
 
 type PeriodCardProps = {
   id: string
+  jobName?: string
+  jobColor?: string
+  paymentDate?: string
   start: string
   end: string
   income: number
@@ -33,6 +36,9 @@ export function PeriodCardSkeleton() {
 
 export function PeriodCard({
   id,
+  jobName,
+  jobColor = '#C8E664',
+  paymentDate,
   start,
   end,
   income,
@@ -56,13 +62,21 @@ export function PeriodCard({
 
   return (
     <Link
-      to={`/dashboard/timesheet/${id}`}
+      to={`/dashboard/timesheet?period=${id}`}
       className="flex items-center gap-3 rounded-xl border border-[#27272A] bg-[#18181B] px-4 py-4 sm:gap-4 sm:px-5 transition-colors hover:bg-[#1E1E1E]"
     >
       <div className="flex-1">
         <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
           <p className="text-base font-medium text-[#F4F4F5]">
+            {jobName ? (
+              <span className="mr-2 text-sm font-semibold" style={{ color: jobColor }}>
+                {jobName}
+              </span>
+            ) : null}
             {fmt.format(range.start)} → {fmt.format(range.end)}
+            {paymentDate ? (
+              <span className="mt-0.5 block text-xs font-normal text-[#A1A1AA]">{paymentDate}</span>
+            ) : null}
           </p>
           <HoursBadge minutes={minutes} payCycle={payCycle} />
         </div>

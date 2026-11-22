@@ -243,6 +243,21 @@
     "checkOut": "Ra ca",
     "thisShift": "Ca này",
     "saveShift": "Lưu ca",
+    "paydayChip": "Ngày lương · {{job}}",
+    "payslip": {
+      "title": "Phiếu lương",
+      "payday": "Trả ngày {{date}}",
+      "withThreshold": "có tax-free threshold",
+      "noThreshold": "không tax-free threshold",
+      "actual": "Số tiền thực nhận",
+      "variance": "Chênh lệch {{amount}}",
+      "saveActual": "Lưu số tiền"
+    },
+    "paydayPanel": {
+      "title": "Ngày trả lương trong tháng",
+      "empty": "Tháng này không có ngày trả lương.",
+      "upcoming": "Kỳ này chưa có ca"
+    },
     "moreShifts": "Có hơn 1 ca?",
     "shiftNumber": "Ca {{n}}",
     "break": {
@@ -442,7 +457,16 @@
       "weekday": "Thứ 2–6",
       "taxFreeBadge": "Tax-free threshold",
       "claimTaxFree": "Claim tax-free threshold",
-      "claimTaxFreeHint": "Chỉ một chỗ làm được claim tax-free threshold. Tick chỗ này sẽ bỏ tick các chỗ khác.",
+      "claimTaxFreeHint": "Mỗi chỗ làm được tính thuế riêng. Tick ở đây không đổi các chỗ khác.",
+      "claimTaxFreeWarn": "Một chỗ khác cũng đang claim tax-free threshold. ATO chỉ cho claim ở một employer. Claim hai chỗ có thể bị truy thu cuối năm.",
+      "scheduleTitle": "Lịch trả lương",
+      "payCycle": "Chu kỳ lương",
+      "scheduleStart": "Ngày đầu của một kỳ lương",
+      "payDate": "Ngày trả lương của kỳ đó",
+      "schedulePick": "Chọn ngày",
+      "schedulePreview": "Kỳ {{start}}–{{end}}, trả {{pay}}. Kỳ sau trả {{nextPay}}.",
+      "scheduleInvalid": "Ngày trả lương phải trong vòng 0 đến 14 ngày sau ngày cuối kỳ.",
+      "scheduleReshuffle": "Lưu sẽ xếp lại ca của chỗ này theo lịch mới. Số tiền thực nhận chỉ giữ khi ngày kỳ không đổi.",
       "delete": "Xóa",
       "deleteConfirm": "Xóa chỗ làm này?",
       "saveError": "Không lưu được rate này"

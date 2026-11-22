@@ -190,6 +190,7 @@ describe('computePeriod: shared first-2h overtime counter', () => {
       {
         startDate: '2026-11-02',
         endDate: '2026-11-15',
+        paymentDate: '2026-11-15',
         payCycle: 'fortnightly',
         shifts: [
           { ...base, part: 1, checkIn: '08:00', checkOut: '12:00', overtimeMinutes: 60 },

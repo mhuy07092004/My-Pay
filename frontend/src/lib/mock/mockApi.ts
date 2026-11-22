@@ -3,8 +3,10 @@ import {
   REPORT_RANGES,
   buildIncomeSeries,
   buildReportStats,
+  addDaysIso,
   computePeriod,
-  diffDaysIso,
+  isValidSchedule,
+  periodFor,
   type PeriodShift,
   type PublicHoliday,
   type RateSnapshot,
@@ -50,8 +52,10 @@ type StoredShift = {
 
 type StoredPeriod = {
   id: string
+  jobId: string
   startDate: string
   endDate: string
+  paymentDate: string
   payCycle: 'weekly' | 'fortnightly'
   actualCents: number | null
   shifts: StoredShift[]
@@ -72,6 +76,9 @@ type JobBody = {
   age: string
   overtimeEnabled: boolean
   claimsTaxFreeThreshold?: boolean
+  payCycle?: 'weekly' | 'fortnightly'
+  scheduleStart?: string
+  payDate?: string
   rate: Omit<RateSnapshot, 'overtimeEnabled'>
 }
 
@@ -132,7 +139,6 @@ function seed(identity: { email: string; firstName: string; lastName: string }):
       studyLoan: false,
       annualOffsetCents: 0,
       medicareVariation: 'none',
-      payCycle: 'fortnightly',
     },
     jobs: [
       {
@@ -144,14 +150,19 @@ function seed(identity: { email: string; firstName: string; lastName: string }):
         age: '21',
         claimsTaxFreeThreshold: true,
         archived: false,
+        payCycle: 'fortnightly',
+        scheduleStart: '2026-10-26',
+        payDate: '2026-11-08',
         rate,
       },
     ],
     periods: [
       {
         id: '00000000-0000-4000-8000-000000000002',
+        jobId,
         startDate: '2026-10-26',
         endDate: '2026-11-08',
+        paymentDate: '2026-11-08',
         payCycle: 'fortnightly',
         actualCents: 82000,
         shifts: [
@@ -173,6 +184,7 @@ function loadStore(identity: { email: string; firstName: string; lastName: strin
   const stored = readJson<Store>(storeKey(identity.email))
   if (stored?.profile && stored.tax && Array.isArray(stored.jobs) && Array.isArray(stored.periods)) {
     stored.profile.email = identity.email
+    migrateStore(stored)
     return stored
   }
   return seed(identity)
@@ -216,6 +228,7 @@ function toPeriodDto(period: StoredPeriod, store: Store) {
   const input = {
     startDate: period.startDate,
     endDate: period.endDate,
+    paymentDate: period.paymentDate,
     payCycle: period.payCycle,
     shifts: periodShifts(period),
   }
@@ -224,8 +237,10 @@ function toPeriodDto(period: StoredPeriod, store: Store) {
   })
   return {
     id: period.id,
+    jobId: period.jobId,
     startDate: period.startDate,
     endDate: period.endDate,
+    paymentDate: period.paymentDate,
     payCycle: period.payCycle,
     actualCents: period.actualCents,
     shifts: period.shifts.map((shift) => ({
@@ -253,6 +268,7 @@ function reportPeriods(store: Store): ReportPeriod[] {
     id: period.id,
     startDate: period.startDate,
     endDate: period.endDate,
+    paymentDate: period.paymentDate,
     payCycle: period.payCycle,
     actualCents: period.actualCents,
     shifts: periodShifts(period),
@@ -327,10 +343,6 @@ function readDayShifts(store: Store, date: string, value: unknown): StoredShift[
   return shifts
 }
 
-function rangesOverlap(start: string, end: string, period: StoredPeriod): boolean {
-  return start <= period.endDate && period.startDate <= end
-}
-
 function readJobBody(body: unknown): JobBody {
   if (!isRecord(body) || !isRecord(body.rate)) fail(400, 'invalid')
   const rate = {} as JobBody['rate']
@@ -351,6 +363,9 @@ function readJobBody(body: unknown): JobBody {
     overtimeEnabled: body.overtimeEnabled,
     claimsTaxFreeThreshold:
       typeof body.claimsTaxFreeThreshold === 'boolean' ? body.claimsTaxFreeThreshold : undefined,
+    payCycle: body.payCycle === 'weekly' || body.payCycle === 'fortnightly' ? body.payCycle : undefined,
+    scheduleStart: typeof body.scheduleStart === 'string' ? body.scheduleStart : undefined,
+    payDate: typeof body.payDate === 'string' ? body.payDate : undefined,
     rate,
   }
 }
@@ -360,10 +375,109 @@ function snapshot(body: JobBody): RateSnapshot {
 }
 
 function applyClaim(store: Store, jobId: string, claim: boolean) {
-  for (const job of store.jobs) {
-    if (job.id === jobId) job.claimsTaxFreeThreshold = claim
-    else if (claim) job.claimsTaxFreeThreshold = false
+  const job = store.jobs.find((item) => item.id === jobId)
+  if (job) job.claimsTaxFreeThreshold = claim
+}
+
+function scheduleOf(job: JobDto) {
+  return { payCycle: job.payCycle, startDate: job.scheduleStart, payDate: job.payDate }
+}
+
+function ensurePeriod(store: Store, job: JobDto, iso: string): StoredPeriod {
+  const bounds = periodFor(scheduleOf(job), iso)
+  let period = store.periods.find(
+    (item) => item.jobId === job.id && item.startDate <= iso && iso <= item.endDate,
+  )
+  if (!period) {
+    period = {
+      id: crypto.randomUUID(),
+      jobId: job.id,
+      startDate: bounds.startDate,
+      endDate: bounds.endDate,
+      paymentDate: bounds.paymentDate,
+      payCycle: job.payCycle,
+      actualCents: null,
+      shifts: [],
+    }
+    store.periods.push(period)
   }
+  return period
+}
+
+function applySchedule(
+  store: Store,
+  job: JobDto,
+  cycle: 'weekly' | 'fortnightly',
+  start: string,
+  pay: string,
+) {
+  const schedule = { payCycle: cycle, startDate: start, payDate: pay }
+  if (!isValidSchedule(schedule)) fail(400, 'invalid_schedule')
+  const shifts = store.periods.flatMap((period) => (period.jobId === job.id ? period.shifts : []))
+  const actuals = store.periods.filter((period) => period.jobId === job.id && period.actualCents !== null)
+  store.periods = store.periods.filter((period) => period.jobId !== job.id)
+  job.payCycle = cycle
+  job.scheduleStart = start
+  job.payDate = pay
+  for (const shift of shifts) {
+    const period = ensurePeriod(store, job, shift.date)
+    const kept = actuals.find((item) => item.startDate === period.startDate && item.endDate === period.endDate)
+    if (kept && period.actualCents === null) period.actualCents = kept.actualCents
+    period.shifts.push(shift)
+  }
+}
+
+function mondayIso(from = new Date()): string {
+  const date = new Date(from)
+  date.setDate(date.getDate() - ((date.getDay() + 6) % 7))
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+function migrateStore(store: Store) {
+  const legacyCycle = (store.tax as { payCycle?: string }).payCycle === 'weekly' ? 'weekly' : 'fortnightly'
+  delete (store.tax as { payCycle?: string }).payCycle
+  for (const job of store.jobs) {
+    if (job.payCycle && job.scheduleStart && job.payDate) continue
+    const owned = store.periods.filter(
+      (period) => period.jobId === job.id || period.shifts.some((shift) => shift.jobId === job.id),
+    )
+    const latest = [...owned].sort((a, b) => b.startDate.localeCompare(a.startDate))[0]
+    const cycle = latest?.payCycle ?? legacyCycle
+    job.payCycle = job.payCycle ?? cycle
+    job.scheduleStart = job.scheduleStart || latest?.startDate || mondayIso()
+    job.payDate = job.payDate || latest?.endDate || addDaysIso(job.scheduleStart, cycle === 'weekly' ? 6 : 13)
+  }
+  const next: StoredPeriod[] = []
+  for (const period of store.periods) {
+    if (period.jobId && period.paymentDate) {
+      next.push(period)
+      continue
+    }
+    const byJob = new Map<string, StoredShift[]>()
+    for (const shift of period.shifts) {
+      const list = byJob.get(shift.jobId) ?? []
+      list.push(shift)
+      byJob.set(shift.jobId, list)
+    }
+    if (byJob.size === 0) continue
+    const primary = [...byJob.entries()].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]))[0][0]
+    let index = 0
+    for (const [jobId, shifts] of byJob) {
+      next.push({
+        ...period,
+        id: index === 0 ? period.id : crypto.randomUUID(),
+        jobId,
+        paymentDate: period.paymentDate || period.endDate,
+        actualCents: jobId === primary ? period.actualCents : null,
+        shifts,
+      })
+      index += 1
+    }
+  }
+  store.periods = next
 }
 
 function findPeriod(store: Store, id: string): StoredPeriod {
@@ -406,7 +520,6 @@ function dispatch(
     if (body.medicareVariation !== 'none' && body.medicareVariation !== 'full' && body.medicareVariation !== 'half') {
       fail(400, 'invalid')
     }
-    if (body.payCycle !== 'weekly' && body.payCycle !== 'fortnightly') fail(400, 'invalid')
     if (typeof body.studyLoan !== 'boolean') fail(400, 'invalid')
     if (typeof body.annualOffsetCents !== 'number' || body.annualOffsetCents < 0) fail(400, 'invalid')
     store.tax = {
@@ -414,7 +527,6 @@ function dispatch(
       studyLoan: body.studyLoan,
       annualOffsetCents: body.annualOffsetCents,
       medicareVariation: body.medicareVariation,
-      payCycle: body.payCycle,
     }
     if (store.tax.residency === 'foreign') {
       for (const job of store.jobs) job.claimsTaxFreeThreshold = false
@@ -440,9 +552,15 @@ function dispatch(
       age: body.age,
       claimsTaxFreeThreshold: false,
       archived: false,
+      payCycle: body.payCycle ?? 'fortnightly',
+      scheduleStart: body.scheduleStart ?? mondayIso(),
+      payDate: body.payDate ?? addDaysIso(body.scheduleStart ?? mondayIso(), body.payCycle === 'weekly' ? 6 : 13),
       rate: snapshot(body),
     }
     store.jobs.push(job)
+    if (body.payCycle && body.scheduleStart && body.payDate) {
+      applySchedule(store, job, body.payCycle, body.scheduleStart, body.payDate)
+    }
     if (body.claimsTaxFreeThreshold) applyClaim(store, job.id, true)
     return { job }
   }
@@ -459,6 +577,9 @@ function dispatch(
     job.age = body.age
     job.rate = snapshot(body)
     if (body.claimsTaxFreeThreshold !== undefined) applyClaim(store, job.id, body.claimsTaxFreeThreshold)
+    if (body.payCycle && body.scheduleStart && body.payDate) {
+      applySchedule(store, job, body.payCycle, body.scheduleStart, body.payDate)
+    }
     return { job }
   }
   if (jobMatch && method === 'DELETE') {
@@ -501,56 +622,39 @@ function dispatch(
     const periods = [...store.periods].sort((a, b) => b.startDate.localeCompare(a.startDate))
     return { periods: periods.map((period) => toPeriodDto(period, store)) }
   }
-  if (pathname === '/periods' && method === 'POST') {
-    const body = options.body
-    if (!isRecord(body) || typeof body.startDate !== 'string' || typeof body.endDate !== 'string') {
-      fail(400, 'invalid')
-    }
-    const expected = store.tax.payCycle === 'weekly' ? 6 : 13
-    if (diffDaysIso(body.startDate, body.endDate) !== expected) fail(400, 'invalid_period_length')
-    if (store.periods.some((period) => rangesOverlap(body.startDate as string, body.endDate as string, period))) {
-      fail(400, 'period_overlap')
-    }
-    const days = Array.isArray(body.days) ? body.days : []
-    if (days.length > 14) fail(400, 'invalid')
-    const seen = new Set<string>()
-    const shifts: StoredShift[] = []
-    for (const day of days) {
-      if (!isRecord(day) || typeof day.date !== 'string') fail(400, 'invalid')
-      if (day.date < body.startDate || day.date > body.endDate || seen.has(day.date)) fail(400, 'invalid')
-      seen.add(day.date)
-      shifts.push(...readDayShifts(store, day.date, day.shifts))
-    }
-    const period: StoredPeriod = {
-      id: crypto.randomUUID(),
-      startDate: body.startDate,
-      endDate: body.endDate,
-      payCycle: store.tax.payCycle,
-      actualCents: null,
-      shifts,
-    }
-    store.periods.push(period)
-    return { period: toPeriodDto(period, store) }
-  }
-
-  const dayMatch = /^\/periods\/([^/]+)\/days\/(\d{4}-\d{2}-\d{2})$/.exec(pathname)
+  const dayMatch = /^\/days\/(\d{4}-\d{2}-\d{2})$/.exec(pathname)
   if (dayMatch && method === 'PUT') {
-    const period = findPeriod(store, dayMatch[1])
-    const date = dayMatch[2]
-    if (date < period.startDate || date > period.endDate) fail(400, 'invalid')
+    const date = dayMatch[1]
     const body = options.body
     if (!isRecord(body)) fail(400, 'invalid')
     const shifts = readDayShifts(store, date, body.shifts)
-    period.shifts = [...period.shifts.filter((shift) => shift.date !== date), ...shifts]
-    return { period: toPeriodDto(period, store) }
+    const touched = new Set<string>()
+    for (const period of store.periods) {
+      if (period.shifts.some((shift) => shift.date === date)) touched.add(period.id)
+      period.shifts = period.shifts.filter((shift) => shift.date !== date)
+    }
+    for (const shift of shifts) {
+      const job = store.jobs.find((item) => item.id === shift.jobId)
+      if (!job) fail(404, 'not_found')
+      const period = ensurePeriod(store, job, date)
+      period.shifts.push(shift)
+      touched.add(period.id)
+    }
+    const deleted: string[] = []
+    store.periods = store.periods.filter((period) => {
+      if (period.shifts.length === 0 && period.actualCents === null) {
+        deleted.push(period.id)
+        return false
+      }
+      return true
+    })
+    return {
+      periods: store.periods.filter((period) => touched.has(period.id)).map((period) => toPeriodDto(period, store)),
+      deleted,
+    }
   }
 
   const periodMatch = /^\/periods\/([^/]+)$/.exec(pathname)
-  if (periodMatch && method === 'DELETE') {
-    const period = findPeriod(store, periodMatch[1])
-    store.periods = store.periods.filter((item) => item.id !== period.id)
-    return {}
-  }
   if (periodMatch && method === 'PATCH') {
     const period = findPeriod(store, periodMatch[1])
     const body = options.body

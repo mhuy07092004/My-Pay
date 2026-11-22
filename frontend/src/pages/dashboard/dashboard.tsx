@@ -10,6 +10,7 @@ import { PeriodCard, PeriodCardSkeleton } from '../../../components/timesheet/pe
 import { useAuth } from '../../context/AuthContext'
 import { usePayData } from '../../context/PayDataContext'
 import { useTimesheet } from '../../context/TimesheetContext'
+import { jobColorMap } from '../../lib/calendar'
 import { toReportContext } from '../../lib/pay'
 import { reportFromPeriods } from '../../lib/report'
 import { formatMoney, startOfDay, toIsoDate } from '../../lib/timesheet'
@@ -17,7 +18,8 @@ import { formatMoney, startOfDay, toIsoDate } from '../../lib/timesheet'
 export function Dashboard() {
   const { user } = useAuth()
   const { periods, loading, error, retry } = useTimesheet()
-  const { taxContext, holidays } = usePayData()
+  const { taxContext, holidays, rates } = usePayData()
+  const colors = useMemo(() => jobColorMap(rates), [rates])
   const { t } = useTranslation()
   const today = useMemo(() => toIsoDate(startOfDay(new Date())), [])
 
@@ -27,7 +29,7 @@ export function Dashboard() {
   }, [loading, error, periods, today, taxContext, holidays])
 
   const recent = useMemo(
-    () => [...periods].sort((a, b) => b.start.localeCompare(a.start)).slice(0, 3),
+    () => [...periods].sort((a, b) => b.paymentDate.localeCompare(a.paymentDate)).slice(0, 3),
     [periods],
   )
 
@@ -47,7 +49,7 @@ export function Dashboard() {
             className="[&>p:nth-of-type(2)]:text-4xl"
           />
           <Button
-            to="/dashboard/timesheet/newshifts"
+            to="/dashboard/timesheet"
             size="lg"
             className="w-full bg-[#C8E664]! text-black hover:bg-[#B5D350]!"
           >
@@ -85,6 +87,9 @@ export function Dashboard() {
                 <PeriodCard
                   key={period.id}
                   id={period.id}
+                  jobName={rates.find((rate) => rate.id === period.jobId)?.name ?? ''}
+                  jobColor={colors.get(period.jobId) ?? '#C8E664'}
+                  paymentDate={period.paymentDate}
                   start={period.start}
                   end={period.end}
                   income={period.totals?.income ?? 0}

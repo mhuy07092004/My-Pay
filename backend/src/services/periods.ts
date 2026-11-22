@@ -21,7 +21,7 @@ import { buildCoeffSets, holidayFromRow, hhmm, jobFromRow, taxProfileFromRow, ty
 type Row = Record<string, any>
 
 export type PayContext = {
-  taxProfile: TaxProfile & { payCycle: 'weekly' | 'fortnightly' }
+  taxProfile: TaxProfile
   jobs: JobDto[]
   jobTax: JobTaxInfo[]
   coeffSets: CoeffSet[]
@@ -121,8 +121,10 @@ export function rawPeriodFromRows(period: Row, shiftRows: Row[]): RawPeriodDto {
     }))
   return {
     id: period.id,
+    jobId: period.job_id,
     startDate: period.start_date,
     endDate: period.end_date,
+    paymentDate: period.payment_date ?? period.end_date,
     payCycle: period.pay_cycle,
     actualCents: period.actual_net_cents ?? null,
     shifts,

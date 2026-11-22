@@ -43,7 +43,10 @@ function fakeDb(
     from,
     rpc: async (fn: string, args: unknown) => {
       rpcs.push({ fn, args })
-      return { data: '11111111-1111-4111-8111-111111111111', error: null }
+      if (fn === 'save_day') {
+        return { data: { affected: ['11111111-1111-4111-8111-111111111111'], deleted: [] }, error: null }
+      }
+      return { data: null, error: null }
     },
   } as unknown as Db
 }
@@ -88,7 +91,7 @@ describe('auth', () => {
 describe('validation', () => {
   it('400 on a malformed period body', async () => {
     const { app } = makeApp()
-    const res = await request(app).post('/api/periods').set(auth).send({ startDate: 'x' })
+    const res = await request(app).put('/api/days/not-a-date').set(auth).send({ shifts: [] })
     expect(res.status).toBe(400)
     expect(res.body.error).toBe('invalid_request')
   })
@@ -96,20 +99,10 @@ describe('validation', () => {
   it('400 on a bad shift body', async () => {
     const { app } = makeApp()
     const res = await request(app)
-      .put('/api/periods/11111111-1111-4111-8111-111111111111/days/2026-11-07')
+      .put('/api/days/2026-11-07')
       .set(auth)
       .send({ shifts: [{ jobId: 'not-a-uuid' }] })
     expect(res.status).toBe(400)
-  })
-
-  it('400 when the period length does not match the pay cycle', async () => {
-    const { app } = makeApp({ tax_profiles: [{ pay_cycle: 'fortnightly' }] })
-    const res = await request(app)
-      .post('/api/periods')
-      .set(auth)
-      .send({ startDate: '2026-11-02', endDate: '2026-11-08' })
-    expect(res.status).toBe(400)
-    expect(res.body.error).toBe('invalid_period_length')
   })
 })
 
@@ -124,7 +117,7 @@ describe('bootstrap', () => {
   it('returns one payload and refuses caches', async () => {
     const { app } = makeApp({
       profiles: [{ id: 'user-1', first_name: 'Ada', last_name: 'Lovelace', state: 'VIC' }],
-      tax_profiles: [{ pay_cycle: 'weekly', residency: 'resident' }],
+      tax_profiles: [{ residency: 'resident' }],
       jobs: [
         {
           id: 'j1',
@@ -140,8 +133,10 @@ describe('bootstrap', () => {
       pay_periods: [
         {
           id: 'p1',
+          job_id: 'j1',
           start_date: '2026-11-02',
           end_date: '2026-11-08',
+          payment_date: '2026-11-11',
           pay_cycle: 'weekly',
           actual_net_cents: null,
         },
@@ -158,14 +153,17 @@ describe('bootstrap', () => {
       email: 'a@b.com',
       state: 'VIC',
     })
-    expect(res.body.taxProfile.payCycle).toBe('weekly')
+    expect(res.body.taxProfile.residency).toBe('resident')
+    expect(res.body.taxProfile.payCycle).toBeUndefined()
     expect(res.body.jobs[0]).toMatchObject({ id: 'j1', name: 'Cafe' })
     expect(res.body.holidays).toEqual([{ date: '2026-11-03', name: 'Cup Day', fromMinute: null }])
     expect(res.body.periods).toEqual([
       {
         id: 'p1',
+        jobId: 'j1',
         startDate: '2026-11-02',
         endDate: '2026-11-08',
+        paymentDate: '2026-11-11',
         payCycle: 'weekly',
         actualCents: null,
         shifts: [],
@@ -203,30 +201,44 @@ describe('main flow', () => {
     })
   })
 
-  it('creates a 14-day period for a fortnightly user', async () => {
+  it('saves a day and returns the periods that hold those shifts', async () => {
     const created = {
       id: '11111111-1111-4111-8111-111111111111',
+      job_id: 'j1',
       start_date: '2026-11-02',
       end_date: '2026-11-15',
+      payment_date: '2026-11-18',
       pay_cycle: 'fortnightly',
       actual_net_cents: null,
     }
     const { app, rpcs } = makeApp({
-      tax_profiles: [{ pay_cycle: 'fortnightly' }],
       pay_periods: [created],
       tax_withholding_coefficients: [
         { effective_from: '2026-07-01', scale: 2, seq: 1, lt: null, a: '0', b: '0' },
       ],
     })
     const res = await request(app)
-      .post('/api/periods')
+      .put('/api/days/2026-11-07')
       .set(auth)
-      .send({ startDate: '2026-11-02', endDate: '2026-11-15' })
-    expect(res.status).toBe(201)
-    expect(rpcs[0].fn).toBe('create_period')
-    expect(res.body.period).toMatchObject({
+      .send({
+        shifts: [
+          {
+            jobId: '11111111-1111-4111-8111-111111111111',
+            checkIn: '09:00',
+            checkOut: '17:00',
+            breakMinutes: 0,
+            publicHoliday: false,
+            overtimeMinutes: 0,
+          },
+        ],
+      })
+    expect(res.status).toBe(200)
+    expect(rpcs[0].fn).toBe('save_day')
+    expect(res.body.deleted).toEqual([])
+    expect(res.body.periods[0]).toMatchObject({
       startDate: '2026-11-02',
       endDate: '2026-11-15',
+      paymentDate: '2026-11-18',
       payCycle: 'fortnightly',
       totals: { grossCents: 0, taxCents: 0 },
     })

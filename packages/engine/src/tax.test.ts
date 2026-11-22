@@ -115,6 +115,7 @@ describe('computePeriod: two jobs', () => {
       {
         startDate: '2026-11-02',
         endDate: '2026-11-15',
+        paymentDate: '2026-11-15',
         payCycle: 'fortnightly',
         shifts: [
           { ...base, jobId: 'a', rate: rate(134400) }, // $1,344 gross
@@ -143,6 +144,7 @@ describe('computePeriod: two jobs', () => {
     const period = {
       startDate: '2026-11-02',
       endDate: '2026-11-15',
+      paymentDate: '2026-11-15',
       payCycle: 'fortnightly' as const,
       shifts: [
         {

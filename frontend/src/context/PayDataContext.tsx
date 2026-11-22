@@ -27,7 +27,6 @@ const EMPTY_PROFILE: TaxProfileDto = {
   studyLoan: false,
   annualOffsetCents: 0,
   medicareVariation: 'none',
-  payCycle: 'fortnightly',
 }
 
 type PayDataValue = {
@@ -52,13 +51,9 @@ type PayDataValue = {
 const PayDataContext = createContext<PayDataValue | null>(null)
 
 function withClaim(jobs: SavedRate[], job: SavedRate): SavedRate[] {
-  const next = jobs.some((item) => item.id === job.id)
+  return jobs.some((item) => item.id === job.id)
     ? jobs.map((item) => (item.id === job.id ? job : item))
     : [...jobs, job]
-  if (!job.claimsTaxFreeThreshold) return next
-  return next.map((item) =>
-    item.id === job.id ? item : { ...item, claimsTaxFreeThreshold: false },
-  )
 }
 
 export function PayDataProvider({ children }: { children: ReactNode }) {

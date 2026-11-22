@@ -243,6 +243,21 @@
     "checkOut": "Check out",
     "thisShift": "This shift",
     "saveShift": "Save Shift",
+    "paydayChip": "Payday · {{job}}",
+    "payslip": {
+      "title": "Payslip",
+      "payday": "Paid {{date}}",
+      "withThreshold": "tax-free threshold",
+      "noThreshold": "no tax-free threshold",
+      "actual": "Amount you received",
+      "variance": "Difference {{amount}}",
+      "saveActual": "Save amount"
+    },
+    "paydayPanel": {
+      "title": "Paydays this month",
+      "empty": "No paydays in this month.",
+      "upcoming": "No shifts in this period yet"
+    },
     "moreShifts": "More than 1 shift?",
     "shiftNumber": "Shift {{n}}",
     "break": {
@@ -443,7 +458,16 @@
       "weekday": "Mon–Fri",
       "taxFreeBadge": "Tax-free threshold",
       "claimTaxFree": "Claim tax-free threshold",
-      "claimTaxFreeHint": "Only one job can claim the tax-free threshold. Ticking this clears it on your other jobs.",
+      "claimTaxFreeHint": "Each job is taxed on its own. Claiming the threshold here does not change your other jobs.",
+      "claimTaxFreeWarn": "Another job already claims the tax-free threshold. The ATO lets you claim it with one employer. Claiming it twice can mean a tax bill later.",
+      "scheduleTitle": "Pay schedule",
+      "payCycle": "Pay cycle",
+      "scheduleStart": "First day of a pay period",
+      "payDate": "Payday for that period",
+      "schedulePick": "Choose a date",
+      "schedulePreview": "Period {{start}}–{{end}}, paid {{pay}}. Next payday {{nextPay}}.",
+      "scheduleInvalid": "Payday must be 0 to 14 days after the period ends.",
+      "scheduleReshuffle": "Saving will move this job's shifts onto the new schedule. A recorded amount is kept only when the period dates stay the same.",
       "delete": "Delete",
       "deleteConfirm": "Delete this job?",
       "saveError": "Could not save this rate"
