@@ -3,10 +3,15 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import {
+  createSaving,
+  deleteSaving,
   getBootstrap,
+  listSavings,
+  updateSaving,
   type BootstrapResponse,
   type PeriodPayload,
   type Profile,
+  type Saving,
   type TaxProfileDto,
 } from './api'
 import { readStoredBootstrap, writeStoredBootstrap } from './bootstrapStorage'
@@ -45,6 +50,67 @@ export function useBootstrap() {
     initialData: () => (email ? readStoredBootstrap<BootstrapCache>(email) : undefined),
     initialDataUpdatedAt: 0,
   })
+}
+
+export function savingsKey(email: string | null) {
+  return ['savings', email] as const
+}
+
+export function useSavings() {
+  const { user } = useAuth()
+  const email = user?.email ?? null
+  const queryClient = useQueryClient()
+  const query = useQuery({
+    queryKey: savingsKey(email),
+    queryFn: listSavings,
+    enabled: email !== null,
+  })
+
+  const patch = useCallback(
+    (next: Saving[]) => {
+      if (!email) return
+      queryClient.setQueryData<Saving[]>(savingsKey(email), next)
+    },
+    [email, queryClient],
+  )
+
+  const add = useCallback(
+    async (body: { name: string; price: number; note?: string }) => {
+      const saving = await createSaving(body)
+      patch([saving, ...(queryClient.getQueryData<Saving[]>(savingsKey(email)) ?? [])])
+      return saving
+    },
+    [email, patch, queryClient],
+  )
+
+  const update = useCallback(
+    async (id: string, body: { name: string; price: number; note?: string }) => {
+      const saving = await updateSaving(id, body)
+      const prev = queryClient.getQueryData<Saving[]>(savingsKey(email)) ?? []
+      patch(prev.map((item) => (item.id === id ? saving : item)))
+      return saving
+    },
+    [email, patch, queryClient],
+  )
+
+  const remove = useCallback(
+    async (id: string) => {
+      await deleteSaving(id)
+      const prev = queryClient.getQueryData<Saving[]>(savingsKey(email)) ?? []
+      patch(prev.filter((item) => item.id !== id))
+    },
+    [email, patch, queryClient],
+  )
+
+  return {
+    savings: query.data ?? [],
+    loading: query.isLoading,
+    error: query.isError,
+    add,
+    update,
+    remove,
+    retry: () => void query.refetch(),
+  }
 }
 
 export function usePatchBootstrap() {

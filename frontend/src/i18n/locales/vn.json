@@ -21,6 +21,7 @@
     "calendar": "Lịch",
     "reports": "Báo cáo",
     "history": "Lịch sử",
+    "calculator": "Máy tính",
     "settings": "Cài đặt",
     "logout": "Đăng xuất",
     "guest": "Khách",
@@ -403,7 +404,42 @@
   },
   "history": {
     "title": "Lịch sử",
-    "subtitle": "Xem các mục chấm công và hoạt động trước đây."
+    "subtitle": "Các kỳ lương đã xong của mọi job, mới nhất trước.",
+    "empty": "Chưa có kỳ lương nào hoàn tất.",
+    "sortNewest": "Mới nhất",
+    "sortOldest": "Cũ nhất",
+    "filterLabel": "Lọc theo job",
+    "filterAll": "Tất cả job",
+    "paydayPending": "Ngày trả lương {{date}}"
+  },
+  "calculator": {
+    "title": "Máy tính",
+    "subtitle": "Ước tính món đồ tương đương bao nhiêu giờ làm — chưa trừ thuế.",
+    "addNew": "Thêm mục tiết kiệm",
+    "addTitle": "Thêm mục tiết kiệm",
+    "editTitle": "Sửa mục tiết kiệm",
+    "name": "Tên món",
+    "price": "Giá (AUD)",
+    "note": "Ghi chú (tuỳ chọn)",
+    "notePlaceholder": "Vì sao bạn muốn mua?",
+    "save": "Lưu",
+    "edit": "Sửa",
+    "delete": "Xóa",
+    "deleteConfirm": "Xác nhận",
+    "validation": "Nhập tên và giá lớn hơn 0.",
+    "hoursPreview": "Số giờ phải làm",
+    "noTaxNote": "Ước tính theo mức lương trước thuế.",
+    "noJobs": "Thêm job trong Cài đặt để xem số giờ.",
+    "goSettings": "Cài đặt",
+    "exampleTitle": "Ví dụ",
+    "exampleBody": "Nếu món đó giá ${{price}}, bạn cần làm bao nhiêu giờ?",
+    "exampleLine": "{{hours}} theo mức ngày thường (${{rate}}/h)",
+    "rates": {
+      "weekday": "Ngày thường",
+      "saturday": "Thứ 7",
+      "sunday": "CN"
+    },
+    "noWeekdayRate": "Chưa có mức ngày thường"
   },
   "settings": {
     "title": "Cài đặt",

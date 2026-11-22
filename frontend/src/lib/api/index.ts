@@ -150,3 +150,70 @@ export async function saveActual(periodId: string, dollars: number | undefined):
   })
   return period
 }
+
+/* ------------------------------------------------------------------ savings */
+type SavingDto = {
+  id: string
+  name: string
+  priceCents: number
+  note?: string
+  createdAt: string
+}
+
+export type Saving = {
+  id: string
+  name: string
+  price: number
+  note?: string
+  createdAt: string
+}
+
+function savingFromDto(dto: SavingDto): Saving {
+  return {
+    id: dto.id,
+    name: dto.name,
+    price: dto.priceCents / 100,
+    note: dto.note,
+    createdAt: dto.createdAt,
+  }
+}
+
+export async function listSavings(): Promise<Saving[]> {
+  const { savings } = await api<{ savings: SavingDto[] }>('/savings')
+  return savings.map(savingFromDto)
+}
+
+export async function createSaving(body: {
+  name: string
+  price: number
+  note?: string
+}): Promise<Saving> {
+  const { saving } = await api<{ saving: SavingDto }>('/savings', {
+    method: 'POST',
+    body: {
+      name: body.name,
+      priceCents: Math.round(body.price * 100),
+      note: body.note,
+    },
+  })
+  return savingFromDto(saving)
+}
+
+export async function updateSaving(
+  id: string,
+  body: { name: string; price: number; note?: string },
+): Promise<Saving> {
+  const { saving } = await api<{ saving: SavingDto }>(`/savings/${id}`, {
+    method: 'PATCH',
+    body: {
+      name: body.name,
+      priceCents: Math.round(body.price * 100),
+      note: body.note,
+    },
+  })
+  return savingFromDto(saving)
+}
+
+export async function deleteSaving(id: string): Promise<void> {
+  await api(`/savings/${id}`, { method: 'DELETE' })
+}

@@ -265,6 +265,28 @@ describe('main flow', () => {
     })
   })
 
+  it('lists savings mapped from rows', async () => {
+    const { app } = makeApp({
+      savings: [
+        {
+          id: 's1',
+          name: 'Laptop',
+          price_cents: 200_000,
+          note: 'upgrade',
+          created_at: '2026-11-01T00:00:00.000Z',
+        },
+      ],
+    })
+    const res = await request(app).get('/api/savings').set(auth)
+    expect(res.status).toBe(200)
+    expect(res.body.savings[0]).toMatchObject({
+      id: 's1',
+      name: 'Laptop',
+      priceCents: 200_000,
+      note: 'upgrade',
+    })
+  })
+
   it('saves a day and returns the periods that hold those shifts', async () => {
     const created = {
       id: '11111111-1111-4111-8111-111111111111',
@@ -306,5 +328,13 @@ describe('main flow', () => {
       payCycle: 'fortnightly',
       totals: { grossCents: 0, taxCents: 0 },
     })
+  })
+})
+
+describe('savings validation', () => {
+  it('400 on a malformed saving body', async () => {
+    const { app } = makeApp({ savings: [] })
+    const res = await request(app).post('/api/savings').set(auth).send({ name: '', priceCents: -1 })
+    expect(res.status).toBe(400)
   })
 })

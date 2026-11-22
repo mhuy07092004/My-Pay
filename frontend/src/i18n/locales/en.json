@@ -21,6 +21,7 @@
     "calendar": "Calendar",
     "reports": "Reports",
     "history": "History",
+    "calculator": "Calculator",
     "settings": "Settings",
     "logout": "Logout",
     "guest": "Guest",
@@ -404,7 +405,42 @@
   },
   "history": {
     "title": "History",
-    "subtitle": "View your past time entries and activity."
+    "subtitle": "Past pay periods from every job, newest first.",
+    "empty": "No completed pay periods yet.",
+    "sortNewest": "Newest first",
+    "sortOldest": "Oldest first",
+    "filterLabel": "Filter by job",
+    "filterAll": "All jobs",
+    "paydayPending": "Payday {{date}}"
+  },
+  "calculator": {
+    "title": "Calculator",
+    "subtitle": "Estimate how many hours a purchase costs you — before tax.",
+    "addNew": "Add new saving",
+    "addTitle": "Add new saving",
+    "editTitle": "Edit saving",
+    "name": "Item name",
+    "price": "Price (AUD)",
+    "note": "Note (optional)",
+    "notePlaceholder": "Why do you want this?",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirm": "Confirm",
+    "validation": "Enter a name and a price above zero.",
+    "hoursPreview": "Hours to earn",
+    "noTaxNote": "Estimates use your pay rates before tax.",
+    "noJobs": "Add a job in Settings to see hour estimates.",
+    "goSettings": "Settings",
+    "exampleTitle": "Example",
+    "exampleBody": "If something costs ${{price}}, how many hours would you need to work?",
+    "exampleLine": "{{hours}} at weekday rate (${{rate}}/h)",
+    "rates": {
+      "weekday": "Weekday",
+      "saturday": "Sat",
+      "sunday": "Sun"
+    },
+    "noWeekdayRate": "No weekday rate set"
   },
   "settings": {
     "title": "Settings",

@@ -49,6 +49,24 @@ export type JobDto = {
   rate: RateSnapshot
 }
 
+export type SavingDto = {
+  id: string
+  name: string
+  priceCents: number
+  note?: string
+  createdAt: string
+}
+
+export function savingFromRow(row: Row): SavingDto {
+  return {
+    id: row.id,
+    name: row.name,
+    priceCents: Number(row.price_cents ?? 0),
+    note: row.note ?? undefined,
+    createdAt: row.created_at,
+  }
+}
+
 export function jobFromRow(row: Row): JobDto {
   return {
     id: row.id,

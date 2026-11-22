@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../src/context/AuthContext'
 import { LanguageSwitchButton } from '../button/swtich_button'
 
-type NavItemKey = 'home' | 'timesheet' | 'reports' | 'settings'
+type NavItemKey = 'home' | 'timesheet' | 'history' | 'calculator' | 'reports' | 'settings'
 
 const iconProps = {
   width: 24,
@@ -31,6 +31,20 @@ const icons: Record<NavItemKey, React.ReactNode> = {
       <path d="M12 7v5l3 2" />
     </svg>
   ),
+  history: (
+    <svg {...iconProps}>
+      <path d="M12 8v5l3 2" />
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12a9 9 0 1 0 3-6.7" />
+      <path d="M3 4v4h4" />
+    </svg>
+  ),
+  calculator: (
+    <svg {...iconProps}>
+      <rect x="5" y="3" width="14" height="18" rx="2" />
+      <path d="M8 7h8M8 11h2M12 11h2M16 11h2M8 15h2M12 15h2M16 15h2" />
+    </svg>
+  ),
   reports: (
     <svg {...iconProps}>
       <path d="M6 20v-7M12 20V5M18 20v-11" />
@@ -47,6 +61,8 @@ const icons: Record<NavItemKey, React.ReactNode> = {
 const navItems: { key: NavItemKey; labelKey: `nav.${NavItemKey}` }[] = [
   { key: 'home', labelKey: 'nav.home' },
   { key: 'timesheet', labelKey: 'nav.timesheet' },
+  { key: 'history', labelKey: 'nav.history' },
+  { key: 'calculator', labelKey: 'nav.calculator' },
   { key: 'reports', labelKey: 'nav.reports' },
   { key: 'settings', labelKey: 'nav.settings' },
 ]
@@ -54,6 +70,8 @@ const navItems: { key: NavItemKey; labelKey: `nav.${NavItemKey}` }[] = [
 const navPaths: Record<NavItemKey, string> = {
   home: '/dashboard',
   timesheet: '/dashboard/timesheet',
+  history: '/dashboard/history',
+  calculator: '/dashboard/calculator',
   reports: '/dashboard/report',
   settings: '/dashboard/settings',
 }
@@ -210,11 +228,11 @@ function MobileTopBar() {
 function MobileTabBar() {
   const { t } = useTranslation()
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-[#27272A] bg-[#09090B]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 border-t border-[#27272A] bg-[#09090B]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
       {navItems.map(({ key, labelKey }) => (
         <NavLink key={key} to={navPaths[key]} end={key === 'home'} className={tabItemClassName}>
           {icons[key]}
-          <span>{t(labelKey)}</span>
+          <span className="max-w-full truncate px-0.5">{t(labelKey)}</span>
         </NavLink>
       ))}
     </nav>

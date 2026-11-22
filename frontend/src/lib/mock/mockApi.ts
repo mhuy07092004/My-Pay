@@ -61,11 +61,20 @@ type StoredPeriod = {
   shifts: StoredShift[]
 }
 
+type StoredSaving = {
+  id: string
+  name: string
+  priceCents: number
+  note?: string
+  createdAt: string
+}
+
 type Store = {
   profile: Profile
   tax: TaxProfileDto
   jobs: JobDto[]
   periods: StoredPeriod[]
+  savings: StoredSaving[]
 }
 
 type JobBody = {
@@ -173,6 +182,7 @@ function seed(identity: { email: string; firstName: string; lastName: string }):
         ],
       },
     ],
+    savings: [],
   }
 }
 
@@ -185,6 +195,7 @@ function loadStore(identity: { email: string; firstName: string; lastName: strin
   if (stored?.profile && stored.tax && Array.isArray(stored.jobs) && Array.isArray(stored.periods)) {
     stored.profile.email = identity.email
     migrateStore(stored)
+    if (!Array.isArray(stored.savings)) stored.savings = []
     return stored
   }
   return seed(identity)
@@ -478,6 +489,30 @@ function migrateStore(store: Store) {
     }
   }
   store.periods = next
+  if (!Array.isArray(store.savings)) store.savings = []
+}
+
+function readSavingBody(body: unknown): { name: string; priceCents: number; note?: string } {
+  if (!isRecord(body) || typeof body.name !== 'string') fail(400, 'invalid')
+  const name = body.name.trim()
+  if (name.length < 1 || name.length > 80) fail(400, 'invalid')
+  if (typeof body.priceCents !== 'number' || body.priceCents < 0 || body.priceCents > 100_000_000) {
+    fail(400, 'invalid')
+  }
+  let note: string | undefined
+  if (body.note !== undefined && body.note !== null) {
+    if (typeof body.note !== 'string') fail(400, 'invalid')
+    const trimmed = body.note.trim()
+    if (trimmed.length > 280) fail(400, 'invalid')
+    note = trimmed || undefined
+  }
+  return { name, priceCents: Math.round(body.priceCents), note }
+}
+
+function findSaving(store: Store, id: string): StoredSaving {
+  const saving = store.savings.find((item) => item.id === id)
+  if (!saving) fail(404, 'not_found')
+  return saving
 }
 
 function findPeriod(store: Store, id: string): StoredPeriod {
@@ -664,6 +699,37 @@ function dispatch(
     }
     period.actualCents = body.actualCents === null ? null : body.actualCents
     return { period: toPeriodDto(period, store) }
+  }
+
+  if (pathname === '/savings' && method === 'GET') {
+    const savings = [...store.savings].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    return { savings }
+  }
+  if (pathname === '/savings' && method === 'POST') {
+    const body = readSavingBody(options.body)
+    const saving: StoredSaving = {
+      id: crypto.randomUUID(),
+      name: body.name,
+      priceCents: body.priceCents,
+      note: body.note,
+      createdAt: new Date().toISOString(),
+    }
+    store.savings.unshift(saving)
+    return { saving }
+  }
+
+  const savingMatch = /^\/savings\/([^/]+)$/.exec(pathname)
+  if (savingMatch && method === 'PATCH') {
+    const saving = findSaving(store, savingMatch[1])
+    const body = readSavingBody(options.body)
+    saving.name = body.name
+    saving.priceCents = body.priceCents
+    saving.note = body.note
+    return { saving }
+  }
+  if (savingMatch && method === 'DELETE') {
+    store.savings = store.savings.filter((item) => item.id !== savingMatch[1])
+    return {}
   }
 
   if (pathname === '/report' && method === 'GET') {

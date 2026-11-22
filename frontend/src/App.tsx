@@ -12,6 +12,8 @@ import { Dashboard } from './pages/dashboard/dashboard'
 import { DashboardLayout } from './pages/dashboard/DashboardLayout'
 import { Report } from './pages/dashboard/report'
 import { Settings } from './pages/dashboard/settings'
+import { Calculator } from './pages/dashboard/calculator'
+import { History } from './pages/dashboard/history'
 import { Timesheet } from './pages/dashboard/timesheet'
 
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -75,6 +77,8 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="calendar" element={<Navigate to="/dashboard/timesheet" replace />} />
           <Route path="timesheet" element={<Timesheet />} />
+          <Route path="history" element={<History />} />
+          <Route path="calculator" element={<Calculator />} />
           <Route path="timesheet/newshifts" element={<Navigate to="/dashboard/timesheet" replace />} />
           <Route path="timesheet/:periodId" element={<PeriodLink />} />
           <Route path="report" element={<Report />} />

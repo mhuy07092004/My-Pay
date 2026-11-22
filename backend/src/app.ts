@@ -7,6 +7,7 @@ import { bootstrapRouter } from './routes/bootstrap'
 import { jobsRouter } from './routes/jobs'
 import { periodsRouter } from './routes/periods'
 import { reportRouter } from './routes/report'
+import { savingsRouter } from './routes/savings'
 
 export function createApp(deps: AppDeps) {
   const app = express()
@@ -34,7 +35,7 @@ export function createApp(deps: AppDeps) {
     req.db = deps.createDb(token)
     next()
   })
-  api.use(accountRouter(), bootstrapRouter(), jobsRouter(), periodsRouter(), reportRouter())
+  api.use(accountRouter(), bootstrapRouter(), jobsRouter(), periodsRouter(), reportRouter(), savingsRouter())
 
   app.use('/api', api)
   app.use((_req, res) => {
