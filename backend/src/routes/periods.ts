@@ -94,12 +94,13 @@ export function periodsRouter(): Router {
       }),
     )
     const saved = saveDayResult.parse(raw)
-    const ctx = await loadContext(req.db!, req.user!.id)
-    const periods = []
-    for (const id of saved.affected) {
-      const { periods: rows, shifts } = await loadPeriodRows(req.db!, id)
-      if (rows.length > 0) periods.push(toPeriodDto(rows[0], shifts, ctx))
-    }
+    const [ctx, loaded] = await Promise.all([
+      loadContext(req.db!, req.user!.id),
+      Promise.all(saved.affected.map((id) => loadPeriodRows(req.db!, id))),
+    ])
+    const periods = loaded.flatMap(({ periods: rows, shifts }) =>
+      rows.length > 0 ? [toPeriodDto(rows[0], shifts, ctx)] : [],
+    )
     res.json({ periods, deleted: saved.deleted })
   })
 

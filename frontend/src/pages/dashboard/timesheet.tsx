@@ -62,8 +62,9 @@ function flatShifts(periods: { shifts: Record<string, Shift> }[]): Record<string
   const flat: Record<string, Shift> = {}
   for (const period of periods) {
     for (const [iso, shift] of Object.entries(period.shifts)) {
-      if (!flat[iso]) flat[iso] = shift
-      else if (!flat[iso].second) flat[iso] = { ...flat[iso], second: shift }
+      const current = flat[iso]
+      if (!current) flat[iso] = shift
+      else if (!current.second) flat[iso] = shift.part === 2 ? { ...current, second: shift } : { ...shift, second: current }
     }
   }
   return flat

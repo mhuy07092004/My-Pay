@@ -201,7 +201,9 @@ export function periodFromPayload(dto: PeriodPayload, ctx: ReportContext): Perio
   const shifts: Record<string, Shift> = {}
   for (const shift of dto.shifts.filter((item) => item.part === 1)) shifts[shift.date] = partFromDto(shift)
   for (const shift of dto.shifts.filter((item) => item.part === 2)) {
-    if (shifts[shift.date]) shifts[shift.date] = { ...shifts[shift.date], second: partFromDto(shift) }
+    const second = partFromDto(shift)
+    const first = shifts[shift.date]
+    shifts[shift.date] = first ? { ...first, second } : { ...second, part: 2 }
   }
   return {
     id: dto.id,

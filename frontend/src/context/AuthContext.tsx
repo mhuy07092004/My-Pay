@@ -10,6 +10,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { clearStoredBootstrap } from '../lib/bootstrapStorage'
 import { supabase } from '../lib/supabaseClient'
 
 export type AuthUser = {
@@ -77,10 +78,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const seenUser = useRef<string | null | undefined>(undefined)
 
   useEffect(() => {
+    if (loading) return
     const id = session?.user?.id ?? null
-    if (seenUser.current !== undefined && seenUser.current !== id) queryClient.clear()
+    if (seenUser.current !== undefined && seenUser.current !== id) {
+      queryClient.clear()
+      clearStoredBootstrap()
+    }
     seenUser.current = id
-  }, [session, queryClient])
+  }, [session, loading, queryClient])
 
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => {

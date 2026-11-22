@@ -117,7 +117,7 @@ export function indexShifts(periods: Period[]): ShiftIndex {
         ...part,
         minutes: calcShiftMinutes(part),
         periodId: period.id,
-        part: (index + 1) as 1 | 2,
+        part: index === 0 ? (shift.part ?? 1) : 2,
       }))
       const existing = byDate.get(iso)
       const merged = existing ? [...existing.parts, ...parts] : parts

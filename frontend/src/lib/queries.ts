@@ -9,6 +9,7 @@ import {
   type Profile,
   type TaxProfileDto,
 } from './api'
+import { readStoredBootstrap, writeStoredBootstrap } from './bootstrapStorage'
 import { savedRateFromJob, type SavedRate } from './rates'
 
 export type BootstrapCache = {
@@ -29,13 +30,20 @@ export async function fetchBootstrap(): Promise<BootstrapCache> {
   return { ...raw, jobs: raw.jobs.map(savedRateFromJob) }
 }
 
+/** Shows the last saved copy at once and refetches in the background. */
 export function useBootstrap() {
   const { user } = useAuth()
   const email = user?.email ?? null
   return useQuery({
     queryKey: bootstrapKey(email),
-    queryFn: fetchBootstrap,
+    queryFn: async () => {
+      const data = await fetchBootstrap()
+      if (email) writeStoredBootstrap(email, data)
+      return data
+    },
     enabled: email !== null,
+    initialData: () => (email ? readStoredBootstrap<BootstrapCache>(email) : undefined),
+    initialDataUpdatedAt: 0,
   })
 }
 
@@ -46,7 +54,11 @@ export function usePatchBootstrap() {
   return useCallback(
     (update: (prev: BootstrapCache) => BootstrapCache) => {
       if (!email) return
-      queryClient.setQueryData<BootstrapCache>(bootstrapKey(email), (prev) => (prev ? update(prev) : prev))
+      const prev = queryClient.getQueryData<BootstrapCache>(bootstrapKey(email))
+      if (!prev) return
+      const next = update(prev)
+      queryClient.setQueryData<BootstrapCache>(bootstrapKey(email), next)
+      writeStoredBootstrap(email, next)
     },
     [email, queryClient],
   )
